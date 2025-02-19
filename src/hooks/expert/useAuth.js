@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { db, signInWithGooglePopPup } from "@/firebaseconfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const useAuth = () => {
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const googleLogin = async (role) => {
     try {
@@ -29,6 +29,10 @@ const useAuth = () => {
       console.log("Error : ", err);
     }
   };
+
+  useEffect(() => {
+    googleLogin();
+  });
   return <div>useAuth</div>;
 };
 
