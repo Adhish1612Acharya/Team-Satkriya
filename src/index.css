@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-green-600 {
+    background-color: #16a34a;
+  }
+  .text-green-600 {
+    color: #16a34a;
+  }
+  .text-green-500 {
+    color: #22c55e;
+  }
+  
