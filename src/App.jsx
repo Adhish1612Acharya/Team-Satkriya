@@ -1,6 +1,9 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { Route, Routes } from "react-router-dom";
+import Footer from "@/components/Footer.jsx";
+import  Register from "./pages/Register";
+import  Login  from "./pages/Login";
 const App = () => {
   return (
     <>
@@ -18,8 +21,13 @@ const App = () => {
         bodyClassName="toastBody"
         style={{ marginTop: "5rem" }}
       />
-      <h1 className="">csdsdc</h1>
-    </>
+      {/* <h1 className="">Cattle breed project</h1> */}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+        <Footer/>
+      </>
   );
 };
 
