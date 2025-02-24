@@ -1,7 +1,7 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes } from "react-router-dom";
-// import Footer from "@/components/Footer.jsx";
+import Footer from "@/components/Footer.jsx";
 import  Register from "./pages/Register";
 import  Login  from "./pages/Login";
 const App = () => {
@@ -26,7 +26,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
-        {/* <Footer/> */}
+        <Footer/>
       </>
   );
 };
