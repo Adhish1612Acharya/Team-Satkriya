@@ -23,8 +23,8 @@ const App = () => {
       />
       {/* <h1 className="">Cattle breed project</h1> */}
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/expert/login" element={<Login />} />
+          <Route path="/expert/register" element={<Register />} />
         </Routes>
         <Footer/>
       </>

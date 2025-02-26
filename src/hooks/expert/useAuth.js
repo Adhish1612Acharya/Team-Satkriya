@@ -1,32 +1,43 @@
-import { db, signInWithGooglePopPup } from "@/firebaseconfig";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "@/firebase";
+import { auth, db, signInWithGooglePopup } from "@/firebase";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
-import { profile } from "console";
 
 const useAuth = () => {
-  const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const [signUpLoading, setSignUpLoading] = useState(false);
+
+  const [gooleLoginLoad, setGoogleLoginLoad] = useState(false);
+
+  const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(auth, (user) => {
-      setLoading(false);
-    });
+  // useEffect(() => {
+  //   const unsubscribe = auth.onAuthStateChanged(auth, (user) => {
+  //     setLoading(false);
+  //   });
 
-    return () => unsubscribe();
-  }, []);
+  //   return () => unsubscribe();
+  // }, []);
+
+  const logout = async () => {
+    await auth.signOut().then(() => {
+      toast.success("LoggedOut");
+      window.location.href = "/";
+    });
+  };
 
   const googleLogin = async (role) => {
     try {
-      setLoading(true);
-      await signInWithGooglePopPup().then(async (data) => {
+      setGoogleLoginLoad(true);
+      await signInWithGooglePopup().then(async (data) => {
         const docRef = doc(db, "expert", `${data.user.uid}`);
 
         const docSnap = await getDoc(docRef);
@@ -39,18 +50,23 @@ const useAuth = () => {
             posts: [],
           });
         }
+        setGoogleLoginLoad(false);
         navigate("/expert/complete-profile");
       });
     } catch (err) {
       console.log("Error : ", err);
+      setGoogleLoginLoad(false);
     }
   };
 
   const signInWithEmailPassword = async (email, password) => {
     try {
+      setLoginLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
+      setLoginLoading(false);
     } catch (err) {
       console.log(err);
+      setLoginLoading(false);
       toast.error(err.message || "Emial or password is not correct");
     }
   };
@@ -65,6 +81,7 @@ const useAuth = () => {
     profileData
   ) => {
     try {
+      setSignUpLoading(true);
       await createUserWithEmailAndPassword(auth, email, password).then(
         async (userCredential) => {
           const user = userCredential.user;
@@ -81,22 +98,45 @@ const useAuth = () => {
           });
         }
       );
+      setSignUpLoading(false);
     } catch (err) {
+      setSignUpLoading(false);
       console.log(err);
       toast.error("Some error occured");
     }
   };
 
   const completeProfile = async (profileData) => {
-    auth.onAuthStateChanged(async (user) => {
-      const expertDocRef = doc(db, "expert", user.uid);
-      await updateDoc(expertDocRef, {
-        profileData: profileData,
+    try {
+      auth.onAuthStateChanged(async (user) => {
+        setCompleteProfileLoading(true);
+        const expertDocRef = doc(db, "expert", user.uid);
+        await updateDoc(expertDocRef, {
+          profileData: profileData,
+        });
+        setCompleteProfileLoading(false);
       });
-    });
+    } catch (err) {
+      console.log(err);
+      toast.error("Some error occured");
+    }
   };
 
-  return { googleLogin, signInWithEmailPassword, completeProfile, signUp };
+  return {
+    loginLoading,
+    signUpLoading,
+    gooleLoginLoad,
+    completeProfileLoading,
+    setLoginLoading,
+    setSignUpLoading,
+    setGoogleLoginLoad,
+    setCompleteProfileLoading,
+    googleLogin,
+    logout,
+    signInWithEmailPassword,
+    completeProfile,
+    signUp,
+  };
 };
 
 export default useAuth;
