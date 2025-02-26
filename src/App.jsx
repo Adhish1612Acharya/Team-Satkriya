@@ -27,10 +27,10 @@ const App = () => {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login-farmer" element={<LoginFarmer />} />
-        <Route path="/register-farmer" element={<RegisterFarmer />} />
+        <Route path="/expert/login" element={<Login />} />
+        <Route path="/expert/register" element={<Register />} />
+        <Route path="/farmer/login" element={<LoginFarmer />} />
+        <Route path="/farmer/register" element={<RegisterFarmer />} />
       </Routes>
       <Footer />
     </>
