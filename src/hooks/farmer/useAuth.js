@@ -1,11 +1,11 @@
 import {
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   // signInWithPhoneNumber,
 } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
 import { useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 // import { setupRecaptcha } from "../../utils/firebaseUtils";
@@ -42,16 +42,19 @@ const useAuth = () => {
   // };
   // return { sendOtp, verifyOtp, loading, confirmationResult };
 
-  const [loading, setLoading] = useState(false);
+  // const [loginLoad, setLoginLoad] = useState(false);
+  // const [signUpLoad, setSignUpLoad] = useState(false);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const phonePaswordLogin = async (email, password) => {
+  const phonePaswordLogin = async ({ email, password }) => {
     try {
+      // setLoginLoad(true);
       const resp = await signInWithEmailAndPassword(auth, email, password);
       const user = auth.currentUser;
       const docRef = doc(db, "farmers", `${user?.uid}`);
       await getDoc(docRef);
+      // setLoginLoad(true);
       return {
         uid: resp.user.uid,
         email: resp.user.email,
@@ -62,38 +65,45 @@ const useAuth = () => {
     }
   };
 
-  const completeFarmerProfile = async (
-    phoneNo,
+  const farmerSignUp = async ({
+    email,
+    password,
+    phoneNumber,
     language,
     name,
     state,
     city,
-    experience
-  ) => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        const farmerProfileData = {
-          phoneNo,
-          language,
-          name,
-          state,
-          city,
-          experience,
-        };
-        const userRef = doc(db, "users", user.uid); // Ensure correct path
-        const userDocSnap = await updateDoc(userRef, farmerProfileData);
-        if (!userDocSnap.exists()) {
-          toast.error("You need to login");
-          navigate("/login");
-        }
-      } else {
-        toast.error("Not logged In");
-        navigate("/login");
+    experience,
+  }) => {
+    await createUserWithEmailAndPassword(auth, email, password).then(
+      async (userCredential) => {
+        const user = userCredential.user;
+        const docRef = doc(db, "farmer", user.uid);
+
+        await setDoc(docRef, {
+          name: name,
+          email: user.email,
+          contactNo: phoneNumber,
+          posts: [],
+          role: "farmer",
+          profileData: {
+            language: language,
+            state: state,
+            city: city,
+            experience: experience,
+          },
+        });
       }
-    });
+    );
   };
 
-  return { loading, setLoading, phonePaswordLogin, completeFarmerProfile };
+  return {
+    // loading,
+    // setLoading,
+    phonePaswordLogin,
+    // completeFarmerProfile,
+    farmerSignUp,
+  };
 };
 
 export default useAuth;

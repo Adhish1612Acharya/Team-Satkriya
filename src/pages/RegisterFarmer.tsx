@@ -1,10 +1,8 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { LogIn } from 'lucide-react';
-import { AuthLayoutFarmer } from '../components/AuthLayoutFarmer';
-import { Button } from '../components/Button';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import  z from "zod";
+import { AuthLayoutFarmer } from "../components/AuthLayoutFarmer";
+import { Button } from "../components/Button";
 import {
   Form,
   FormControl,
@@ -12,34 +10,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const farmerSchema = z.object({
-  phoneNumber: z.string().min(10, 'Invalid phone number'),
-  language: z.string().min(1, 'Language is required'),
-  name: z.string().min(1, 'Name is required'),
-  state: z.string().min(1, 'State is required'),
-  city: z.string().min(1, 'City is required'),
-  experience: z.string().min(1, 'Experience is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  phoneNumber: z.string().min(10, "Invalid phone number"),
+  language: z.string().min(1, "Language is required"),
+  name: z.string().min(1, "Name is required"),
+  state: z.string().min(1, "State is required"),
+  city: z.string().min(1, "City is required"),
+  experience: z.string().min(1, "Experience is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export function RegisterFarmer() {
   const form = useForm({
     resolver: zodResolver(farmerSchema),
     defaultValues: {
-      phoneNumber: '',
-      language: '',
-      name: '',
-      state: '',
-      city: '',
-      experience: '',
-      password: '',
+      phoneNumber: "",
+      language: "",
+      name: "",
+      state: "",
+      city: "",
+      experience: "",
+      password: "",
     },
   });
 
-  function onSubmit(data) {
+  function onSubmit(data: z.infer<typeof farmerSchema>) {
+    const newFramer = {
+      ...data,
+      email: data,
+    };
     console.log(data);
   }
 
@@ -149,7 +151,11 @@ export function RegisterFarmer() {
           />
 
           <div className="space-y-4">
-            <Button type="submit" fullWidth className="bg-green-600 hover:bg-green-700">
+            <Button
+              type="submit"
+              fullWidth
+              className="bg-green-600 hover:bg-green-700"
+            >
               Create Account
             </Button>
             <Button type="button" variant="outline" fullWidth>
@@ -158,8 +164,11 @@ export function RegisterFarmer() {
           </div>
 
           <p className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <a href="/login-farmer" className="font-medium text-green-600 hover:text-green-500">
+            Already have an account?{" "}
+            <a
+              href="/farmer/login"
+              className="font-medium text-green-600 hover:text-green-500"
+            >
               Sign in
             </a>
           </p>
