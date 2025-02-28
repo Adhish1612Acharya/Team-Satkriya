@@ -1,7 +1,7 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes } from "react-router-dom";
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 import Footer from "@/components/Footer.jsx";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -22,7 +22,7 @@ const App = () => {
         draggable
         pauseOnHover
         theme="light"
-        bodyClassName="toastBody"
+        // bodyClassName="toastBody"
         style={{ marginTop: "5rem" }}
       />
       <Routes>
