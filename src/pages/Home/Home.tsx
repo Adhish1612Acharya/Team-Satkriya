@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import  { FC } from "react";
 
 import {
   Cog as Cow,
@@ -8,8 +8,6 @@ import {
   ShoppingBag,
   VideoIcon,
   Activity,
-  Phone,
-  MessageCircle,
   Info,
 } from "lucide-react";
 import HomeProps from "./Home.types";
@@ -141,34 +139,34 @@ function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<Users className="h-8 w-8" />}
+              icon={Users}
               title="Expert Consultation"
               description="Connect with veterinary experts through live chat and video calls"
             />
             <FeatureCard
-              icon={<Map className="h-8 w-8" />}
+              icon={Map}
               title="Breed Mapping"
               description="Interactive map showing indigenous cow breed distribution"
             />
             <FeatureCard
-              icon={<Heart className="h-8 w-8" />}
+              icon={Heart}
               title="Cow Adoption"
               description="Support farmers by virtually adopting indigenous cows"
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <FeatureCard
-              icon={<ShoppingBag className="h-8 w-8" />}
+              icon={ShoppingBag}
               title="Marketplace"
               description="Buy and sell organic cow products from verified sellers"
             />
             <FeatureCard
-              icon={<VideoIcon className="h-8 w-8" />}
+              icon={VideoIcon}
               title="Educational Content"
               description="Access training videos and resources on sustainable farming"
             />
             <FeatureCard
-              icon={<Activity className="h-8 w-8" />}
+              icon={Activity}
               title="Health Tracking"
               description="Monitor cow health and get timely medical alerts"
             />

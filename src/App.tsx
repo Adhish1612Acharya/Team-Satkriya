@@ -3,10 +3,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import Footer from "@/components/Footer.jsx";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import RegisterFarmer from "./pages/RegisterFarmer";
-import LoginFarmer from "./pages/LoginFarmer";
+import RegisterFarmer from "./pages/Farmer/RegisterFarmer/RegisterFarmer";
+import LoginFarmer from "./pages/Farmer/LoginFarmer/LoginFarmer";
+import LoginExpert from "./pages/Expert/LoginExpert/LoginExpert";
+import RegisterExpert from "./pages/Expert/RegisterExpert/RegisterExpert";
 
 const App = () => {
   return (
@@ -27,8 +27,8 @@ const App = () => {
       />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/expert/login" element={<Login />} />
-        <Route path="/expert/register" element={<Register />} />
+        <Route path="/expert/login" element={<LoginExpert />} />
+        <Route path="/expert/register" element={<RegisterExpert />} />
         <Route path="/farmer/login" element={<LoginFarmer />} />
         <Route path="/farmer/register" element={<RegisterFarmer />} />
       </Routes>

@@ -4,8 +4,8 @@ export default {
   darkMode: ["class"],
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx}", // Ensure it includes JSX files
-    "./components/**/*.{js,jsx}",
+    "./src/**/*.{js,jsx,ts,tsx}", // Ensure it includes JSX files
+    "./components/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
   	extend: {

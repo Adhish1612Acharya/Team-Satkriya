@@ -1,5 +1,7 @@
+import { ElementType } from "react";
+
 interface FeatureCardProps {
-  icon: string;
+  icon: ElementType;
   title: string;
   description: string;
 }

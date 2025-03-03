@@ -14,16 +14,14 @@ import { LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import CircularProgress from "@mui/material/CircularProgress";
+import GoogleIcon from "@mui/icons-material/Google";
+import { FC } from "react";
+import loginSchema from "./ExpertLoginFormSchema";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-const ExpertLoginForm = () => {
+const ExpertLoginForm: FC = () => {
   const { googleLogin, signInWithEmailPassword, gooleLoginLoad } = useAuth();
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -31,9 +29,9 @@ const ExpertLoginForm = () => {
     },
   });
 
-  function onSubmit(data) {
+  function onSubmit(data: z.infer<typeof loginSchema>) {
     console.log(data);
-    signInWithEmailPassword(data);
+    // signInWithEmailPassword(data);
   }
 
   return (
@@ -77,6 +75,7 @@ const ExpertLoginForm = () => {
             onClick={() => googleLogin("expert")}
             variant="outline"
             fullWidth
+            icon={<GoogleIcon />}
           >
             {gooleLoginLoad}?<CircularProgress />: Sign In with Google
           </Button>

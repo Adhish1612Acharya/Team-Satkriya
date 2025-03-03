@@ -1,10 +1,16 @@
-import React from "react";
+import { FC } from "react";
 import { Building2, GraduationCap, Heart, Microscope } from "lucide-react";
+import AuthLayoutExpertProps from "./AuthLayoutExpert.types";
 
-export function AuthLayout({ children, title, subtitle }) {
+const AuthLayoutExpert: FC<AuthLayoutExpertProps> = ({
+  children,
+  title,
+  subtitle,
+}) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row h-[80vh]">
+        {/* Left Side (Intro Section) */}
         <div className="w-full md:w-1/2 bg-indigo-600 p-12 text-white flex flex-col justify-between">
           <div>
             <h2 className="text-3xl font-bold mb-6">{title}</h2>
@@ -29,8 +35,14 @@ export function AuthLayout({ children, title, subtitle }) {
             </div>
           </div>
         </div>
-        <div className="w-full md:w-1/2 p-12">{children}</div>
+
+        {/* Right Side (Form Section) */}
+        <div className="w-full md:w-1/2 p-12 overflow-y-auto max-h-[80vh]">
+          {children}
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default AuthLayoutExpert;
