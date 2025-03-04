@@ -7,8 +7,9 @@ import {
   Twitter,
   Linkedin,
 } from "lucide-react";
+import { FC } from "react";
 
-const Footer = () => {
+const Footer:FC = () => {
   return (
     <footer
       className="w-full bg-gray-900 text-gray-300 border-t border-gray-700"

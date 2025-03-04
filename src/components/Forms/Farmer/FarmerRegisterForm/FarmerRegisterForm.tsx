@@ -1,3 +1,4 @@
+import z from "zod";
 import {
   Form,
   FormControl,
@@ -7,49 +8,31 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import doctorSignUpSchema from "./DoctorSignUpFormSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/Button/Button";
-import { Lock } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Button from "@/components/Button/Button";
+import farmerRegisterSchema from "./FarmerRegisterSchema";
 
-const DoctorSignUpForm = () => {
-  const form = useForm<z.infer<typeof doctorSignUpSchema>>({
-    resolver: zodResolver(doctorSignUpSchema),
+export const FarmerRegisterForm = () => {
+  const form = useForm({
+    resolver: zodResolver(farmerRegisterSchema),
     defaultValues: {
-      type: "doctor",
-      email: "",
       phoneNumber: "",
-      address: "",
+      language: "",
       name: "",
-      uniqueId: "",
-      education: "",
-      yearsOfPractice: 1, // Assuming 1 as the minimum valid default
-      clinicLocation: "",
+      state: "",
+      city: "",
+      experience: "",
+      password: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof doctorSignUpSchema>) => {
+  function onSubmit(data: z.infer<typeof farmerRegisterSchema>) {
     console.log(data);
-  };
-
+  }
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email Address</FormLabel>
-              <FormControl>
-                <Input placeholder="you@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="phoneNumber"
@@ -57,85 +40,91 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="tel" {...field} />
+                <Input placeholder="123-456-7890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="address"
+          name="language"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Language</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="English" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="John Doe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="uniqueId"
+          name="state"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Unique ID</FormLabel>
+              <FormLabel>State</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="California" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="education"
+          name="city"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Education</FormLabel>
+              <FormLabel>City</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="Los Angeles" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="yearsOfPractice"
+          name="experience"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Years of Practice</FormLabel>
+              <FormLabel>Experience</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input placeholder="5 years" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
-          name="clinicLocation"
+          name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Clinic Location</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -143,13 +132,29 @@ const DoctorSignUpForm = () => {
         />
 
         <div className="space-y-4">
-          <Button icon={Lock} type="submit" fullWidth>
+          <Button
+            variant="outline"
+            type="submit"
+            fullWidth
+            className="bg-green-600 hover:bg-green-700"
+          >
             Create Account
           </Button>
+          <Button type="button" variant="outline" fullWidth>
+            Sign up with Google
+          </Button>
         </div>
+
+        <p className="text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <a
+            href="/farmer/login"
+            className="font-medium text-green-600 hover:text-green-500"
+          >
+            Sign in
+          </a>
+        </p>
       </form>
     </Form>
   );
 };
-
-export default DoctorSignUpForm;

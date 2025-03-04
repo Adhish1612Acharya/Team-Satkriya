@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { Button } from "../../../components/Button";
+
 import {
   Heart,
   Building2,
@@ -12,6 +12,7 @@ import NgoSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/NgoSignUpF
 import ResearchInstSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/ResearchInstSignUpForm/ResearchInstSignUpForm";
 import VolunteerSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/VolunteerSignUpForm/VolunteerSignUpForm";
 import AuthLayoutExpert from "@/components/AuthLayoutExpert/AuthLayoutExpert";
+import Button from "@/components/Button/Button";
 
 const userTypeOptions = [
   { type: "doctor", label: "Doctor", icon: Heart },

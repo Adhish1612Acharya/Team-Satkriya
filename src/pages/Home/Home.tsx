@@ -1,5 +1,3 @@
-import  { FC } from "react";
-
 import {
   Cog as Cow,
   Heart,
@@ -8,67 +6,15 @@ import {
   ShoppingBag,
   VideoIcon,
   Activity,
-  Info,
 } from "lucide-react";
-import HomeProps from "./Home.types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FeatureCard from "@/components/FeatureCard/FeatureCard";
-
-const BreedCard: FC<HomeProps> = ({ name, image, description, traits }) => {
-  return (
-    <Card className="overflow-hidden transition-transform hover:scale-105">
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <CardContent className="p-6">
-        <h3 className="text-2xl font-bold text-primary mb-2">{name}</h3>
-        <p className="text-muted-foreground mb-4">{description}</p>
-        <div className="space-y-2">
-          {traits.map((trait, index) => (
-            <div key={index} className="flex items-center text-sm">
-              <Info className="h-4 w-4 text-primary mr-2" />
-              <span className="text-muted-foreground">{trait}</span>
-            </div>
-          ))}
-        </div>
-        <Button className="mt-4 w-full">Learn More</Button>
-      </CardContent>
-    </Card>
-  );
-};
+import impactMetrics from "@/constants/impactMetrics";
+import breeds from "@/constants/breeds";
+import BreedCard from "@/components/BreedCard/BreedCard";
 
 function Home() {
-  const impactMetrics = [
-    { label: "Cows Saved", value: "12,450+" },
-    { label: "Farmers Supported", value: "5,200+" },
-    { label: "Successful Treatments", value: "28,900+" },
-    { label: "Organic Farms", value: "850+" },
-    { label: "CO₂ Reduced (tons)", value: "15,000+" },
-  ];
-
-  const breeds = [
-    {
-      name: "Gir",
-      image:
-        "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?ixlib=rb-4.0.3",
-      description: "Known for high milk yield and disease resistance",
-      traits: ["A2 Milk", "Heat Tolerant", "Disease Resistant"],
-    },
-    {
-      name: "Sahiwal",
-      image:
-        "https://images.unsplash.com/photo-1545468800-85cc9bc6ecf7?ixlib=rb-4.0.3",
-      description: "Excellent dairy breed with good mothering ability",
-      traits: ["High Fat Content", "Adaptable", "Good Mother"],
-    },
-    {
-      name: "Red Sindhi",
-      image:
-        "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQ7QVzl5Goiu3fUqO6vh7Xs1H59QlBphyYIRN_J2ovWaaYKb8LPLm5menceV-gl_3gioDKE3bFiy8teUlqtGk6vHg",
-      description: "Hardy breed suitable for tropical climate",
-      traits: ["Heat Resistant", "Low Maintenance", "Regular Breeder"],
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}

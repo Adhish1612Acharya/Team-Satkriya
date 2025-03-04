@@ -1,14 +1,14 @@
-import React from "react";
-import { Divide as LucideIcon } from "lucide-react";
+import  { FC } from "react";
+import ButtonProps from "./Button.types";
 
-export function Button({ 
-  children, 
-  variant = "primary", 
-  icon: Icon, 
-  fullWidth, 
-  className = "", 
-  ...props 
-}) {
+const Button: FC<ButtonProps> = ({
+  children,
+  variant = "primary",
+  icon: Icon,
+  fullWidth,
+  className = "",
+  ...props
+}) => {
   const baseStyles =
     "inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50";
   const variants = {
@@ -19,11 +19,15 @@ export function Button({
 
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`${baseStyles} ${variants[variant]} ${
+        fullWidth ? "w-full" : ""
+      } ${className}`}
       {...props}
     >
       {Icon && <Icon className="w-5 h-5 mr-2" />}
       {children}
     </button>
   );
-}
+};
+
+export default Button;

@@ -1,8 +1,15 @@
-import React from "react";
+import { FC } from "react";
+import AuthLayoutFarmerProps from "./AuthLayoutFarmer.types";
 
-export function AuthLayoutFarmer({ children, title, subtitle }) {
+const AuthLayoutFarmer: FC<AuthLayoutFarmerProps> = ({
+  children,
+  title,
+  subtitle,
+}) => {
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4`}>
+    <div
+      className={`min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4`}
+    >
       <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 bg-green-600 p-12 text-white flex flex-col justify-between">
           <div>
@@ -14,4 +21,6 @@ export function AuthLayoutFarmer({ children, title, subtitle }) {
       </div>
     </div>
   );
-}
+};
+
+export default AuthLayoutFarmer;
