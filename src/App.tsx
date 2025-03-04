@@ -2,7 +2,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
-import Footer from "@/components/Footer.jsx";
+import Footer from "@/components/Footer/Footer.js";
 import RegisterFarmer from "./pages/Farmer/RegisterFarmer/RegisterFarmer";
 import LoginFarmer from "./pages/Farmer/LoginFarmer/LoginFarmer";
 import LoginExpert from "./pages/Expert/LoginExpert/LoginExpert";

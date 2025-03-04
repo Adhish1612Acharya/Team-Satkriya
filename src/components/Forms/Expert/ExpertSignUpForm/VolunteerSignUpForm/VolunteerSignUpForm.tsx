@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/Button";
+import { Button } from "@/components/Button/Button";
 import { Lock } from "lucide-react";
 import volunteerSignUpSchema from "./VolunteerSignUpSchema";
 import { useEffect } from "react";
