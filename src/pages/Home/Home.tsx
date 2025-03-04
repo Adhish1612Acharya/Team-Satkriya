@@ -13,8 +13,11 @@ import FeatureCard from "@/components/FeatureCard/FeatureCard";
 import impactMetrics from "@/constants/impactMetrics";
 import breeds from "@/constants/breeds";
 import BreedCard from "@/components/BreedCard/BreedCard";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -148,7 +151,13 @@ function Home() {
             Join our community of farmers, experts, and supporters in preserving
             India's indigenous cow breeds
           </p>
-          <Button size="lg" variant="secondary">
+          <Button
+            size="lg"
+            onClick={() => {
+              navigate("/farmer/register");
+            }}
+            variant="secondary"
+          >
             Get Started Now
           </Button>
         </div>

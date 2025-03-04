@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button/Button";
 import {
   Form,
   FormControl,
@@ -17,6 +16,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import GoogleIcon from "@mui/icons-material/Google";
 import { FC } from "react";
 import loginSchema from "./ExpertLoginFormSchema";
+import Button from "@/components/Button/Button";
 
 const ExpertLoginForm: FC = () => {
   const { googleLogin, signInWithEmailPassword, gooleLoginLoad } = useAuth();
@@ -66,7 +66,7 @@ const ExpertLoginForm: FC = () => {
         />
 
         <div className="space-y-4">
-          <Button type="submit" fullWidth icon={LogIn}>
+          <Button type="submit" variant="outline" fullWidth icon={LogIn}>
             {form.formState.isSubmitting ? <CircularProgress /> : "Sign in"}
           </Button>
 
@@ -75,7 +75,7 @@ const ExpertLoginForm: FC = () => {
             onClick={() => googleLogin("expert")}
             variant="outline"
             fullWidth
-            icon={<GoogleIcon />}
+            icon={GoogleIcon}
           >
             {gooleLoginLoad}?<CircularProgress />: Sign In with Google
           </Button>
