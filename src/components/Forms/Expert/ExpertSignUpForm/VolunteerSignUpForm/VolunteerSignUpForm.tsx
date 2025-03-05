@@ -21,6 +21,7 @@ const VolunteerSignUpForm = () => {
     defaultValues: {
       type: "volunteer",
       email: "",
+      password: "",
       phoneNumber: "",
       address: "",
       name: "",
@@ -47,6 +48,19 @@ const VolunteerSignUpForm = () => {
               <FormLabel>Email Address</FormLabel>
               <FormControl>
                 <Input placeholder="you@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Enter password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="*******" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
