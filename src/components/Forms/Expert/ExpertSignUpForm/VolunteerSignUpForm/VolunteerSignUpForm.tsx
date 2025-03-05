@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/Button/Button";
 import { Lock } from "lucide-react";
 import volunteerSignUpSchema from "./VolunteerSignUpSchema";
 import { useEffect } from "react";
+import Button from "@/components/Button/Button";
 
 const VolunteerSignUpForm = () => {
   const form = useForm<z.infer<typeof volunteerSignUpSchema>>({
@@ -105,7 +105,7 @@ const VolunteerSignUpForm = () => {
           )}
         />
         <div className="space-y-4">
-          <Button icon={Lock} type="submit" fullWidth>
+          <Button variant="outline" icon={Lock} type="submit" fullWidth>
             Create Account
           </Button>
         </div>

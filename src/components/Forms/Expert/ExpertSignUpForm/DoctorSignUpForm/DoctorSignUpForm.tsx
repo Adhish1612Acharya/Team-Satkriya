@@ -11,8 +11,8 @@ import doctorSignUpSchema from "./DoctorSignUpFormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/Button/Button";
 import { Lock } from "lucide-react";
+import Button from "@/components/Button/Button";
 
 const DoctorSignUpForm = () => {
   const form = useForm<z.infer<typeof doctorSignUpSchema>>({
@@ -143,7 +143,7 @@ const DoctorSignUpForm = () => {
         />
 
         <div className="space-y-4">
-          <Button icon={Lock} type="submit" fullWidth>
+          <Button variant="outline" icon={Lock} type="submit" fullWidth>
             Create Account
           </Button>
         </div>

@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/Button/Button";
 import { Lock } from "lucide-react";
 import ngoSignUpSchema from "./NgoSignUpFormSchema";
+import Button from "@/components/Button/Button";
 
 const NgoSignUpForm = () => {
   const form = useForm<z.infer<typeof ngoSignUpSchema>>({
@@ -100,7 +100,7 @@ const NgoSignUpForm = () => {
           )}
         />
         <div className="space-y-4">
-          <Button icon={Lock} type="submit" fullWidth>
+          <Button variant="outline" icon={Lock} type="submit" fullWidth>
             Create Account
           </Button>
         </div>
