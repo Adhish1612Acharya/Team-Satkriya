@@ -8,6 +8,7 @@ import LoginFarmer from "./pages/Farmer/LoginFarmer/LoginFarmer";
 import LoginExpert from "./pages/Expert/LoginExpert/LoginExpert";
 import RegisterExpert from "./pages/Expert/RegisterExpert/RegisterExpert";
 import { FarmerProfile } from "./pages/Profiles/FarmerProfile/FarmerProfile"; 
+import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/farmer/login" element={<LoginFarmer />} />
         <Route path="/farmer/register" element={<RegisterFarmer />} />
         <Route path="/profile/farmer/:id" element={<FarmerProfile />} />
+        <Route path="/profile/doctor/:id" element={<DoctorProfile />} />
       </Routes>
       <Footer />
     </>
