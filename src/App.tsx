@@ -10,6 +10,7 @@ import RegisterExpert from "./pages/Expert/RegisterExpert/RegisterExpert";
 import { FarmerProfile } from "./pages/Profiles/FarmerProfile/FarmerProfile"; 
 import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
 import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
+import { ResearchInstituteProfile } from "./pages/Profiles/ResearchInstituteProfile/ResearchInstituteProfile";
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
         <Route path="/profile/farmer/:id" element={<FarmerProfile />} />
         <Route path="/profile/doctor/:id" element={<DoctorProfile />} />
         <Route path="/profile/ngo/:id" element={<NGOProfile />} />
+        <Route path="/profile/researchinsti/:id" element={<ResearchInstituteProfile />} />
       </Routes>
       <Footer />
     </>
