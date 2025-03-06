@@ -9,6 +9,7 @@ import LoginExpert from "./pages/Expert/LoginExpert/LoginExpert";
 import RegisterExpert from "./pages/Expert/RegisterExpert/RegisterExpert";
 import { FarmerProfile } from "./pages/Profiles/FarmerProfile/FarmerProfile"; 
 import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
+import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
         <Route path="/farmer/register" element={<RegisterFarmer />} />
         <Route path="/profile/farmer/:id" element={<FarmerProfile />} />
         <Route path="/profile/doctor/:id" element={<DoctorProfile />} />
+        <Route path="/profile/ngo/:id" element={<NGOProfile />} />
       </Routes>
       <Footer />
     </>
