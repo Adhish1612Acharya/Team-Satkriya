@@ -44,7 +44,7 @@ const useAuth = () => {
     try {
       setGoogleLoginLoad(true);
       await signInWithGooglePopup().then(async (data) => {
-        const docRef = doc(db, "expert", `${data.user.uid}`);
+        const docRef = doc(db, "experts", `${data.user.uid}`);
 
         const docSnap = await getDoc(docRef);
 
@@ -104,7 +104,7 @@ const useAuth = () => {
       await createUserWithEmailAndPassword(auth, email, password).then(
         async (userCredential) => {
           const user = userCredential.user;
-          const docRef = doc(db, "expert", user.uid);
+          const docRef = doc(db, "experts", user.uid);
 
           await setDoc(docRef, {
             name: username,
@@ -131,7 +131,7 @@ const useAuth = () => {
       auth.onAuthStateChanged(async (user) => {
         setCompleteProfileLoading(true);
         if (user?.uid) {
-          const expertDocRef = doc(db, "expert", user.uid);
+          const expertDocRef = doc(db, "experts", user.uid);
           await updateDoc(expertDocRef, {
             profileData: profileData,
           });
