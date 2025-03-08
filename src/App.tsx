@@ -12,6 +12,7 @@ import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
 import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
 import { ResearchInstituteProfile } from "./pages/Profiles/ResearchInstituteProfile/ResearchInstituteProfile";
 import { VolunteerProfile } from "./pages/Profiles/VolunteerProfile/VolunteerProfile";
+import { PostsPage } from '@/pages/Posts/PostsPage/PostsPage';
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/profile/ngo/:id" element={<NGOProfile />} />
         <Route path="/profile/researchinsti/:id" element={<ResearchInstituteProfile />} />     
         <Route path="/profile/volunteer/:id" element={<VolunteerProfile />} />
+        <Route path="/posts" element={<PostsPage />} />
       </Routes>
       <Footer />
     </>
