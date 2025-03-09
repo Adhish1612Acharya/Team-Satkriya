@@ -90,30 +90,24 @@ const useAuth = () => {
     }
   };
 
-  const signUp: SignUpArguProps = async (
-    email,
-    password,
-    username,
-    address,
-    contactNo,
-    role,
-    profileData
+  const expertSignUp: SignUpArguProps = async (
+   data
   ) => {
     try {
       setSignUpLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password).then(
+      await createUserWithEmailAndPassword(auth, data.email, data.password).then(
         async (userCredential) => {
           const user = userCredential.user;
           const docRef = doc(db, "experts", user.uid);
 
           await setDoc(docRef, {
-            name: username,
+            name: data.name,
             email: user.email,
-            contactNo: contactNo,
-            address: address,
+            contactNo: data.contactNo,
+            address: data.address,
             posts: [],
-            role: role,
-            profileData: profileData,
+            role: data.role,
+            profileData: data.profileData,
           });
         }
       );
@@ -159,7 +153,7 @@ const useAuth = () => {
     logout,
     signInWithEmailPassword,
     completeProfile,
-    signUp,
+    expertSignUp,
   };
 };
 

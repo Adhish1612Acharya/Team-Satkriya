@@ -31,7 +31,7 @@ const ExpertLoginForm: FC = () => {
 
   function onSubmit(data: z.infer<typeof loginSchema>) {
     console.log(data);
-    // signInWithEmailPassword(data);
+    signInWithEmailPassword(data.email,data.password);
   }
 
   return (

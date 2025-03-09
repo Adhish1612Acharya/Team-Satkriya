@@ -34,7 +34,7 @@ const FarmerLoginForm = () => {
     };
     console.log(newData);
 
-    await phonePaswordLogin(newData);
+    await phonePaswordLogin(data.phoneNumber + "@gmail.com", data.password);
   };
 
   return (
@@ -76,20 +76,12 @@ const FarmerLoginForm = () => {
             icon={LogIn}
             className="bg-green-600 hover:bg-green-700"
           >
-            Sign in
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            fullWidth
-            className="border-green-600 text-green-600 hover:bg-green-50"
-          >
             {form.formState.isSubmitting ? (
               <CircularProgress />
             ) : (
-              "Sign up with Google"
+              "Sign in"
             )}
+           
           </Button>
         </div>
       </form>

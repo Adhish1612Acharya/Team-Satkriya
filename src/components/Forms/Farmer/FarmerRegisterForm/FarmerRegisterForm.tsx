@@ -12,12 +12,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/components/Button/Button";
 import farmerRegisterSchema from "./FarmerRegisterSchema";
+import useAuth from "@/hooks/farmer/useAuth/useAuth";
 
 export const FarmerRegisterForm = () => {
+  const {farmerSignUp}=useAuth();
   const form = useForm({
     resolver: zodResolver(farmerRegisterSchema),
     defaultValues: {
-      phoneNumber: "",
+      phoneNumber: 0,
       language: "",
       name: "",
       state: "",
@@ -27,8 +29,9 @@ export const FarmerRegisterForm = () => {
     },
   });
 
-  function onSubmit(data: z.infer<typeof farmerRegisterSchema>) {
+const onSubmit=async (data: z.infer<typeof farmerRegisterSchema>)=> {
     console.log(data);
+    await farmerSignUp(data);
   }
   return (
     <Form {...form}>
@@ -40,7 +43,7 @@ export const FarmerRegisterForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="123-456-7890" {...field} />
+                <Input type="number" placeholder="123-456-7890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

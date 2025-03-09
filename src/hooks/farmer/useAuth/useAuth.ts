@@ -58,7 +58,7 @@ const useAuth = () => {
       if (docSnap.exists()) {
         let farmerData = docSnap.data();
 
-        if (farmerData.profile === null) {
+        if (farmerData.profileData === null) {
           navigate("/farmer/complete-profile");
         }
       }
@@ -71,33 +71,26 @@ const useAuth = () => {
   };
 
   const farmerSignUp: FarmerSignUp = async (
-    email,
-    password,
-    phoneNumber,
-    language,
-    name,
-    state,
-    city,
-    experience
+    data
   ) => {
     try {
       setSignUpLoad(true);
-      await createUserWithEmailAndPassword(auth, email, password).then(
+      await createUserWithEmailAndPassword(auth, data.phoneNumber+"@gmail.com", data.password).then(
         async (userCredential) => {
           const user = userCredential.user;
           const docRef = doc(db, "farmer", user.uid);
 
           await setDoc(docRef, {
-            name: name,
+            name: data.name,
             email: user.email,
-            contactNo: phoneNumber,
+            contactNo: data.phoneNumber,
             posts: [],
             role: "farmer",
             profileData: {
-              language: language,
-              state: state,
-              city: city,
-              experience: experience,
+              language: data.language,
+              state: data.state,
+              city: data.city,
+              experience: data.experience,
             },
           });
         }

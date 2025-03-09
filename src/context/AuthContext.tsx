@@ -6,6 +6,10 @@ import { auth } from "@/firebase";
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
+  setCurrentUser: (user: User | null) => void;
+  setLoading: (loading: boolean) => void;
+  userType:string | null;
+  setUserType:(userType:string | null)=>void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,11 +27,15 @@ export const useAuthContext = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userType,setUserType]=useState<string | null>(null);
 
   useEffect(() => {
-    // Listen to Firebase Auth State
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
 
@@ -35,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading }}>
+    <AuthContext.Provider value={{ currentUser, loading,userType,setUserType,setCurrentUser,setLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -3,8 +3,7 @@ export type PhonePasswordLogin = (
   password: string
 ) => Promise<void>;
 
-export type FarmerSignUp = (
-  email: string,
+interface FarmerSignUpArgu{
   password: string,
   phoneNumber: number,
   language: string,
@@ -12,4 +11,6 @@ export type FarmerSignUp = (
   state: string,
   city: string,
   experience: string
-) => Promise<void>;
+}
+
+export type FarmerSignUp = (data:FarmerSignUpArgu) => Promise<void>;

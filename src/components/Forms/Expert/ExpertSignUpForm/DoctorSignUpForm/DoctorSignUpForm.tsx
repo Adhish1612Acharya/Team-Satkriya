@@ -13,8 +13,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Lock } from "lucide-react";
 import Button from "@/components/Button/Button";
+import useAuth from "@/hooks/expert/useAuth/useAuth";
+import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
 
 const DoctorSignUpForm = () => {
+const {expertSignUp}=useAuth();
+
   const form = useForm<z.infer<typeof doctorSignUpSchema>>({
     resolver: zodResolver(doctorSignUpSchema),
     defaultValues: {
@@ -26,13 +30,30 @@ const DoctorSignUpForm = () => {
       name: "",
       uniqueId: "",
       education: "",
-      yearsOfPractice: 1, // Assuming 1 as the minimum valid default
+      yearsOfPractice: "1", 
       clinicLocation: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof doctorSignUpSchema>) => {
+  const onSubmit = async (data: z.infer<typeof doctorSignUpSchema>) => {
     console.log(data);
+    const dataToPass:SignUpArguTypes={
+       name:data.name,
+       email:data.email,
+       password:data.password,
+       address:data.address,
+       contactNo:Number(data.phoneNumber),
+       role:data.type,
+       profileData :{
+        uniqueId: Number(data.uniqueId),
+        education: data.education,
+        yearsOfPractice: Number(data.yearsOfPractice),
+        clinicLocation: data.clinicLocation
+       },
+
+
+    }
+    await expertSignUp(dataToPass);
   };
 
   return (
@@ -136,7 +157,7 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Years of Practice</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number"    {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

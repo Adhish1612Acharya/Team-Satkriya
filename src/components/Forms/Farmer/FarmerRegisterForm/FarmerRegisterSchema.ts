@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 const farmerRegisterSchema = z.object({
-  phoneNumber: z.string().min(10, "Invalid phone number"),
+  phoneNumber: z .number()
+  .int()
+  .positive()
+  .refine((num) => num.toString().length === 10, {
+    message: "Phone number must be exactly 10 digits",
+  }),
   language: z.string().min(1, "Language is required"),
   name: z.string().min(1, "Name is required"),
   state: z.string().min(1, "State is required"),

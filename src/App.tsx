@@ -12,6 +12,7 @@ import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
 import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
 import { ResearchInstituteProfile } from "./pages/Profiles/ResearchInstituteProfile/ResearchInstituteProfile";
 import { VolunteerProfile } from "./pages/Profiles/VolunteerProfile/VolunteerProfile";
+import ProtectedRoute from "./pages/ProtectedRoute/ProtectedRoute";
 
 const App = () => {
   return (
@@ -30,16 +31,19 @@ const App = () => {
         style={{ marginTop: "5rem" }}
       />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/expert/login" element={<LoginExpert />} />
-        <Route path="/expert/register" element={<RegisterExpert />} />
+      <Route path="/expert/register" element={<RegisterExpert />} />
         <Route path="/farmer/login" element={<LoginFarmer />} />
         <Route path="/farmer/register" element={<RegisterFarmer />} />
-        <Route path="/profile/farmer/:id" element={<FarmerProfile />} />
-        <Route path="/profile/doctor/:id" element={<DoctorProfile />} />
-        <Route path="/profile/ngo/:id" element={<NGOProfile />} />
-        <Route path="/profile/researchinsti/:id" element={<ResearchInstituteProfile />} />     
-        <Route path="/profile/volunteer/:id" element={<VolunteerProfile />} />
+        <Route path="/expert/login" element={<LoginExpert />} />
+        <Route element={<ProtectedRoute/>}>
+        <Route path="/" element={<Home />} />
+        <Route path="/profile/farmer" element={<FarmerProfile />} />
+        <Route path="/profile/doctor" element={<DoctorProfile />} />
+        <Route path="/profile/ngo" element={<NGOProfile />} />
+        <Route path="/profile/researchinsti" element={<ResearchInstituteProfile />} />     
+        <Route path="/profile/volunteer" element={<VolunteerProfile />} />
+        </Route>
+       
       </Routes>
       <Footer />
     </>

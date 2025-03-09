@@ -1,38 +1,20 @@
 interface DoctorSignUp {
-  type: "doctor";
-  email: string;
-  phoneNumber: string;
-  address: string;
-  name: string;
-  uniqueId: string;
+  uniqueId: number;
   education: string;
   yearsOfPractice: number;
   clinicLocation: string;
 }
 
 interface NgoSignUp {
-  type: "ngo";
-  email: string;
-  phoneNumber: string;
-  address: string;
   name: string;
   organization: string;
 }
 
 interface ResearchInstSignUp {
-  type: "research";
-  email: string;
-  phoneNumber: string;
-  address: string;
-  name: string;
+  researchArea: string;
 }
 
 interface VolunteerSignUp {
-  type: "volunteer";
-  email: string;
-  phoneNumber: string;
-  address: string;
-  name: string;
   education: string;
 }
 
@@ -43,14 +25,18 @@ export type SignInWithEmailPasswordProps = (
 
 export type GoogleLoginProps = (role: string) => Promise<void>;
 
+export interface SignUpArguTypes {
+  email: string;
+  password: string;
+  name: string;
+  address: string;
+  contactNo: number;
+  role: string;
+  profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp;
+}
+
 export type SignUpArguProps = (
-  email: string,
-  password: string,
-  username: string,
-  address: string,
-  contactNo: string,
-  role: string,
-  profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp
+  data:SignUpArguTypes
 ) => Promise<void>;
 
 export type CompleteProfile = (
