@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CreatePostType, GetAllPostType, GetFilteredPostType } from "./usePost.types";
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { auth, db } from "@/firebase";
-import { uploadImagesToCloudinary, uploadVideosToCloudinary } from "./usePostUtility";
+import { uploadFilesToCloudinary } from "./usePostUtility";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import getUserInfo from "@/utils/getUserInfo";
@@ -107,26 +107,32 @@ const navigate=useNavigate();
             const userData=await getUserInfo(user.uid,"experts");
             let imageUrls:string[] = [];
             let videoUrls:string[] = [];
+            let documentUrls:string[]=[];
               if(postData.images.length!==0){
-                  imageUrls=await uploadImagesToCloudinary(postData.images)
+                  imageUrls=await uploadFilesToCloudinary(postData.images)
               }
               if(postData.videos.length!==0){
-                  videoUrls=await uploadVideosToCloudinary(postData.videos)
+                  videoUrls=await uploadFilesToCloudinary(postData.videos)
               }
 
+              if(postData.documents.length!==0){
+                documentUrls=await uploadFilesToCloudinary(postData.videos)
+            }
+
+
               const contentData = {
-                  title:postData.title,
                   content:postData.content,
                   images: imageUrls,
                   videos: videoUrls,
+                  documents:documentUrls,
                   filters:[],
                   createdAt: new Date(),
                   updatedAt:new Date(),
                   ownerId:user.uid,
-                  role:postData.role,
+                  role:userData?.role,
                   profileData:{
                       name:userData?.name,
-                      profilePic:userData?.profileData?.profilePic,
+                      profilePic:userData?.profileData?.profilePic || "",
                   },
                 };
           
@@ -178,6 +184,8 @@ const editPost = async (postId: string, updatedData: {title:string,content:strin
       navigate("/expert/login");
     }
   });
+}
+  
 
  const deletePost = async (postId: string) => {
     auth.onAuthStateChanged(async (user) => {
@@ -207,11 +215,10 @@ const editPost = async (postId: string, updatedData: {title:string,content:strin
       }
     });
  };
-   
-  return {
-    postLoading,setPostLoading,editPostLoading,setEditPostLoading,deletePostLoading,setDeletePostLoading,createPost,editPost,deletePost,getAllPosts,getFilteredPosts,getPostLoading,setGetPostLoading
-    ,getYourPosts
-  }
+
+return {
+  postLoading,setPostLoading,editPostLoading,setEditPostLoading,deletePostLoading,setDeletePostLoading,createPost,editPost,deletePost,getAllPosts,getFilteredPosts,getPostLoading,setGetPostLoading
+  ,getYourPosts
 }
 }
 

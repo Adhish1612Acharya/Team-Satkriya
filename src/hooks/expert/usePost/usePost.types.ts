@@ -1,11 +1,10 @@
 import Post from "@/types/posts.types";
 
 export interface PostArgu{
-    title:string;
     content:string;
     images:File[];
     videos:File[];
-    role:string;
+    documents:File[];
 }
 
 export type CreatePostType=(postData:PostArgu)=>Promise<void>;

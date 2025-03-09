@@ -4,6 +4,7 @@ interface Post{
     content:string;
     images:string[];
     videos:string[];
+    documents:string[];
     filters:string[];
     createdAt: Date,
     updatedAt: Date,
