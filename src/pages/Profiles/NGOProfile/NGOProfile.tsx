@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { ProfileCard } from "@/components/profiles/ProfileCard";
 import { ProfileField } from "@/components/profiles/ProfileField";
-import { NGOProfile as NGOProfileType } from "@/types/profiles/NGOProfile.types";
+import { NGOProfile as NGOProfileType } from "./NGOProfile.types";
 
 // Mock data - in a real app, this would come from an API
 const mockNGO: NGOProfileType = {
@@ -25,7 +25,9 @@ const mockNGO: NGOProfileType = {
 
 export function NGOProfile() {
   const { id } = useParams<{ id: string }>();
-  const [ngo] = useState<NGOProfileType>(mockNGO);
+  if (!id) 
+    return <p>Error: Farmer ID is missing in the URL!</p>
+ const [ngo] = useState<NGOProfileType>(mockNGO);
 
   // Format the establishment date
   const formattedDate = new Date(ngo.establishmentDate).toLocaleDateString('en-IN', {

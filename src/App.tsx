@@ -13,6 +13,8 @@ import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
 import { ResearchInstituteProfile } from "./pages/Profiles/ResearchInstituteProfile/ResearchInstituteProfile";
 import { VolunteerProfile } from "./pages/Profiles/VolunteerProfile/VolunteerProfile";
 import ProtectedRoute from "./pages/ProtectedRoute/ProtectedRoute";
+import { PostsPage } from '@/pages/Posts/PostsPage/PostsPage';
+
 
 const App = () => {
   return (
@@ -43,7 +45,7 @@ const App = () => {
         <Route path="/profile/researchinsti" element={<ResearchInstituteProfile />} />     
         <Route path="/profile/volunteer" element={<VolunteerProfile />} />
         </Route>
-       
+        <Route path="/posts" element={<PostsPage />} />
       </Routes>
       <Footer />
     </>

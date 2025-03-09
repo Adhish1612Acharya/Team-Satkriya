@@ -11,7 +11,7 @@ import { ProfileCard } from "@/components/profiles/ProfileCard"; // Corrected im
 import { ProfileField } from "@/components/profiles/ProfileField"; // Corrected import
 import { FarmerProfile as FarmerProfileType } from "./FarmerProfile.types"; // Corrected import
 
-// Mock data - in a real app, this would come from an API
+
 const mockFarmer: FarmerProfileType = {
   id: "farmer-123",
   name: "Rajesh Kumar",
