@@ -27,6 +27,8 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import Post from "@/types/posts.types";
 import { PostArgu } from "@/hooks/expert/usePost/usePost.types";
 import usePost from "@/hooks/expert/usePost/usePost";
+import fetchFilters from "@/utils/fetchFilters";
+import { defineFilter } from "@/index";
 
 // Mock data for posts
 const mockPosts: Post[] = [
@@ -293,6 +295,42 @@ export function PostsPage() {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const categorizePost = async (textContent: string, file: File) => {
+    const base64Media = await fileToBase64(file); // Convert file to Base64
+    const filters = await fetchFilters(); // Fetch available filters
+  
+    const result = await defineFilter({
+      content: textContent,
+      media: base64Media,
+      existingFilters: filters, // Pass Firebase filters to AI
+    });
+  
+    if (!result || !result.data) {
+      console.error("Unexpected AI response format:", result);
+      return { matchedFilters: [], newFilter: null };
+    }
+  
+    const { filter = [], newFilter = null } = result.data;
+
+    const matchedFilters = filter.filter((f: string) =>
+      Object.prototype.hasOwnProperty.call(filters, f)
+    );
+  
+    console.log("Matched Filters:", matchedFilters);
+    console.log("New Suggested Filter:", newFilter); // Logs newly suggested filters if needed
+  
+    return { matchedFilters, newFilter: newFilter };
+  };
+
   const onSubmit = async (data: PostFormValues) => {
     const newPost: PostArgu = {
       content:data.content,
@@ -303,7 +341,11 @@ export function PostsPage() {
 
     console.log(newPost);
 
-    await createPost(newPost);
+    await categorizePost(newPost.content, newPost.images[0]);
+
+    const categorizedPostData=await createPost(newPost);
+
+    console.log("CategorisedPostData : " , categorizedPostData);
 
     form.reset();
   };
