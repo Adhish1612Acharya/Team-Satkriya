@@ -1,0 +1,21 @@
+import { db } from "@/firebase";
+import { doc, getDoc } from "firebase/firestore";
+
+const getUserInfo=async (userId:string,userType:string)=>{
+    try {
+        const userDocRef = doc(db, userType, userId); // Assuming user data is in the 'users' collection
+        const userDocSnap = await getDoc(userDocRef);
+    
+        if (userDocSnap.exists()) {
+          return userDocSnap.data(); // Returns user details
+        } else {
+          console.log("No user found with UID:", userId);
+          return null;
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        throw error;
+      }
+}
+
+export default getUserInfo;
