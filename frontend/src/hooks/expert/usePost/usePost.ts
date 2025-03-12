@@ -100,11 +100,11 @@ const navigate=useNavigate();
     })
   }
 
-  const createPost:CreatePostType=async (postData)=>{
+  const createPost:CreatePostType=async (postData,firebaseDocument)=>{
     auth.onAuthStateChanged(async (user) => {
         if (user) {
           try {
-            const userData=await getUserInfo(user.uid,"experts");
+            const userData=await getUserInfo(user.uid,firebaseDocument);
             let imageUrls:string[] = [];
             let videoUrls:string[] = [];
             let documentUrls:string[]=[];
@@ -125,7 +125,7 @@ const navigate=useNavigate();
                   images: imageUrls,
                   videos: videoUrls,
                   documents:documentUrls,
-                  filters:[],
+                  filters:postData.filters,
                   createdAt: new Date(),
                   updatedAt:new Date(),
                   ownerId:user.uid,

@@ -5,6 +5,7 @@ export const uploadFilesToCloudinary = async (files: File[]): Promise<string[]> 
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET);
+        formData.append("folder", "GSC_DEV"); 
     
         try {
             const response = await axios.post(
