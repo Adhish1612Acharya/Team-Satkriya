@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home/Home";
+import Footer from "./components/Footer/Footer";
+import RegisterFarmer from "./pages/Farmer/RegisterFarmer/RegisterFarmer";
+import LoginFarmer from "./pages/Farmer/LoginFarmer/LoginFarmer";
+import LoginExpert from "./pages/Expert/LoginExpert/LoginExpert";
+import RegisterExpert from "./pages/Expert/RegisterExpert/RegisterExpert";
+import { FarmerProfile } from "./pages/Profiles/FarmerProfile/FarmerProfile";
+import { DoctorProfile } from "./pages/Profiles/DoctorProfile/DoctorProfile";
+import { NGOProfile } from "./pages/Profiles/NGOProfile/NGOProfile";
+import { ResearchInstituteProfile } from "./pages/Profiles/ResearchInstituteProfile/ResearchInstituteProfile";
+import { VolunteerProfile } from "./pages/Profiles/VolunteerProfile/VolunteerProfile";
+import ProtectedRoute from "./pages/ProtectedRoute/ProtectedRoute";
+import { PostsPage } from "@/pages/Posts/PostsPage/PostsPage";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ToastContainer
+        position="top-right"
+        autoClose={1500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{ marginTop: "5rem" }}
+      />
+      <Routes>
+        <Route path="/expert/register" element={<RegisterExpert />} />
+        <Route path="/farmer/login" element={<LoginFarmer />} />
+        <Route path="/farmer/register" element={<RegisterFarmer />} />
+        <Route path="/expert/login" element={<LoginExpert />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile/farmer" element={<FarmerProfile />} />
+          <Route path="/profile/doctor" element={<DoctorProfile />} />
+          <Route path="/profile/ngo" element={<NGOProfile />} />
+          <Route
+            path="/profile/researchinsti"
+            element={<ResearchInstituteProfile />}
+          />
+          <Route path="/profile/volunteer" element={<VolunteerProfile />} />
+          <Route path="/posts" element={<PostsPage />} />
+        </Route>
+      </Routes>
+      <Footer />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
