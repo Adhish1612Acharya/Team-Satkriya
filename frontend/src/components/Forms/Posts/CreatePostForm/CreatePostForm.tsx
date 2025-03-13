@@ -65,6 +65,9 @@ firebaseDocuemntType
     console.log("HanleFileChange : ");
     const file = event.target.files?.[0];
     console.log(file);
+    setNewPostImage([]);
+    setNewPostVideo([]);
+    setNewPostDocument([]);
     if (file) {
       if(mediaType==="image"){
         setNewPostImage((prev) => [...prev, file]);

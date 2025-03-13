@@ -88,7 +88,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
                 </div>
               </div>
             </div>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">
@@ -106,7 +106,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X size={18} />
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Content */}
@@ -141,14 +141,14 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
               <ThumbsUp size={18} className={isLiked ? "fill-blue-500" : ""} />
               <span>Like</span>
             </Button>
-            <Button 
+            {/* <Button 
               variant="ghost" 
               size="sm" 
               className="flex items-center space-x-1"
             >
               <MessageCircle size={18} />
               <span>Comment</span>
-            </Button>
+            </Button> */}
             <Button 
               variant="ghost" 
               size="sm" 
@@ -160,9 +160,9 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
             </Button>
           </div>
 
-          {/* Comments */}
+          //Comments
           <div className="flex-1 overflow-y-auto p-4">
-            {post.comments.map((comment) => (
+            {/* {post.comments.map((comment) => (
               <div key={comment.id} className="flex items-start space-x-2 mb-4">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={comment.authorProfilePhoto} alt={comment.authorName} />
@@ -176,11 +176,11 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
                   </p>
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
 
           {/* Add Comment */}
-          <div className="p-4 border-t">
+          {/* <div className="p-4 border-t">
             <div className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80" alt="Your profile" />
@@ -206,7 +206,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
                 </Button>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>

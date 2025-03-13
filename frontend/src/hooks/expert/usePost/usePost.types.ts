@@ -10,8 +10,8 @@ export interface PostArgu{
 
 export type CreatePostType=(postData:PostArgu,firebaseDocument:"experts" | "farmers")=>Promise<void>;
 
-export type GetAllPostType=()=>Promise<Post[] | void>;
+export type GetAllPostType=()=>Promise<Post[] >;
 
-export type GetFilteredPostType=(filters:string[])=>Promise<Post[] | void>;
+export type GetFilteredPostType=(filters:string[])=>Promise<Post[] >;
 
-export type GetYourPostType=()=>Promise<Post[] | void>
+export type GetYourPostType=()=>Promise<Post[]>

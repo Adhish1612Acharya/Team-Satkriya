@@ -1,9 +1,10 @@
-import { useState} from "react";
-import { PostCard } from "@/components/posts/PostCard";
+import { useEffect, useState} from "react";
+import { PostCard } from "@/components/posts/PostCard/PostCard";
 import { PostModal } from "@/components/posts/PostModal";
 import { Card } from "@/components/ui/card";
 import Post from "@/types/posts.types";
 import CreatePostForm from "@/components/Forms/Posts/CreatePostForm/CreatePostForm";
+import usePost from "@/hooks/expert/usePost/usePost";
 
 // Mock data for posts
 const mockPosts: Post[] = [
@@ -155,14 +156,21 @@ const mockPosts: Post[] = [
 ];
 
 export function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+
+  const {getAllPosts,getPostLoading}=usePost();
+
+  const [posts, setPosts] = useState<Post[]>([];
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [newPostContent, setNewPostContent] = useState("");
-  // const [newPostMedia, setNewPostMedia] = useState<{
-  //   url: string;
-  //   type: "image" | "video";
-  // } | null>(null);
+
+  useEffect(()=>{
+    async function getPosts(){
+     const postData= await getAllPosts();
+     setPosts(postData);
+    }
+
+    getPosts();
+  },[]);
 
   const handleLike = (postId: string) => {
     // In a real app, this would call an API
@@ -216,25 +224,25 @@ export function PostsPage() {
     setSelectedPost(null);
   };
 
-  // const onSubmit = async (data: PostFormValues) => {
-  //   const postFilters = await categorizePost(data.content, newPostImage[0]);
-
-  //   console.log("Post Filters : ", postFilters);
-
-  //   const newPost: PostArgu = {
-  //     content: data.content,
-  //     images: newPostImage,
-  //     videos: newPostVideo,
-  //     documents: newPostDocument,
-  //     filters: postFilters,
-  //   };
-
-  //   const categorizedPostData = await createPost(newPost,"experts");
-
-  //   console.log("CategorisedPostData : ", categorizedPostData);
-
-  //   // form.reset();
+  // const handleMediaClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   if (post.mediaUrl) {
+  //     onPostClick(post);
+  //   }
   // };
+
+
+  // const handleShare = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // Prevent event bubbling
+  //   onShare(post.id);
+  // };
+
+  // const handleSave = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // Prevent event bubbling
+  //   setIsSaved(!isSaved);
+  // };
+
+
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24">
