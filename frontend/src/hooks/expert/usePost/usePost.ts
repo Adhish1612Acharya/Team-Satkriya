@@ -6,6 +6,7 @@ import { uploadFilesToCloudinary } from "./usePostUtility";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import getUserInfo from "@/utils/getUserInfo";
+import Post from "@/types/posts.types";
 
 const usePost=()=>{
 const navigate=useNavigate();
@@ -47,30 +48,50 @@ const navigate=useNavigate();
   }
 
   const getAllPosts:GetAllPostType=async ()=>{
-    auth.onAuthStateChanged(async (user) => {
-      if(user){
+      if(auth.currentUser){
         try {
           setGetPostLoading(true);
           const querySnapshot = await getDocs(collection(db, "posts"));
           setGetPostLoading(false);
-          return querySnapshot.docs.map((doc) => ({ id: doc.id, postData:doc.data() }));
+          return querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title || "Untitled", 
+              content: data.content || "No content available",
+              images: data.images || [],
+              videos: data.videos || [],
+              documents: data.documents || [],
+              filters: data.filters || [],
+              createdAt: data.createdAt?.toDate() || new Date(),  // Convert Firestore Timestamp to Date
+              updatedAt: data.updatedAt?.toDate() || new Date(),
+              ownerId: data.ownerId || "Unknown",
+              role: data.role || "guest",
+              profileData: {
+                name: data.profileData?.name || "Anonymous",
+                profilePic: data.profileData?.profilePic || "",
+              },
+            } as Post;
+          });
         }catch(error){
           setGetPostLoading(false);
           console.error("Error updating post:", error);
           toast.error("Post Creation error");
+          return [];
         }
       } else {
         setGetPostLoading(false);
         console.log("User is not logged in");
         toast.warn("You need to login");
         navigate("/expert/login");
+
+        return [];
       }
-    })
+  
   }
 
   const getFilteredPosts:GetFilteredPostType=async (filters:string[])=>{
-    auth.onAuthStateChanged(async (user) => {
-      if(user){
+      if(auth.currentUser){
         try {
           setGetPostLoading(true);
           const postsRef = collection(db, "posts");
@@ -78,10 +99,26 @@ const navigate=useNavigate();
           const q = query(postsRef, where("filters", "array-contains-any", filters));
       
           const querySnapshot = await getDocs(q);
-          const filteredPosts = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            postData:doc.data(),
-          }));
+          const filteredPosts =  querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title || "Untitled", 
+              content: data.content || "No content available",
+              images: data.images || [],
+              videos: data.videos || [],
+              documents: data.documents || [],
+              filters: data.filters || [],
+              createdAt: data.createdAt?.toDate() || new Date(),  // Convert Firestore Timestamp to Date
+              updatedAt: data.updatedAt?.toDate() || new Date(),
+              ownerId: data.ownerId || "Unknown",
+              role: data.role || "guest",
+              profileData: {
+                name: data.profileData?.name || "Anonymous",
+                profilePic: data.profileData?.profilePic || "",
+              },
+            } as Post;
+          });
 
           setGetPostLoading(false);
       
@@ -96,8 +133,10 @@ const navigate=useNavigate();
         console.log("User is not logged in");
         toast.warn("You need to login");
         navigate("/expert/login");
+
+        return [];
       }
-    })
+  
   }
 
   const createPost:CreatePostType=async (postData,firebaseDocument)=>{
