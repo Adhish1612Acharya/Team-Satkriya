@@ -165,6 +165,8 @@ const navigate=useNavigate();
                   videos: videoUrls,
                   documents:documentUrls,
                   filters:postData.filters,
+                  likesCount:0,
+                  commentsCount:0,
                   createdAt: new Date(),
                   updatedAt:new Date(),
                   ownerId:user.uid,
@@ -173,6 +175,7 @@ const navigate=useNavigate();
                       name:userData?.name,
                       profilePic:userData?.profileData?.profilePic || "",
                   },
+                 
                 };
           
                const newPost= await addDoc(collection(db, "posts"), contentData);

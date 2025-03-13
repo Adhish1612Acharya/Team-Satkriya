@@ -6,14 +6,17 @@ interface Post{
     videos:string[];
     documents:string[];
     filters:string[];
-    createdAt: Date,
-    updatedAt: Date,
-    ownerId:string,
-    role:string,
+    likesCount:number;
+    commentsCount:number;
+    createdAt: Date;
+    updatedAt: Date;
+    ownerId:string;
+    role:string;
     profileData:{
-        name:string,
-        profilePic:string,
+        name:string;
+        profilePic:string;
     }
+    
 }
 
 export default Post;

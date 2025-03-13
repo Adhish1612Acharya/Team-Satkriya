@@ -159,7 +159,7 @@ export function PostsPage() {
 
   const {getAllPosts,getPostLoading}=usePost();
 
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([];
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -223,6 +223,26 @@ export function PostsPage() {
     setIsModalOpen(false);
     setSelectedPost(null);
   };
+
+  // const handleMediaClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  //   if (post.mediaUrl) {
+  //     onPostClick(post);
+  //   }
+  // };
+
+
+  // const handleShare = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // Prevent event bubbling
+  //   onShare(post.id);
+  // };
+
+  // const handleSave = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // Prevent event bubbling
+  //   setIsSaved(!isSaved);
+  // };
+
+
 
   return (
     <div className="container mx-auto px-4 py-8 pt-24">

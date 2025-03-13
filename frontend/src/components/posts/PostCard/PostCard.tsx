@@ -27,6 +27,7 @@ import PostCardProps from "./PostCard.types";
 
 const PostCard:FC<PostCardProps>  = ({
   post,
+  handleMediaClick,
   onLike,
   onComment,
   onShare,
@@ -34,40 +35,11 @@ const PostCard:FC<PostCardProps>  = ({
 }) => {
   const [comment, setComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(post.likes);
+  // const [likesCount, setLikesCount] = useState(post.likes);
   const [showComments, setShowComments] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  const handleLike = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-    onLike(post.id);
-  };
-
-  const handleComment = () => {
-    if (comment.trim()) {
-      onComment(post.id, comment);
-      setComment("");
-    }
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    onShare(post.id);
-  };
-
-  const handleSave = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    setIsSaved(!isSaved);
-  };
-
-  const handleMediaClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (post.mediaUrl) {
-      onPostClick(post);
-    }
-  };
+ 
 
   return (
     <Card className="mb-6 overflow-hidden hover:shadow-md transition-shadow">
@@ -76,15 +48,15 @@ const PostCard:FC<PostCardProps>  = ({
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarImage
-                src={post.authorProfilePhoto}
-                alt={post.authorName}
+                src={post.profileData.profilePic}
+                alt={post.profileData.name}
               />
-              <AvatarFallback>{post.authorName.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{post.profileData.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">{post.authorName}</p>
+              <p className="font-medium">{post.profileData.name}</p>
               <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                <span>{post.authorType}</span>
+                <span>{post.role}</span>
                 <span className="mx-1">•</span>
                 <span>
                   {formatDistanceToNow(new Date(post.createdAt), {
@@ -112,20 +84,24 @@ const PostCard:FC<PostCardProps>  = ({
       </CardHeader>
       <CardContent className="pb-3">
         <p className="mb-4 whitespace-pre-line">{post.content}</p>
-        {post.mediaUrl && (
+        {post.images.length > 0 || post.videos.length > 0 || post.documents.length > 0 && (
           <div
             className="relative cursor-pointer overflow-hidden rounded-md"
-            onClick={handleMediaClick}
+            onClick={()=>handleMediaClick(post)}
           >
-            {post.mediaType === "image" ? (
+            {post.images.length>0 ? (
               <img
-                src={post.mediaUrl}
+                src={post.images[0]}
                 alt="Post content"
                 className="w-full h-auto object-cover rounded-md hover:opacity-95 transition-opacity"
               />
             ) : (
               <video
-                src={post.mediaUrl}
+                src={post.videos[0]}
+                loop
+                muted
+                autoPlay
+                style={{ objectFit: "cover" }}
                 controls
                 className="w-full h-auto rounded-md"
                 preload="metadata"
@@ -138,23 +114,23 @@ const PostCard:FC<PostCardProps>  = ({
       <CardFooter className="flex flex-col pt-0">
         <div className="flex items-center justify-between w-full pb-3 border-b">
           <div className="flex items-center space-x-1 text-sm text-gray-500">
-            {likesCount > 0 && (
+            {post.likesCount > 0 && (
               <>
                 <ThumbsUp
                   size={14}
                   className={isLiked ? "text-blue-500" : ""}
                 />
                 <span>
-                  {likesCount} {likesCount === 1 ? "like" : "likes"}
+                  {post.likesCount} {post.likesCount === 1 ? "like" : "likes"}
                 </span>
               </>
             )}
           </div>
           <div className="flex items-center space-x-1 text-sm text-gray-500">
-            {post.comments.length > 0 && (
+            {post.commentsCount> 0 && (
               <span>
-                {post.comments.length}{" "}
-                {post.comments.length === 1 ? "comment" : "comments"}
+                {post.commentsCount}{" "}
+                {post.commentsCount=== 1 ? "comment" : "comments"}
               </span>
             )}
           </div>
