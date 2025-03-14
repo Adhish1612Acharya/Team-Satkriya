@@ -15,6 +15,7 @@ const navigate=useNavigate();
   const [postLoading,setPostLoading]=useState<boolean>(false);
   const [editPostLoading,setEditPostLoading]=useState<boolean>(false);
   const [deletePostLoading,setDeletePostLoading]=useState<boolean>(false);
+  const [addPostCommentLoading,setAddPostCommentLoading]=useState<boolean>(false);
 
   const getYourPosts=async()=>{
     auth.onAuthStateChanged(async (user) => {
@@ -26,11 +27,12 @@ const navigate=useNavigate();
           const q = query(postsRef, where("ownerId", "==", user.uid));
       
           const querySnapshot = await getDocs(q);
-          const filteredPosts = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            postData:doc.data(),
-          }));
-      
+          const filteredPosts = querySnapshot.docs.map((doc) => {
+            return {
+              id: doc.id,
+              postData:doc.data(),
+            }
+          });
           setGetPostLoading(false);
           return filteredPosts;
         } catch (error) {
@@ -63,6 +65,8 @@ const navigate=useNavigate();
               videos: data.videos || [],
               documents: data.documents || [],
               filters: data.filters || [],
+              likesCount:data.likesCount,
+              commentsCount:data.commentsCount,
               createdAt: data.createdAt?.toDate() || new Date(),  // Convert Firestore Timestamp to Date
               updatedAt: data.updatedAt?.toDate() || new Date(),
               ownerId: data.ownerId || "Unknown",
@@ -112,6 +116,8 @@ const navigate=useNavigate();
               createdAt: data.createdAt?.toDate() || new Date(),  // Convert Firestore Timestamp to Date
               updatedAt: data.updatedAt?.toDate() || new Date(),
               ownerId: data.ownerId || "Unknown",
+              likesCount:data.likesCount,
+              commentsCount:data.commentsCount,
               role: data.role || "guest",
               profileData: {
                 name: data.profileData?.name || "Anonymous",
@@ -197,6 +203,47 @@ const navigate=useNavigate();
     })
   }
 
+  const addCommentPost=async (postId:string,firebaseDocument:string,commentData:string)=>{
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          setAddPostCommentLoading(true);
+          const userData=await getUserInfo(user.uid,firebaseDocument);
+          const postRef = doc(db, "posts", postId);
+          const postSnapshot = await getDoc(postRef);
+          
+          if (!postSnapshot.exists()) {
+            throw new Error("Post not found");
+          }
+
+          const newComment={
+            content:commentData,
+            createdAt: new Date(),
+            postId:postId,
+            ownerId:user.uid,
+            role:userData?.role,
+            profileData:{
+                name:userData?.name,
+                profilePic:userData?.profileData?.profilePic || "",
+            }
+          }
+
+          await addDoc(collection(db,"comments"),newComment);
+          setAddPostCommentLoading(false);
+        }catch (error) {
+          setAddPostCommentLoading(false);
+          console.error("Error creating comment:", error);
+          toast.error("Comment Creation error");
+        }
+        
+      } else {
+        console.log("User is not logged in");
+        toast.warn("You need to login");
+        navigate("/expert/login");
+      }
+  })
+  }
+
 const editPost = async (postId: string, updatedData: {title:string,content:string}) => {
   auth.onAuthStateChanged(async (user) => {
     if (user) {
@@ -260,7 +307,7 @@ const editPost = async (postId: string, updatedData: {title:string,content:strin
 
 return {
   postLoading,setPostLoading,editPostLoading,setEditPostLoading,deletePostLoading,setDeletePostLoading,createPost,editPost,deletePost,getAllPosts,getFilteredPosts,getPostLoading,setGetPostLoading
-  ,getYourPosts
+  ,getYourPosts,addPostCommentLoading,setAddPostCommentLoading,addCommentPost
 }
 }
 
