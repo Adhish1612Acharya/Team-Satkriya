@@ -23,7 +23,7 @@ export type SignInWithEmailPasswordProps = (
   password: string
 ) => Promise<void>;
 
-export type GoogleLoginProps = (role: string) => Promise<void>;
+export type GoogleLoginProps = (role: "doctor" | "researchInstitution" | "ngo" | "volunteer") => Promise<void>;
 
 export interface SignUpArguTypes {
   email: string;
@@ -31,7 +31,7 @@ export interface SignUpArguTypes {
   name: string;
   address: string;
   contactNo: number;
-  role: string;
+  role: "doctor" | "researchInstitution" | "ngo" | "volunteer";
   profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp;
 }
 

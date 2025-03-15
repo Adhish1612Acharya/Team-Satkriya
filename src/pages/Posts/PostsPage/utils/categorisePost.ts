@@ -30,11 +30,11 @@ const categorizePost = async (textContent: string, file: File | null) => {
 
     if (jsonData.newFilter) {
       Object.keys(jsonData.newFilter).forEach((newMainFilter) => {
-        aiFilters.push(...jsonData.newFilter[newMainFilter]);
+        aiFilters.push(...jsonData.newFilter[newMainFilter].subFilters);
       });
     }
 
-    if (jsonData.filters && Array.isArray(jsonData.filters)) {
+    if (jsonData.filters && Array.isArray(jsonData.filters) && jsonData.filters.length>0) {
       aiFilters.push(...jsonData.filters);
     }
 
