@@ -7,7 +7,7 @@ const getUserInfo=async (userId:string,userType:string)=>{
         const userDocSnap = await getDoc(userDocRef);
     
         if (userDocSnap.exists()) {
-          return userDocSnap.data(); // Returns user details
+          return userDocSnap.data(); 
         } else {
           console.log("No user found with UID:", userId);
           return null;
