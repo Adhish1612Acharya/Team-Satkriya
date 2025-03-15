@@ -12,6 +12,6 @@ export type CreatePostType=(postData:PostArgu,firebaseDocument:"experts" | "farm
 
 export type GetAllPostType=()=>Promise<Post[] >;
 
-export type GetFilteredPostType=(filters:string[])=>Promise<Post[] >;
+export type GetFilteredPostType=(filters:string[],userType:string | null)=>Promise<Post[] >;
 
 export type GetYourPostType=()=>Promise<Post[]>

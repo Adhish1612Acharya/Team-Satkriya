@@ -10,19 +10,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import postSchema from "./CreatePostFormSchema";
-import usePost from "@/hooks/expert/usePost/usePost";
+import usePost from "@/hooks/usePost/usePost";
 import { FC, useRef, useState } from "react";
 import { CreatePostFormProps } from "./CreatePostForm.types";
-import { PostArgu } from "@/hooks/expert/usePost/usePost.types";
+import { PostArgu } from "@/hooks/usePost/usePost.types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, VideoIcon, X, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const CreatePostForm: FC<CreatePostFormProps> = ({
-firebaseDocuemntType
-}) => {
-
+const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
   const [newPostImage, setNewPostImage] = useState<File[]>([]);
   const [newPostVideo, setNewPostVideo] = useState<File[]>([]);
   const [newPostDocument, setNewPostDocument] = useState<File[]>([]);
@@ -61,7 +58,10 @@ firebaseDocuemntType
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>,mediaType:"image" | "video" | "document") => {
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    mediaType: "image" | "video" | "document"
+  ) => {
     console.log("HanleFileChange : ");
     const file = event.target.files?.[0];
     console.log(file);
@@ -69,11 +69,11 @@ firebaseDocuemntType
     setNewPostVideo([]);
     setNewPostDocument([]);
     if (file) {
-      if(mediaType==="image"){
+      if (mediaType === "image") {
         setNewPostImage((prev) => [...prev, file]);
-      }else if(mediaType==="video"){
+      } else if (mediaType === "video") {
         setNewPostVideo((prev) => [...prev, file]);
-      }else{
+      } else {
         setNewPostDocument((prev) => [...prev, file]);
       }
       const url = URL.createObjectURL(file);
@@ -83,7 +83,7 @@ firebaseDocuemntType
     }
   };
 
-  const handleRemoveMedia=()=>{
+  const handleRemoveMedia = () => {
     form.setValue("media", null);
     setNewPostImage([]);
     setNewPostVideo([]);
@@ -92,7 +92,7 @@ firebaseDocuemntType
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
-  }
+  };
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     const postFilters = await categorizePost(data.content, newPostImage[0]);
@@ -224,21 +224,21 @@ firebaseDocuemntType
             ref={fileInputRef}
             className="hidden"
             accept="image/*"
-            onChange={(file)=>handleFileChange(file,"image")}
+            onChange={(file) => handleFileChange(file, "image")}
           />
           <input
             type="file"
             ref={videoInputRef}
             className="hidden"
             accept="video/*"
-            onChange={(file)=>handleFileChange(file,"video")}
+            onChange={(file) => handleFileChange(file, "video")}
           />
           <input
             type="file"
             ref={documentInputRef}
             className="hidden"
             accept=".pdf,.doc,.docx"
-            onChange={(file)=>handleFileChange(file,"document")}
+            onChange={(file) => handleFileChange(file, "document")}
           />
         </div>
       </form>
