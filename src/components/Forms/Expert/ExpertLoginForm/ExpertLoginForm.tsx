@@ -30,8 +30,7 @@ const ExpertLoginForm: FC = () => {
   });
 
   function onSubmit(data: z.infer<typeof loginSchema>) {
-    console.log(data);
-    signInWithEmailPassword(data.email,data.password);
+    signInWithEmailPassword(data.email, data.password);
   }
 
   return (
@@ -72,12 +71,12 @@ const ExpertLoginForm: FC = () => {
 
           <Button
             type="button"
-            onClick={() => googleLogin("expert")}
+            onClick={() => googleLogin()}
             variant="outline"
             fullWidth
             icon={GoogleIcon}
           >
-            {gooleLoginLoad}?<CircularProgress />: Sign In with Google
+            {gooleLoginLoad?<CircularProgress />: "Sign In with Google"}
           </Button>
         </div>
 

@@ -32,7 +32,6 @@ const FarmerLoginForm = () => {
       email: data.phoneNumber + "@gmail.com",
       password: data.password,
     };
-    console.log(newData);
 
     await phonePaswordLogin(data.phoneNumber + "@gmail.com", data.password);
   };
@@ -75,13 +74,9 @@ const FarmerLoginForm = () => {
             fullWidth
             icon={LogIn}
             className="bg-green-600 hover:bg-green-700"
+            disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? (
-              <CircularProgress />
-            ) : (
-              "Sign in"
-            )}
-           
+            "Sign in"
           </Button>
         </div>
       </form>

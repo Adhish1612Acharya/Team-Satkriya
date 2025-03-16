@@ -2,11 +2,9 @@ interface DoctorSignUp {
   uniqueId: number;
   education: string;
   yearsOfPractice: number;
-  clinicLocation: string;
 }
 
 interface NgoSignUp {
-  name: string;
   organization: string;
 }
 
@@ -23,7 +21,14 @@ export type SignInWithEmailPasswordProps = (
   password: string
 ) => Promise<void>;
 
-export type GoogleLoginProps = (role: "doctor" | "researchInstitution" | "ngo" | "volunteer") => Promise<void>;
+export type GoogleLoginProps = () => Promise<void>;
+
+export type GoogleSignUpProps = (
+  role: "doctor" | "researchInstitution" | "ngo" | "volunteer",
+  profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp,
+  address:string,
+  phoneNumber:number
+) => Promise<void>;
 
 export interface SignUpArguTypes {
   email: string;
@@ -35,9 +40,7 @@ export interface SignUpArguTypes {
   profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp;
 }
 
-export type SignUpArguProps = (
-  data:SignUpArguTypes
-) => Promise<void>;
+export type SignUpArguProps = (data: SignUpArguTypes) => Promise<void>;
 
 export type CompleteProfile = (
   profileData: DoctorSignUp | NgoSignUp | ResearchInstSignUp | VolunteerSignUp

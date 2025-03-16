@@ -62,7 +62,6 @@ const usePost = () => {
         }
       } else {
         setGetPostLoading(false);
-        console.log("User is not logged in");
         toast.warn("You need to login");
         navigate("/expert/login");
       }
@@ -105,7 +104,6 @@ const usePost = () => {
       }
     } else {
       setGetPostLoading(false);
-      console.log("User is not logged in");
       toast.warn("You need to login");
       navigate("/expert/login");
 
@@ -171,7 +169,6 @@ const usePost = () => {
       }
     } else {
       setGetFilteredPostLoading(false);
-      console.log("User is not logged in");
       toast.warn("You need to login");
       navigate("/expert/login");
 
@@ -226,7 +223,6 @@ const usePost = () => {
           toast.error("Post Creation error");
         }
       } else {
-        console.log("User is not logged in");
         toast.warn("You need to login");
         navigate("/expert/login");
       }
@@ -241,7 +237,6 @@ const usePost = () => {
     const user = auth.currentUser; // Get the currently signed-in user
 
     if (!user) {
-      console.log("User is not logged in");
       toast.warn("You need to login");
       navigate("/expert/login");
       return;
@@ -286,7 +281,6 @@ const usePost = () => {
     const user = auth.currentUser;
 
     if (!user) {
-      console.log("User is not logged in");
       toast.warn("You need to login");
       navigate("/expert/login");
       return [];
@@ -306,7 +300,6 @@ const usePost = () => {
         ...doc.data(),
       }));
 
-      console.log("Fetched Comments: ", comments);
       return comments as Comment[];
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -322,7 +315,6 @@ const usePost = () => {
     const user = auth.currentUser;
 
     if (!user) {
-      console.log("User is not logged in");
       toast.warn("You need to login");
       navigate("/expert/login");
       return [];
@@ -343,7 +335,6 @@ const usePost = () => {
         ...doc.data(),
       }));
 
-      console.log("Fetched Comments: ", comments);
       return comments as Comment[];
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -376,7 +367,7 @@ const usePost = () => {
           toast.error("Post edit error");
         }
       } else {
-        console.log("User is not logged in");
+     
         toast.warn("You need to login");
         navigate("/expert/login");
       }
@@ -404,7 +395,6 @@ const usePost = () => {
           toast.error("Post delete error");
         }
       } else {
-        console.log("User is not logged in");
         toast.warn("You need to login");
         navigate("/expert/login");
       }

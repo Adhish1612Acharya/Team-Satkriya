@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ExpertProtectRoute = () => {
-  const { currentUser, loading, userType, setUserType } = useAuthContext();
+  const { currentUser, loading, userType, setUserType,setUsername } = useAuthContext();
 
   useEffect(() => {
     async function checkUserRole() {
@@ -12,6 +12,7 @@ const ExpertProtectRoute = () => {
         const userInfo = await getUserInfo(currentUser.uid, "experts");
         if (userInfo !== null) {
           setUserType(userInfo.role);
+          setUsername(userInfo.name);
         } else {
           setUserType(null);
         }

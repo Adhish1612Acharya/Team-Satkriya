@@ -15,11 +15,11 @@ import farmerRegisterSchema from "./FarmerRegisterSchema";
 import useAuth from "@/hooks/farmer/useAuth/useAuth";
 
 export const FarmerRegisterForm = () => {
-  const {farmerSignUp}=useAuth();
+  const { farmerSignUp } = useAuth();
   const form = useForm({
     resolver: zodResolver(farmerRegisterSchema),
     defaultValues: {
-      phoneNumber: 0,
+      phoneNumber: "",
       language: "",
       name: "",
       state: "",
@@ -29,10 +29,18 @@ export const FarmerRegisterForm = () => {
     },
   });
 
-const onSubmit=async (data: z.infer<typeof farmerRegisterSchema>)=> {
-    console.log(data);
-    await farmerSignUp(data);
-  }
+  const onSubmit = async (data: z.infer<typeof farmerRegisterSchema>) => {
+    const newData = {
+      phoneNumber: Number(data.phoneNumber),
+      language: data.language,
+      name: data.name,
+      state: data.state,
+      city: data.city,
+      experience: data.experience,
+      password: data.password,
+    };
+    await farmerSignUp(newData);
+  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -140,11 +148,9 @@ const onSubmit=async (data: z.infer<typeof farmerRegisterSchema>)=> {
             type="submit"
             fullWidth
             className="bg-green-600 hover:bg-green-700"
+            disabled={form.formState.isSubmitting}
           >
             Create Account
-          </Button>
-          <Button type="button" variant="outline" fullWidth>
-            Sign up with Google
           </Button>
         </div>
 

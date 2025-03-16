@@ -14,12 +14,10 @@ const updateFilters = async (
     if (existingFilters) {
       if (Object.keys(newFilterData).length > 0) {
         Object.keys(newFilterData).forEach((newMainFilter) => {
-          console.log("New Main Filter:", newMainFilter);
+
 
           // Get corresponding sub-filters for this main filter
           const newSubFilters = newFilterData[newMainFilter].subFilters;
-
-          console.log("Associated Sub-Filters:", newSubFilters);
 
           // Check if the main filter already exists
           if (existingFilters[newMainFilter]) {

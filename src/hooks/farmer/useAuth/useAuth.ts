@@ -9,10 +9,12 @@ import { auth, db } from "../../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FarmerSignUp, PhonePasswordLogin } from "./useAuth.types";
+import { useAuthContext } from "@/context/AuthContext";
 // import { setupRecaptcha } from "../../utils/firebaseUtils";
 
 const useAuth = () => {
   const navigate = useNavigate();
+  const {setUserType}=useAuthContext();
 
   const [loginLoad, setLoginLoad] = useState(false);
   const [signUpLoad, setSignUpLoad] = useState(false);
@@ -51,17 +53,9 @@ const useAuth = () => {
     try {
       setLoginLoad(true);
       await signInWithEmailAndPassword(auth, phone, password);
-      const user = auth.currentUser;
-      const docRef = doc(db, "farmer", `${user?.uid}`);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        let farmerData = docSnap.data();
-
-        if (farmerData.profileData === null) {
-          navigate("/farmer/complete-profile");
-        }
-      }
+      setUserType("farmers");
+      localStorage.setItem("userType", "farmers");
+      navigate("/posts");
       setLoginLoad(false);
     } catch (err) {
       setLoginLoad(false);
@@ -70,31 +64,34 @@ const useAuth = () => {
     }
   };
 
-  const farmerSignUp: FarmerSignUp = async (
-    data
-  ) => {
+  const farmerSignUp: FarmerSignUp = async (data) => {
     try {
       setSignUpLoad(true);
-      await createUserWithEmailAndPassword(auth, data.phoneNumber+"@gmail.com", data.password).then(
-        async (userCredential) => {
-          const user = userCredential.user;
-          const docRef = doc(db, "farmer", user.uid);
+      await createUserWithEmailAndPassword(
+        auth,
+        data.phoneNumber + "@gmail.com",
+        data.password
+      ).then(async (userCredential) => {
+        const user = userCredential.user;
+        const docRef = doc(db, "farmers", user.uid);
 
-          await setDoc(docRef, {
-            name: data.name,
-            email: user.email,
-            contactNo: data.phoneNumber,
-            posts: [],
-            role: "farmer",
-            profileData: {
-              language: data.language,
-              state: data.state,
-              city: data.city,
-              experience: data.experience,
-            },
-          });
-        }
-      );
+        await setDoc(docRef, {
+          name: data.name,
+          email: user.email,
+          contactNo: data.phoneNumber,
+          posts: [],
+          role: "farmer",
+          profileData: {
+            language: data.language,
+            state: data.state,
+            city: data.city,
+            experience: data.experience,
+          },
+        });
+      });
+      setUserType("farmers");
+      localStorage.setItem("userType", "experts");
+      navigate("/posts");
       setSignUpLoad(false);
     } catch (err: any) {
       setSignUpLoad(false);

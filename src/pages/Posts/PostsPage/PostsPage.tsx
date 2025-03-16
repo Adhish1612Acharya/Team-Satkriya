@@ -8,10 +8,12 @@ import usePost from "@/hooks/usePost/usePost";
 import addFiltersToFirestore from "@/addFilters";
 import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleton";
 import Filter from "@/components/Filter/Filter/Filter";
+import getUserInfo from "@/utils/getUserInfo";
+import { useAuthContext } from "@/context/AuthContext";
 
 export function PostsPage() {
-  const { getAllPosts, getPostLoading ,getFilteredPostLoading} = usePost();
-
+  const { currentUser } = useAuthContext();
+  const { getAllPosts, getPostLoading, getFilteredPostLoading } = usePost();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -21,6 +23,8 @@ export function PostsPage() {
     async function getPosts() {
       const postData = await getAllPosts();
       setPosts(postData);
+      // const userInfo = await getUserInfo(currentUser.uid, "farmers");
+      // console.log("UserInfo; ", userInfo);
     }
 
     getPosts();
@@ -97,49 +101,48 @@ export function PostsPage() {
 
   return (
     <>
-    <Filter setPosts={setPosts}/>
-     <div className="container mx-auto px-4 py-8 pt-24">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
+      <Filter setPosts={setPosts} />
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
-        <Card className="mb-8 overflow-hidden">
-          <CreatePostForm firebaseDocuemntType={"experts"} />
-        </Card>
+          <Card className="mb-8 overflow-hidden">
+            <CreatePostForm firebaseDocuemntType={"experts"} />
+          </Card>
 
-        {/* Posts Feed */}
-        <div>
-          {getPostLoading || getFilteredPostLoading ? (
-            <>
-              <PostCardSkeleton />
-              <PostCardSkeleton />
-              <PostCardSkeleton />
-            </>
-          ) : (
-            posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onLike={handleLike}
-                onComment={handleComment}
-                onShare={handleShare}
-                onPostClick={handlePostClick}
-              />
-            ))
-          )}
+          {/* Posts Feed */}
+          <div>
+            {getPostLoading || getFilteredPostLoading ? (
+              <>
+                <PostCardSkeleton />
+                <PostCardSkeleton />
+                <PostCardSkeleton />
+              </>
+            ) : (
+              posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={handleLike}
+                  onComment={handleComment}
+                  onShare={handleShare}
+                  onPostClick={handlePostClick}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Post Modal */}
+          <PostModal
+            post={selectedPost}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+          />
         </div>
-
-        {/* Post Modal */}
-        <PostModal
-          post={selectedPost}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onLike={handleLike}
-          onComment={handleComment}
-          onShare={handleShare}
-        />
       </div>
-    </div>
     </>
-   
   );
 }
