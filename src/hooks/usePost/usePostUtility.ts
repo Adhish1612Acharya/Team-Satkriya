@@ -4,8 +4,6 @@ export const uploadFilesToCloudinary = async (files: File[]): Promise<string[]> 
         const uploadPromises = files.map(async (file) => {
             const isVideo = file.type.startsWith("video/");
 
-            console.log("Is Video : ",isVideo);
-
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET);
@@ -15,7 +13,6 @@ export const uploadFilesToCloudinary = async (files: File[]): Promise<string[]> 
         ? `${import.meta.env.VITE_CLOUDINARY_VIDEO_UPLOAD_URL}`  // Use video upload endpoint
         : `${import.meta.env.VITE_CLOUDINARY_IMAGE_UPLOAD_URL}`;
 
-        console.log("Cloudinary URL : " , cloudinaryUrl)
     
         try {
             const response = await axios.post(

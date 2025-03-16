@@ -4,14 +4,16 @@ import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const FarmerProtectRoute = () => {
-  const { currentUser, loading, userType, setUserType } = useAuthContext();
+  const { currentUser, loading, userType, setUserType, setUsername } =
+    useAuthContext();
 
   useEffect(() => {
     async function checkUserRole() {
       if (currentUser) {
         const userInfo = await getUserInfo(currentUser.uid, "farmers");
         if (userInfo !== null) {
-          setUserType(userInfo.role); 
+          setUserType(userInfo.role);
+          setUsername(userInfo.name);
         } else {
           setUserType(null);
         }
@@ -19,7 +21,7 @@ const FarmerProtectRoute = () => {
     }
 
     checkUserRole();
-  }, [currentUser, setUserType]); // Add currentUser and setUserType as dependencies
+  }, [currentUser, setUserType]); 
 
   if (loading) return <p>Loading...</p>;
 
@@ -34,4 +36,4 @@ const FarmerProtectRoute = () => {
   return <Navigate to="/expert/home" replace />;
 };
 
-export default  FarmerProtectRoute;
+export default FarmerProtectRoute;

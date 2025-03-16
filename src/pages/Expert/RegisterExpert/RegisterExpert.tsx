@@ -5,14 +5,12 @@ import {
   Building2,
   GraduationCap,
   Microscope,
-  LockIcon,
 } from "lucide-react";
 import DoctorSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/DoctorSignUpForm/DoctorSignUpForm";
 import NgoSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/NgoSignUpForm/NgoSignUpForm";
 import ResearchInstSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/ResearchInstSignUpForm/ResearchInstSignUpForm";
 import VolunteerSignUpForm from "@/components/Forms/Expert/ExpertSignUpForm/VolunteerSignUpForm/VolunteerSignUpForm";
 import AuthLayoutExpert from "@/components/AuthLayoutExpert/AuthLayoutExpert";
-import Button from "@/components/Button/Button";
 
 const userTypeOptions = [
   { type: "doctor", label: "Doctor", icon: Heart },
@@ -73,19 +71,10 @@ const RegisterExpert: FC = () => {
           {userType === "research" && <ResearchInstSignUpForm />}
           {userType === "volunteer" && <VolunteerSignUpForm />}
           <div className="flex flex-col items-center gap-3 w-full">
-            <Button
-              icon={LockIcon}
-              type="button"
-              className="mt-2"
-              fullWidth
-              variant="outline"
-            >
-              Sign up with Google
-            </Button>
             <p className="text-center text-sm text-gray-600 mt-2">
               Already have an account?{" "}
               <a
-                href="/login"
+                href="/expert/login"
                 className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
               >
                 Sign in

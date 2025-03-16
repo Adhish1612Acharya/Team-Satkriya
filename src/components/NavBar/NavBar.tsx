@@ -1,15 +1,5 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-} from "../ui/navigation-menu";
+import { NavigationMenu, NavigationMenuList } from "../ui/navigation-menu";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
@@ -17,58 +7,125 @@ import { Button } from "../ui/button";
 import {
   Menu,
   Heart,
-  Sun,
-  Moon,
   Calendar,
-  Users,
   FileText,
-  Microscope,
   ClipboardList,
   LogOut,
+  BookOpen,
+  PenTool,
+  Home,
+  LogIn,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
-const navItems = [
-  {
-    title: "Doctors Post",
-    href: "/doctors-post",
-    icon: <FileText className="h-4 w-4" />,
-    color: "text-blue-500",
-  },
-  {
-    title: "NGO Post",
-    href: "/ngo-post",
-    icon: <Users className="h-4 w-4" />,
-    color: "text-purple-500",
-  },
-  {
-    title: "Farmers Post",
-    href: "/farmers-post",
-    icon: <ClipboardList className="h-4 w-4" />,
-    color: "text-green-500",
-  },
-  {
-    title: "Research Institution",
-    href: "/research-institution",
-    icon: <Microscope className="h-4 w-4" />,
-    color: "text-amber-500",
-  },
-  {
-    title: "Events",
-    href: "/events",
-    icon: <Calendar className="h-4 w-4" />,
-    color: "text-red-500",
-  },
-  {
-    title: "Your Posts",
-    href: "/your-posts",
-    icon: <FileText className="h-4 w-4" />,
-    color: "text-teal-500",
-  },
-];
+import { useAuthContext } from "@/context/AuthContext";
+import Profile from "./Profile";
 
 const NavBar = () => {
+  const { currentUser, userType } =useAuthContext();
   const location = useLocation();
+
+  const navItems = [
+    // Common items for logged-in users
+    ...(currentUser
+      ? [
+          {
+            title: "Posts",
+            href: "/posts",
+            icon: <FileText className="h-4 w-4" />,
+            color: "text-blue-500",
+          },
+          {
+            title: "Your Posts",
+            href: "/your-posts",
+            icon: <FileText className="h-4 w-4" />,
+            color: "text-teal-500",
+          },
+          {
+            title: "Farmer Queries",
+            href: "/farmer-queries",
+            icon: <ClipboardList className="h-4 w-4" />,
+            color: "text-green-500",
+          },
+          {
+            title: "Success Stories",
+            href: "/success-stories",
+            icon: <BookOpen className="h-4 w-4" />,
+            color: "text-purple-500",
+          },
+          {
+            title: "Workshops and Training",
+            href: "/workshops",
+            icon: <Calendar className="h-4 w-4" />,
+            color: "text-amber-500",
+          },
+        ]
+      : []),
+
+    // Role-specific items for farmers
+    ...(currentUser && userType === "farmer"
+      ? [
+          // {
+          //   title: "Doctors Post",
+          //   href: "/doctors-post",
+          //   icon: <FileText className="h-4 w-4" />,
+          //   color: "text-blue-500",
+          // },
+          // {
+          //   title: "NGO Post",
+          //   href: "/ngo-post",
+          //   icon: <Users className="h-4 w-4" />,
+          //   color: "text-purple-500",
+          // },
+          // {
+          //   title: "Farmers Post",
+          //   href: "/farmers-post",
+          //   icon: <ClipboardList className="h-4 w-4" />,
+          //   color: "text-green-500",
+          // },
+          // {
+          //   title: "Research Institution",
+          //   href: "/research-institution",
+          //   icon: <Microscope className="h-4 w-4" />,
+          //   color: "text-amber-500",
+          // },
+          {
+            title: "Events",
+            href: "/events",
+            icon: <Calendar className="h-4 w-4" />,
+            color: "text-red-500",
+          },
+        ]
+      : []),
+
+    // Role-specific items for experts
+    ...(currentUser && userType === "expert"
+      ? [
+          {
+            title: "Create & Educate",
+            href: "/create-educate",
+            icon: <PenTool className="h-4 w-4" />,
+            color: "text-indigo-500",
+          },
+        ]
+      : []),
+
+    // Items for logged-out users
+    ...(!currentUser
+      ? [
+          {
+            title: "Home",
+            href: "/",
+            icon: <Home className="h-4 w-4" />,
+            color: "text-gray-500",
+          },
+          {
+            title: "Login",
+            href: "/auth",
+            icon: <LogIn className="h-4 w-4" />,
+            color: "text-blue-500",
+          },
+        ]
+      : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800">
@@ -141,50 +198,11 @@ const NavBar = () => {
             </div>
 
             {/* Profile Dropdown */}
-            <div className="mt-8 border-t border-blue-200 dark:border-blue-800 pt-6">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start rounded-lg px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
-                        <AvatarImage src="/placeholder.svg" alt="User" />
-                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                          HC
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start">
-                        <p className="font-medium">Dr. Jane Smith</p>
-                        <p className="text-xs text-muted-foreground">
-                          doctor@example.com
-                        </p>
-                      </div>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="w-56 dark:bg-gray-900"
-                >
-                  <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                    <span>My Publications</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {currentUser && (
+              <div className="mt-8 border-t border-blue-200 dark:border-blue-800 pt-6">
+                <Profile />
+              </div>
+            )}
           </SheetContent>
         </Sheet>
 
@@ -225,47 +243,11 @@ const NavBar = () => {
           </NavigationMenu>
 
           {/* Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
-              >
-                <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
-                  <AvatarImage src="/placeholder.svg" alt="User" />
-                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                    HC
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 dark:bg-gray-900">
-              <div className="flex items-center gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">Dr. Jane Smith</p>
-                  <p className="text-xs text-muted-foreground">
-                    doctor@example.com
-                  </p>
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                <span>Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                <span>My Publications</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive cursor-pointer flex items-center gap-2">
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {currentUser && (
+            <div className="mt-8 border-t border-blue-200 dark:border-blue-800 pt-6">
+              <Profile />
+            </div>
+          )}
         </div>
       </div>
     </header>

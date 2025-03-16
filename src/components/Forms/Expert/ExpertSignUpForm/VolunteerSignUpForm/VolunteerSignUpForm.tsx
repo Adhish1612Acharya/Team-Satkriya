@@ -12,10 +12,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Lock } from "lucide-react";
 import volunteerSignUpSchema from "./VolunteerSignUpSchema";
-import { useEffect } from "react";
 import Button from "@/components/Button/Button";
+import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
+import useAuth from "@/hooks/expert/useAuth/useAuth";
+import { toast } from "react-toastify";
 
 const VolunteerSignUpForm = () => {
+  const { expertSignUp, googleSignUp } = useAuth();
+
   const form = useForm<z.infer<typeof volunteerSignUpSchema>>({
     resolver: zodResolver(volunteerSignUpSchema),
     defaultValues: {
@@ -29,43 +33,54 @@ const VolunteerSignUpForm = () => {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof volunteerSignUpSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof volunteerSignUpSchema>) => {
+    const dataToPass: SignUpArguTypes = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      address: data.address,
+      contactNo: Number(data.phoneNumber),
+      role: data.type,
+      profileData: {
+        education: data.education,
+      },
+    };
+    await expertSignUp(dataToPass);
   };
 
-  useEffect(() => {
+  const signUpWithGoogle = async () => {
     form.reset();
-  }, []);
+    const profileFields: (keyof z.infer<typeof volunteerSignUpSchema>)[] = [
+      "phoneNumber",
+      "address",
+      "education",
+    ];
+
+    let isValid = true;
+
+    for (const field of profileFields) {
+      const fieldValid = await form.trigger(field);
+      if (!fieldValid) isValid = false;
+    }
+
+    if (!isValid) {
+      toast.error(
+        "Please fill all required fields correctly before signing up with Google."
+      );
+      return;
+    } else {
+      const phoneNumber = Number(form.getValues("phoneNumber"));
+      const address = form.getValues("address");
+      const profileData = {
+        education: form.getValues("education"),
+      };
+      await googleSignUp("volunteer", profileData, address, phoneNumber);
+    }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email Address</FormLabel>
-              <FormControl>
-                <Input placeholder="you@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-         <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Enter password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="*******" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="phoneNumber"
@@ -92,19 +107,7 @@ const VolunteerSignUpForm = () => {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name="education"
@@ -118,9 +121,63 @@ const VolunteerSignUpForm = () => {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email Address</FormLabel>
+              <FormControl>
+                <Input placeholder="you@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Enter password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="*******" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="space-y-4">
           <Button variant="outline" icon={Lock} type="submit" fullWidth>
             Create Account
+          </Button>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={signUpWithGoogle}
+            fullWidth
+            className="flex items-center justify-center gap-2"
+          >
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google Logo"
+              className="w-5 h-5"
+            />
+            Sign Up with Google
           </Button>
         </div>
       </form>

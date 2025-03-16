@@ -7,14 +7,13 @@ const doctorSignUpSchema = z.object({
   phoneNumber: z.string().refine((value) => /^[0-9]{10}$/.test(value), {
     message: "Enter a valid 10-digit phone number",
   }),
-  address: z.string().min(1, "Address is required"),
+  address: z.string().min(1, "clinic location is required is required"),
   name: z.string().min(1, "Name is required"),
   uniqueId: z.string().min(1, "Unique ID is required"),
   education: z.string().min(1, "Education is required"),
   yearsOfPractice: z.string().refine((value) => /^[1-9]\d*$/.test(value), {
     message: "Enter a valid number greater than 0",
   }),
-  clinicLocation: z.string().min(1, "Clinic location is required"),
 });
 
 export default doctorSignUpSchema;

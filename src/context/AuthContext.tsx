@@ -8,8 +8,10 @@ interface AuthContextType {
   loading: boolean;
   setCurrentUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  userType:string | null;
-  setUserType:(userType:string | null)=>void;
+  userType: string | null;
+  setUserType: (userType: string | null) => void;
+  username: string | null;
+  setUsername: (username: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,10 +29,12 @@ export const useAuthContext = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userType,setUserType]=useState<string | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
+  const [username,setUsername]=useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       if (user) {
         setCurrentUser(user);
       } else {
@@ -42,8 +46,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+
+
   return (
-    <AuthContext.Provider value={{ currentUser, loading,userType,setUserType,setCurrentUser,setLoading }}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        loading,
+        userType,
+        setUserType,
+        setCurrentUser,
+        setLoading,
+        username,
+        setUsername,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

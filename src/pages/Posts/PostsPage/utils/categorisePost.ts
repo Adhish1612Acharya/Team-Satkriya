@@ -12,15 +12,12 @@ const categorizePost = async (textContent: string, file: File | null) => {
 
     const filters = await fetchFilters(); // Fetch available filters
 
-    console.log("filters : ", filters);
 
     const aiResponse = await classifyContent(textContent, base64Media, filters);
 
     const cleanResponse = aiResponse.replace(/```json|```/g, "");
-    console.log("Clean reponse  : ", cleanResponse);
     const jsonData = JSON.parse(cleanResponse);
 
-    console.log("AI response : ", jsonData);
 
     if (jsonData.newFilter !== null) {
       await updateFilters(filters, jsonData.newFilter);

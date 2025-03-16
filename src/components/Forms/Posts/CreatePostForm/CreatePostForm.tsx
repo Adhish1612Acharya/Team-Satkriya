@@ -62,9 +62,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
     event: React.ChangeEvent<HTMLInputElement>,
     mediaType: "image" | "video" | "document"
   ) => {
-    console.log("HanleFileChange : ");
     const file = event.target.files?.[0];
-    console.log(file);
     setNewPostImage([]);
     setNewPostVideo([]);
     setNewPostDocument([]);
