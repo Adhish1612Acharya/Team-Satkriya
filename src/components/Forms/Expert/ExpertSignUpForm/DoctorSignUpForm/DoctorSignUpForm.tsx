@@ -55,7 +55,7 @@ const DoctorSignUpForm = () => {
   };
 
   const signUpWithGoogle = async () => {
-    form.reset();
+
     const profileFields: (keyof z.infer<typeof doctorSignUpSchema>)[] = [
       "phoneNumber",
       "address",

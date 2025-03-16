@@ -49,7 +49,7 @@ const NgoSignUpForm = () => {
   };
 
   const signUpWithGoogle = async () => {
-    form.reset();
+
     const profileFields: (keyof z.infer<typeof ngoSignUpSchema>)[] = [
       "phoneNumber",
       "address",

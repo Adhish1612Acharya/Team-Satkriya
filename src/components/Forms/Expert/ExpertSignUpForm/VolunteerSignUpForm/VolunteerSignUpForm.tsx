@@ -49,7 +49,7 @@ const VolunteerSignUpForm = () => {
   };
 
   const signUpWithGoogle = async () => {
-    form.reset();
+  
     const profileFields: (keyof z.infer<typeof volunteerSignUpSchema>)[] = [
       "phoneNumber",
       "address",

@@ -12,8 +12,9 @@ const ProtectedRoute = () => {
     async function checkUserRole() {
       if (currentUser) {
         const userTypeFromLS=localStorage.getItem("userType");
+        console.log("FLS : ",userTypeFromLS);
         const userInfo = await getUserInfo(currentUser.uid, userTypeFromLS || "");
-        if (userInfo) {
+        if (userInfo) { 
           setUserType(userInfo.role==="farmer"?"farmers":"experts");
           setUsername(userInfo.name);
         } else {
@@ -24,7 +25,7 @@ const ProtectedRoute = () => {
     }
 
     checkUserRole();
-  }, [currentUser]);
+  }, [currentUser,localStorage.getItem("userType")]);
 
   if (loading || !isRoleChecked) {
     return <p>Loading...</p>; // Show loading indicator until role check is complete
