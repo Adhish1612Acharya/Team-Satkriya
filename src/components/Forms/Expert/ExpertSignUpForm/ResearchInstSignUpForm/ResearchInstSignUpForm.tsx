@@ -49,7 +49,7 @@ const ResearchInstSignUpForm = () => {
   };
 
   const signUpWithGoogle = async () => {
-    form.reset();
+  
     const profileFields: (keyof z.infer<typeof researchInstSignUpSchema>)[] = [
       "phoneNumber",
       "address",
