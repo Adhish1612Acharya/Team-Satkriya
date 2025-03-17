@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, VideoIcon, X, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import filters from "@/constants/filters";
 
 const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
   const [newPostImage, setNewPostImage] = useState<File[]>([]);
@@ -91,6 +92,24 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
+
+
+const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
+  if (!subFilters || subFilters.length === 0) return false;
+
+  // Check if "Queries" is present in the subFilters array
+  if (subFilters.includes("Queries")) {
+    return true;
+  }
+
+  // Check if any FarmerQueryType sub-filters are present
+  const farmerQuerySubFilters = filters.FarmerQueryType.subFilters;
+  const hasFarmerQueryType = subFilters.some((filter) =>
+    farmerQuerySubFilters.includes(filter)
+  );
+
+  return hasFarmerQueryType;
+};
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     const postFilters = await categorizePost(data.content, newPostImage[0]);
