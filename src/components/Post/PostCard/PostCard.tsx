@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 
 const PostCard: FC<PostCardProps> = ({
   post,
@@ -60,7 +61,7 @@ const PostCard: FC<PostCardProps> = ({
   );
 
   return (
-    <Card className="mb-6 overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -86,6 +87,7 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
+          <VerifyPostButton/>
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
@@ -157,7 +159,7 @@ const PostCard: FC<PostCardProps> = ({
         </div>
 
         <div className="flex items-center justify-between w-full py-2">
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             className={cn(
@@ -168,7 +170,7 @@ const PostCard: FC<PostCardProps> = ({
           >
             <ThumbsUp size={18} className={isLiked ? "fill-blue-500" : ""} />
             <span>Like</span>
-          </Button>
+          </Button> */}
           <Button
             variant="ghost"
             size="sm"
@@ -188,7 +190,7 @@ const PostCard: FC<PostCardProps> = ({
             <MessageCircle size={18} />
             <span>Comment</span>
           </Button>
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             className="flex items-center space-x-1 flex-1 justify-center"
@@ -208,7 +210,7 @@ const PostCard: FC<PostCardProps> = ({
           >
             <Bookmark size={18} className={isSaved ? "fill-blue-500" : ""} />
             <span>Save</span>
-          </Button>
+          </Button> */}
         </div>
 
         {showComments && (

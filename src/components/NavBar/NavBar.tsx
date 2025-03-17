@@ -20,7 +20,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import Profile from "./Profile";
 
 const NavBar = () => {
-  const { currentUser, userType } =useAuthContext();
+  const { currentUser, userType } = useAuthContext();
   const location = useLocation();
 
   const navItems = [
@@ -61,7 +61,7 @@ const NavBar = () => {
       : []),
 
     // Role-specific items for farmers
-    ...(currentUser && userType === "farmer"
+    ...(currentUser && localStorage.getItem("userType") === "farmers"
       ? [
           // {
           //   title: "Doctors Post",
@@ -97,7 +97,7 @@ const NavBar = () => {
       : []),
 
     // Role-specific items for experts
-    ...(currentUser && userType === "expert"
+    ...(currentUser && localStorage.getItem("userType") === "experts"
       ? [
           {
             title: "Create & Educate",

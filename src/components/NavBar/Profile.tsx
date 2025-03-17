@@ -24,7 +24,6 @@ const Profile = () => {
       setUserType(null); // Clear the user type in the context
       localStorage.removeItem("userType");
       toast.success("Logged out successfully!");
-      window.location.href = "/"; // Redirect to home page
     } catch (error) {
       console.error("Logout Error:", error);
       toast.error("Failed to log out. Please try again.");
