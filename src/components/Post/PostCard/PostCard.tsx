@@ -8,26 +8,13 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  MessageCircle,
-  Share,
-  ThumbsUp,
-  Bookmark,
-  MoreHorizontal,
-  Smile,
-} from "lucide-react";
+import { MessageCircle, ThumbsUp, Smile } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import PostCardProps from "./PostCard.types";
 import Comment from "@/types/comment.types";
 import usePost from "@/hooks/usePost/usePost";
-import { CircularProgress, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { Timestamp } from "@firebase/firestore";
 import {
   Select,
@@ -41,17 +28,18 @@ import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 const PostCard: FC<PostCardProps> = ({
   post,
   handleMediaClick,
-  onLike,
-  onComment,
-  onShare,
-  onPostClick,
+  userRole
+  // onLike,
+  // onComment,
+  // onShare,
+  // onPostClick,
 }) => {
   const { getPostComments, addCommentPost, getFilteredComments } = usePost();
 
   const [comment, setComment] = useState("");
-  const [isLiked, setIsLiked] = useState(false);
+  // const [isLiked, setIsLiked] = useState(false);
   // const [likesCount, setLikesCount] = useState(post.likes);
-  const [isSaved, setIsSaved] = useState(false);
+  // const [isSaved, setIsSaved] = useState(false);
   const [showComments, setShowComments] = useState<boolean>(false);
   const [getCommentsLoad, setGetCommentsLoad] = useState<boolean>(true);
   const [addCommentsLoad, setAddCommentsLoad] = useState<boolean>(false);
@@ -87,7 +75,14 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          <VerifyPostButton/>
+          {post.verified !== null && (
+            <VerifyPostButton
+            userRole={userRole}
+              verifiedProfiles={post.verified}
+              postId={post.id}
+            />
+          )}
+
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
@@ -135,7 +130,7 @@ const PostCard: FC<PostCardProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col pt-0">
         <div className="flex items-center justify-between w-full pb-3 border-b">
-          <div className="flex items-center space-x-1 text-sm text-gray-500">
+          {/* <div className="flex items-center space-x-1 text-sm text-gray-500">
             {post.likesCount > 0 && (
               <>
                 <ThumbsUp
@@ -147,7 +142,7 @@ const PostCard: FC<PostCardProps> = ({
                 </span>
               </>
             )}
-          </div>
+          </div> */}
           <div className="flex items-center space-x-1 text-sm text-gray-500">
             {post.commentsCount > 0 && (
               <span>

@@ -1,4 +1,5 @@
 import ProfileData from "./profile.types";
+import VerifiedPostProfile from "./verifiedPostProfileInfo";
 
 interface Post {
   id: string;
@@ -10,6 +11,7 @@ interface Post {
   filters: string[];
   likesCount: number;
   commentsCount: number;
+  verified:VerifiedPostProfile[] | null
   createdAt: Date;
   updatedAt: Date;
   ownerId: string;
