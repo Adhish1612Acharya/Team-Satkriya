@@ -10,6 +10,7 @@ import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleto
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
 import { useAuthContext } from "@/context/AuthContext";
+import { auth } from "@/firebase";
 
 export function PostsPage() {
   const { currentUser } = useAuthContext();
@@ -18,13 +19,20 @@ export function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userRole,setUserRole]=useState<string | null>(null);
 
   useEffect(() => {
     async function getPosts() {
       const postData = await getAllPosts();
       setPosts(postData);
-      // const userInfo = await getUserInfo(currentUser.uid, "farmers");
-      // console.log("UserInfo; ", userInfo);
+      let userInfo;
+      if (auth.currentUser) {
+        userInfo = await getUserInfo(
+          auth.currentUser.uid,
+          localStorage.getItem("userType") as "farmers" | "experts"
+        );
+        console.log("UserInfo; ", userInfo);
+      }
     }
 
     getPosts();
@@ -123,10 +131,10 @@ export function PostsPage() {
                 <PostCard
                   key={post.id}
                   post={post}
-                  onLike={handleLike}
+                  // onLike={handleLike}
                   onComment={handleComment}
-                  onShare={handleShare}
-                  onPostClick={handlePostClick}
+                  // onShare={handleShare}
+                  // onPostClick={handlePostClick}
                 />
               ))
             )}

@@ -116,13 +116,33 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
 
     console.log("Post Filters : ", postFilters);
 
-    const newPost: PostArgu = {
-      content: data.content,
-      images: newPostImage,
-      videos: newPostVideo,
-      documents: newPostDocument,
-      filters: postFilters,
-    };
+    const hasQueries = hasQueriesOrFarmerQueryType(postFilters);
+
+    console.log("Has Queries : ", hasQueries);
+
+    let newPost:PostArgu;
+
+    if(hasQueries){
+       newPost = {
+        content: data.content,
+        images: newPostImage,
+        videos: newPostVideo,
+        documents: newPostDocument,
+        filters: postFilters,
+        verified:[]
+      };
+    }else{
+       newPost = {
+        content: data.content,
+        images: newPostImage,
+        videos: newPostVideo,
+        documents: newPostDocument,
+        filters: postFilters,
+        verified:null
+      };
+    }
+
+
 
     const categorizedPostData = await createPost(newPost, firebaseDocuemntType);
 

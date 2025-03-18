@@ -30,7 +30,8 @@ const usePost = () => {
   const navigate = useNavigate();
 
   const [getPostLoading, setGetPostLoading] = useState<boolean>(false);
-  const [getFilteredPostLoading, setGetFilteredPostLoading] = useState<boolean>(false);
+  const [getFilteredPostLoading, setGetFilteredPostLoading] =
+    useState<boolean>(false);
   const [postLoading, setPostLoading] = useState<boolean>(false);
   const [editPostLoading, setEditPostLoading] = useState<boolean>(false);
   const [deletePostLoading, setDeletePostLoading] = useState<boolean>(false);
@@ -133,9 +134,8 @@ const usePost = () => {
         } else {
           q = query(postsRef, where("role", "==", userType));
         }
-        ;
         const querySnapshot = await getDocs(q);
-      
+
         const filteredPosts = querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -159,7 +159,6 @@ const usePost = () => {
           } as Post;
         });
 
-  
         setGetFilteredPostLoading(false);
         return filteredPosts;
       } catch (error) {
@@ -231,7 +230,7 @@ const usePost = () => {
 
   const addCommentPost = async (
     postId: string,
-    firebaseDocument: string,
+    firebaseDocument: "farmers" | "experts",
     commentData: string
   ) => {
     const user = auth.currentUser; // Get the currently signed-in user
@@ -342,63 +341,101 @@ const usePost = () => {
     }
   };
 
-  const editPost = async (
-    postId: string,
-    updatedData: { title: string; content: string }
-  ) => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const postRef = doc(db, "posts", postId);
-          const postSnapshot = await getDoc(postRef);
+  // const editPost = async (
+  //   postId: string,
+  //   updatedData: { title: string; content: string }
+  // ) => {
+  //   auth.onAuthStateChanged(async (user) => {
+  //     if (user) {
+  //       try {
+  //         const postRef = doc(db, "posts", postId);
+  //         const postSnapshot = await getDoc(postRef);
 
-          if (!postSnapshot.exists()) {
-            throw new Error("Post not found");
-          }
+  //         if (!postSnapshot.exists()) {
+  //           throw new Error("Post not found");
+  //         }
 
-          await updateDoc(postRef, {
-            ...updatedData,
-            updatedAt: new Date(),
-          });
+  //         await updateDoc(postRef, {
+  //           ...updatedData,
+  //           updatedAt: new Date(),
+  //         });
 
-          toast.success("Post edited");
-        } catch (error) {
-          console.error("Error updating post:", error);
-          toast.error("Post edit error");
-        }
+  //         toast.success("Post edited");
+  //       } catch (error) {
+  //         console.error("Error updating post:", error);
+  //         toast.error("Post edit error");
+  //       }
+  //     } else {
+
+  //       toast.warn("You need to login");
+  //       navigate("/expert/login");
+  //     }
+  //   });
+  // };
+
+  // const deletePost = async (postId: string) => {
+  //   auth.onAuthStateChanged(async (user) => {
+  //     if (user) {
+  //       try {
+  //         setDeletePostLoading(true);
+  //         const postRef = doc(db, "posts", postId);
+  //         await deleteDoc(postRef);
+
+  //         const userRef = doc(db, "experts", user.uid);
+  //         await updateDoc(userRef, {
+  //           posts: arrayRemove(postId), // Firebase will remove this ID from the array
+  //         });
+
+  //         toast.success("Post deleted");
+  //         setDeletePostLoading(false);
+  //       } catch (error) {
+  //         setDeletePostLoading(false);
+  //         console.error("Error updating post:", error);
+  //         toast.error("Post delete error");
+  //       }
+  //     } else {
+  //       toast.warn("You need to login");
+  //       navigate("/expert/login");
+  //     }
+  //   });
+  // };
+
+  const verifyPost = async (postId: string) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      toast.warn("You need to login");
+      navigate("/expert/login");
+      return false;
+    }
+
+    try {
+      const userInfo = await getUserInfo(user.uid, "experts");
+
+      const postRef = doc(db, "posts", postId);
+
+      if (userInfo) {
+        await updateDoc(postRef, {
+          verified: arrayUnion({
+            id: user.uid,
+            name: userInfo.name,
+            profilePic: userInfo.profilePic || "",
+          }),
+        });
+
+        return {
+          id: user.uid,
+          name: userInfo.name,
+          profilePic: userInfo.profilePic || "",
+        };
       } else {
-     
-        toast.warn("You need to login");
-        navigate("/expert/login");
+        return false;
       }
-    });
-  };
-
-  const deletePost = async (postId: string) => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          setDeletePostLoading(true);
-          const postRef = doc(db, "posts", postId);
-          await deleteDoc(postRef);
-
-          const userRef = doc(db, "experts", user.uid);
-          await updateDoc(userRef, {
-            posts: arrayRemove(postId), // Firebase will remove this ID from the array
-          });
-
-          toast.success("Post deleted");
-          setDeletePostLoading(false);
-        } catch (error) {
-          setDeletePostLoading(false);
-          console.error("Error updating post:", error);
-          toast.error("Post delete error");
-        }
-      } else {
-        toast.warn("You need to login");
-        navigate("/expert/login");
-      }
-    });
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error);
+      return false;
+    }
   };
 
   return {
@@ -409,8 +446,8 @@ const usePost = () => {
     deletePostLoading,
     setDeletePostLoading,
     createPost,
-    editPost,
-    deletePost,
+    // editPost,
+    // deletePost,
     getAllPosts,
     getFilteredPosts,
     getPostLoading,
@@ -423,6 +460,7 @@ const usePost = () => {
     addCommentPost,
     getPostComments,
     getFilteredComments,
+    verifyPost,
   };
 };
 
