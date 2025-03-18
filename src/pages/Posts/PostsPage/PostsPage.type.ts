@@ -1,4 +1,5 @@
-import { Post, Comment } from '@/pages/Profiles/index';
+import { Comment } from '@/pages/Profiles/index';
+import Post from '@/types/posts.types';
 
 export interface PostCardProps {
   post: Post;

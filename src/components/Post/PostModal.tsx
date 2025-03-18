@@ -1,52 +1,37 @@
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  MessageCircle, 
-  MoreHorizontal, 
-  Share, 
-  ThumbsUp, 
-  X 
-} from "lucide-react";
 import { PostModalProps } from "@/pages/Posts/PostsPage/PostsPage.type";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 
 export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }: PostModalProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(post?.likes || 0);
-  const [comment, setComment] = useState("");
-  const [isSaved, setIsSaved] = useState(false);
+  // const [isLiked, setIsLiked] = useState(false);
+  // const [likesCount, setLikesCount] = useState(post?.likes || 0);
+  // const [comment, setComment] = useState("");
+  // const [isSaved, setIsSaved] = useState(false);
 
   if (!post) return null;
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-    onLike(post.id);
-  };
+  // const handleLike = () => {
+  //   setIsLiked(!isLiked);
+  //   setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+  //   onLike(post.id);
+  // };
 
-  const handleComment = () => {
-    if (comment.trim()) {
-      onComment(post.id, comment);
-      setComment("");
-    }
-  };
+  // const handleComment = () => {
+  //   if (comment.trim()) {
+  //     onComment(post.id, comment);
+  //     setComment("");
+  //   }
+  // };
 
-  const handleShare = () => {
-    onShare(post.id);
-  };
+  // const handleShare = () => {
+  //   onShare(post.id);
+  // };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-  };
+  // const handleSave = () => {
+  //   setIsSaved(!isSaved);
+  // };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,15 +39,15 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
       <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-0 overflow-hidden flex">
         {/* Media Section */}
         <div className="flex-1 bg-black flex items-center justify-center">
-          {post.mediaType === 'image' ? (
+          {post.images.length> 0 ? (
             <img 
-              src={post.mediaUrl} 
+              src={post.images?.[0]} 
               alt="Post content" 
               className="max-h-full max-w-full object-contain"
             />
           ) : (
             <video 
-              src={post.mediaUrl} 
+              src={post.videos?.[0]} 
               controls 
               className="max-h-full max-w-full"
               autoPlay
@@ -76,13 +61,13 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
           <div className="p-4 border-b flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Avatar>
-                <AvatarImage src={post.authorProfilePhoto} alt={post.authorName} />
-                <AvatarFallback>{post.authorName.charAt(0)}</AvatarFallback>
+                <AvatarImage src={post.profileData.profilePic} alt={post.profileData.name} />
+                <AvatarFallback>{post.profileData.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium">{post.authorName}</p>
+                <p className="font-medium">{post.profileData.name}</p>
                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                  <span>{post.authorType}</span>
+                  <span>{post.role}</span>
                   <span className="mx-1">•</span>
                   <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
                 </div>
@@ -115,7 +100,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
           </div>
 
           {/* Likes and Comments Count */}
-          <div className="px-4 py-2 border-b flex items-center justify-between text-sm text-gray-500">
+          {/* <div className="px-4 py-2 border-b flex items-center justify-between text-sm text-gray-500">
             {likesCount > 0 && (
               <div className="flex items-center space-x-1">
                 <ThumbsUp size={14} className={isLiked ? "text-blue-500" : ""} />
@@ -125,10 +110,10 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
             {post.comments.length > 0 && (
               <span>{post.comments.length} {post.comments.length === 1 ? 'comment' : 'comments'}</span>
             )}
-          </div>
+          </div> */}
 
           {/* Action Buttons */}
-          <div className="px-4 py-2 border-b flex items-center justify-between">
+          {/* <div className="px-4 py-2 border-b flex items-center justify-between">
             <Button 
               variant="ghost" 
               size="sm" 
@@ -140,7 +125,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
             >
               <ThumbsUp size={18} className={isLiked ? "fill-blue-500" : ""} />
               <span>Like</span>
-            </Button>
+            </Button> */}
             {/* <Button 
               variant="ghost" 
               size="sm" 
@@ -149,7 +134,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
               <MessageCircle size={18} />
               <span>Comment</span>
             </Button> */}
-            <Button 
+            {/* <Button 
               variant="ghost" 
               size="sm" 
               className="flex items-center space-x-1"
@@ -158,10 +143,10 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
               <Share size={18} />
               <span>Share</span>
             </Button>
-          </div>
+          </div> */}
 
-          //Comments
-          <div className="flex-1 overflow-y-auto p-4">
+ 
+          {/* <div className="flex-1 overflow-y-auto p-4"> */}
             {/* {post.comments.map((comment) => (
               <div key={comment.id} className="flex items-start space-x-2 mb-4">
                 <Avatar className="h-8 w-8">
@@ -177,7 +162,7 @@ export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }:
                 </div>
               </div>
             ))} */}
-          </div>
+          {/* </div> */}
 
           {/* Add Comment */}
           {/* <div className="p-4 border-t">

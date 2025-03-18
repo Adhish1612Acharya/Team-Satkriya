@@ -14,7 +14,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
   const { verifyPost } = usePost();
 
   const [verified, setVerified] = useState(
-    verifiedProfiles.length > 0 &&
+    verifiedProfiles?.length > 0 &&
       verifiedProfiles.filter(
         (eachProfile) => eachProfile.id === auth.currentUser?.uid
       ).length === 1
@@ -24,6 +24,11 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
   const [verifyLoad, setVerifyLoad] = useState<boolean>(false);
   const [postVeriedProfiles, setPostVerifiedProfiles] =
     useState<VerifiedPostProfile[]>(verifiedProfiles);
+
+  console.log("Verified : ", verified);
+  console.log("UserRole : ", userRole);
+
+  console.log("Verified Profiles : ",verifiedProfiles);
 
   // Handle initial verification
   const handleVerify = async () => {
@@ -83,7 +88,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               : "bg-red-500 hover:bg-red-600 text-white"
           }
         `}
-        disabled={verifyLoad}
+        disabled={verifyLoad || verifiedProfiles?.length == 0}
       >
         {userRole !== "farmer" &&
         userRole !== "volunteer" &&
@@ -97,13 +102,45 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
           <>
             <span>Verify</span>
           </>
-        ) : (
-          <>
-            <CheckCircle className="text-white" size={18} />
-            {/* Replaced FaCheckCircle with CheckCircle */}
-            <span>Verified</span>
-          </>
-        )}
+        ) :(
+          userRole !== "farmer" &&
+          userRole !== "volunteer" &&
+          userRole !== "ngo" &&
+          verified ||  userRole === "farmer" ||
+          userRole === "volunteer" ||
+          userRole === "ngo" &&
+          verifiedProfiles.length>0?(
+            <>
+              <CheckCircle className="text-white" size={18} />
+              {/* Replaced FaCheckCircle with CheckCircle */}
+              <span>Verified</span>
+            </>
+          ):
+          (
+            <>
+              <CheckCircle className="text-white" size={18} />
+              {/* Replaced FaCheckCircle with CheckCircle */}
+              <span>Under Verification</span>
+            </>
+          )
+        )
+       
+      // userRole === "farmer" ||
+      //     (userRole === "volunteer" && verifiedProfiles?.length == 0) ? (
+      //     <>
+      //       <CheckCircle className="text-white" size={18} />
+      //       {/* Replaced FaCheckCircle with CheckCircle */}
+      //       <span>Under Verification</span>
+      //     </>
+      //   ) : (
+      //     <>
+      //       <CheckCircle className="text-white" size={18} />
+      //       {/* Replaced FaCheckCircle with CheckCircle */}
+      //       <span>Verified</span>
+      //     </>
+      //   )
+        
+        }
       </button>
 
       {/* Popup showing verified users */}

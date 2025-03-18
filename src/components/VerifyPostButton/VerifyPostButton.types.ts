@@ -1,7 +1,7 @@
 import VerifiedPostProfile from "@/types/verifiedPostProfileInfo";
 
 interface VerifyPostButtonProps {
-    userRole:string;
+    userRole:"farmer" | "doctor" | "ngo" | "volunteer" | "researchInstitution" | null;
   verifiedProfiles: VerifiedPostProfile[];
   postId:string;
 }

@@ -91,6 +91,7 @@ const usePost = () => {
             updatedAt: data.updatedAt?.toDate() || new Date(),
             ownerId: data.ownerId || "Unknown",
             role: data.role || "guest",
+            verified:data.verified,
             profileData: {
               name: data.profileData?.name || "Anonymous",
               profilePic: data.profileData?.profilePic || "",
@@ -152,6 +153,7 @@ const usePost = () => {
             likesCount: data.likesCount,
             commentsCount: data.commentsCount,
             role: data.role || "guest",
+            verified:data.verified,
             profileData: {
               name: data.profileData?.name || "Anonymous",
               profilePic: data.profileData?.profilePic || "",
@@ -176,10 +178,9 @@ const usePost = () => {
   };
 
   const createPost: CreatePostType = async (postData, firebaseDocument) => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
+      if (auth.currentUser) {
         try {
-          const userData = await getUserInfo(user.uid, firebaseDocument);
+          const userData = await getUserInfo(auth.currentUser.uid, firebaseDocument);
           let imageUrls: string[] = [];
           let videoUrls: string[] = [];
           let documentUrls: string[] = [];
@@ -204,17 +205,18 @@ const usePost = () => {
             commentsCount: 0,
             createdAt: new Date(),
             updatedAt: new Date(),
-            ownerId: user.uid,
+            ownerId: auth.currentUser.uid,
             role: userData?.role,
             profileData: {
               name: userData?.name,
               profilePic: userData?.profileData?.profilePic || "",
             },
+            verified:postData.verified
           };
 
           const newPost = await addDoc(collection(db, "posts"), contentData);
 
-          const postRef = doc(db, "experts", user.uid);
+          const postRef = doc(db, "experts", auth.currentUser.uid);
 
           await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
         } catch (error) {
@@ -225,7 +227,7 @@ const usePost = () => {
         toast.warn("You need to login");
         navigate("/expert/login");
       }
-    });
+    
   };
 
   const addCommentPost = async (
