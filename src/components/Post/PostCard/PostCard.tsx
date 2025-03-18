@@ -48,6 +48,8 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
+  console.log("Post.verified : ",post);
+
   return (
     <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -75,7 +77,7 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          {post.verified !== null && (
+          {post.verified !== null && post.role!=="doctor" && post.role!=="researchInstitution" &&  (
             <VerifyPostButton
             userRole={userRole}
               verifiedProfiles={post.verified}

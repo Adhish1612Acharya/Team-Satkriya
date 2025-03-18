@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import Post from "@/types/posts.types";
 import CreatePostForm from "@/components/Forms/Posts/CreatePostForm/CreatePostForm";
 import usePost from "@/hooks/usePost/usePost";
-import addFiltersToFirestore from "@/addFilters";
 import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleton";
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
@@ -13,13 +12,14 @@ import { useAuthContext } from "@/context/AuthContext";
 import { auth } from "@/firebase";
 
 export function PostsPage() {
-  const { currentUser } = useAuthContext();
   const { getAllPosts, getPostLoading, getFilteredPostLoading } = usePost();
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userRole,setUserRole]=useState<string | null>(null);
+  const [userRole, setUserRole] = useState<
+    "farmer" | "doctor" | "ngo" | "volunteer" | "researchInstitution" | null
+  >(null);
 
   useEffect(() => {
     async function getPosts() {
@@ -32,6 +32,7 @@ export function PostsPage() {
           localStorage.getItem("userType") as "farmers" | "experts"
         );
         console.log("UserInfo; ", userInfo);
+        setUserRole(userInfo?.role);
       }
     }
 
@@ -131,8 +132,10 @@ export function PostsPage() {
                 <PostCard
                   key={post.id}
                   post={post}
-                  // onLike={handleLike}
                   onComment={handleComment}
+                  userRole={userRole}
+                  handleMediaClick={handlePostClick}
+                  // onLike={handleLike}
                   // onShare={handleShare}
                   // onPostClick={handlePostClick}
                 />

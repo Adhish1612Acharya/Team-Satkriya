@@ -2,7 +2,7 @@ import Post from "@/types/posts.types";
 
 interface PostCardProps {
   post: Post;
-  userRole: string | null;;
+  userRole:"farmer" | "doctor" | "ngo" | "volunteer" | "researchInstitution" | null;
   handleMediaClick: (post: Post) => void;
   onComment: (postId: string, comment: string) => void;
   // likeCount:number;
