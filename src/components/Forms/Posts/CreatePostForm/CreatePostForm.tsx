@@ -24,6 +24,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
   const [newPostImage, setNewPostImage] = useState<File[]>([]);
   const [newPostVideo, setNewPostVideo] = useState<File[]>([]);
   const [newPostDocument, setNewPostDocument] = useState<File[]>([]);
+  const [error,setError]=useState<string>("No error");
 
   const { createPost } = usePost();
 
@@ -144,7 +145,9 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
 
 
 
-     await createPost(newPost, firebaseDocuemntType);
+     const response=await createPost(newPost, firebaseDocuemntType);
+
+     setError(String(response));
 
     form.reset();
   };
@@ -161,6 +164,7 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
               />
               <AvatarFallback>YP</AvatarFallback>
             </Avatar>
+            <p>Error : {error}</p>
             <FormField
               control={form.control}
               name="content"
