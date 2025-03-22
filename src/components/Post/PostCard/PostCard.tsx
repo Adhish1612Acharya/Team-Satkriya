@@ -28,7 +28,7 @@ import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 const PostCard: FC<PostCardProps> = ({
   post,
   handleMediaClick,
-  userRole
+  userRole,
   // onLike,
   // onComment,
   // onShare,
@@ -48,7 +48,7 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
-  console.log("Post.verified : ",post);
+  console.log("Post.verified : ", post);
 
   return (
     <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
@@ -77,13 +77,15 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          {post.verified !== null && post.role!=="doctor" && post.role!=="researchInstitution" &&  (
-            <VerifyPostButton
-            userRole={userRole}
-              verifiedProfiles={post.verified}
-              postId={post.id}
-            />
-          )}
+          {post.verified !== null &&
+            post.role !== "doctor" &&
+            post.role !== "researchInstitution" && (
+              <VerifyPostButton
+                userRole={userRole}
+                verifiedProfiles={post.verified}
+                postId={post.id}
+              />
+            )}
 
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -104,29 +106,56 @@ const PostCard: FC<PostCardProps> = ({
       <CardContent className="pb-3">
         <p className="mb-4 whitespace-pre-line">{post.content}</p>
 
-        <div
-          className="relative cursor-pointer overflow-hidden rounded-md"
-          onClick={() => handleMediaClick(post)}
-        >
+        <div className="relative cursor-pointer overflow-hidden rounded-md">
+          {/* Display Image */}
           {post.images.length > 0 && (
             <img
               src={post.images[0]}
               alt="Post content"
-              className="w-full h-auto object-cover rounded-md hover:opacity-95 transition-opacity"
+              className="w-full h-64 object-contain rounded-md hover:opacity-95 transition-opacity bg-gray-100"
+              onClick={() => handleMediaClick(post)}
             />
           )}
+
+          {/* Display Video */}
           {post.videos.length > 0 && (
             <video
               src={post.videos[0]}
               loop
               muted
               autoPlay
-              style={{ objectFit: "cover" }}
               controls
-              className="w-full h-auto rounded-md"
+              className="w-full h-64 object-contain rounded-md bg-gray-100"
               preload="metadata"
-              onClick={(e) => e.stopPropagation()}
+              onClick={() => handleMediaClick(post)
+                }
             />
+          )}
+
+          {/* Display PDF Document */}
+          {post.documents?.length > 0 && (
+            <div className="mt-2">
+              <a
+                href={post.documents[0]} // Link to the PDF document
+                target="_blank" // Open in a new tab
+                rel="noopener noreferrer" // Security best practice
+                className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                <span>View Document</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 011 1v10.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V4a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </a>
+            </div>
           )}
         </div>
       </CardContent>
@@ -331,7 +360,13 @@ const PostCard: FC<PostCardProps> = ({
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       setAddCommentsLoad(true);
-                      await addCommentPost(post.id, localStorage.getItem("userType") as "farmers" | "experts", comment);
+                      await addCommentPost(
+                        post.id,
+                        localStorage.getItem("userType") as
+                          | "farmers"
+                          | "experts",
+                        comment
+                      );
                       const postComments = await getPostComments(post.id);
                       setComments(postComments);
                       setAddCommentsLoad(false);
@@ -348,7 +383,11 @@ const PostCard: FC<PostCardProps> = ({
                   onClick={async (e) => {
                     e.stopPropagation();
                     setAddCommentsLoad(true);
-                    await addCommentPost(post.id, localStorage.getItem("userType") as "farmers" | "experts", comment);
+                    await addCommentPost(
+                      post.id,
+                      localStorage.getItem("userType") as "farmers" | "experts",
+                      comment
+                    );
                     const postComments = await getPostComments(post.id);
                     setComments(postComments);
                     setComment("");

@@ -195,7 +195,7 @@ const usePost = () => {
         }
 
         if (postData.documents.length !== 0) {
-          documentUrls = await uploadFilesToCloudinary(postData.videos);
+          documentUrls = await uploadFilesToCloudinary(postData.documents);
         }
 
         const contentData = {

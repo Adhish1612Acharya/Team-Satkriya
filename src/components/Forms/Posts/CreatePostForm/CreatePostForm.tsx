@@ -64,16 +64,13 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
     mediaType: "image" | "video" | "document"
   ) => {
     const file = event.target.files?.[0];
-    setNewPostImage([]);
-    setNewPostVideo([]);
-    setNewPostDocument([]);
     if (file) {
       if (mediaType === "image") {
-        setNewPostImage((prev) => [...prev, file]);
+        setNewPostImage([file]);
       } else if (mediaType === "video") {
-        setNewPostVideo((prev) => [...prev, file]);
+        setNewPostVideo([file]);
       } else {
-        setNewPostDocument((prev) => [...prev, file]);
+        setNewPostDocument([file]);
       }
       const url = URL.createObjectURL(file);
       form.setValue("media", { url, type: mediaType });
@@ -93,23 +90,22 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
+  const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
+    if (!subFilters || subFilters.length === 0) return false;
 
-const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
-  if (!subFilters || subFilters.length === 0) return false;
+    // Check if "Queries" is present in the subFilters array
+    if (subFilters.includes("Queries")) {
+      return true;
+    }
 
-  // Check if "Queries" is present in the subFilters array
-  if (subFilters.includes("Queries")) {
-    return true;
-  }
+    // Check if any FarmerQueryType sub-filters are present
+    const farmerQuerySubFilters = filters.FarmerQueryType.subFilters;
+    const hasFarmerQueryType = subFilters.some((filter) =>
+      farmerQuerySubFilters.includes(filter)
+    );
 
-  // Check if any FarmerQueryType sub-filters are present
-  const farmerQuerySubFilters = filters.FarmerQueryType.subFilters;
-  const hasFarmerQueryType = subFilters.some((filter) =>
-    farmerQuerySubFilters.includes(filter)
-  );
-
-  return hasFarmerQueryType;
-};
+    return hasFarmerQueryType;
+  };
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     const postFilters = await categorizePost(data.content, newPostImage[0]);
@@ -120,31 +116,29 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
 
     console.log("Has Queries : ", hasQueries);
 
-    let newPost:PostArgu;
+    let newPost: PostArgu;
 
-    if(hasQueries){
-       newPost = {
+    if (hasQueries) {
+      newPost = {
         content: data.content,
         images: newPostImage,
         videos: newPostVideo,
         documents: newPostDocument,
         filters: postFilters,
-        verified:[]
+        verified: [],
       };
-    }else{
-       newPost = {
+    } else {
+      newPost = {
         content: data.content,
         images: newPostImage,
         videos: newPostVideo,
         documents: newPostDocument,
         filters: postFilters,
-        verified:null
+        verified: null,
       };
     }
 
-
-
-     await createPost(newPost, firebaseDocuemntType);
+    await createPost(newPost, firebaseDocuemntType);
 
     form.reset();
   };
@@ -180,34 +174,36 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
           </div>
 
           {media && (
-            <div className="relative mb-4 rounded-md overflow-hidden">
+            <div className="relative mb-4 rounded-md overflow-hidden h-64 w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
               {media.type === "image" ? (
                 <img
                   src={media.url}
                   alt="Post preview"
-                  className="w-full h-auto rounded-md"
+                  className="h-full w-auto object-contain rounded-md"
                 />
               ) : media.type === "video" ? (
                 <video
                   src={media.url}
                   controls
-                  className="w-full h-auto rounded-md"
+                  className="h-full w-auto object-contain rounded-md"
                 />
               ) : (
                 <a
                   href={media.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
+                  className="text-blue-500 hover:underline text-center"
                 >
                   View Document
                 </a>
               )}
+
+              {/* Delete Button */}
               <Button
                 variant="destructive"
                 size="icon"
                 type="button"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white"
                 onClick={handleRemoveMedia}
               >
                 <X size={16} />
