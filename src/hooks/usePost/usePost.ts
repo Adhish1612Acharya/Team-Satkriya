@@ -219,9 +219,9 @@ const usePost = () => {
           const postRef = doc(db, "experts", auth.currentUser.uid);
 
           await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
-        } catch (error) {
+        } catch (error:any) {
           console.error("Error updating post:", error);
-          toast.error("Post Creation error");
+          toast.error(error);
         }
       } else {
         toast.warn("You need to login");
