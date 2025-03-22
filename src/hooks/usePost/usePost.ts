@@ -221,7 +221,8 @@ const usePost = () => {
           await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
         } catch (error:any) {
           console.error("Error updating post:", error);
-          toast.error(error);
+          return error;
+          // toast.error(error);
         }
       } else {
         toast.warn("You need to login");
