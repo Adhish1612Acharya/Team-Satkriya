@@ -268,7 +268,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
             type="file"
             ref={documentInputRef}
             className="hidden"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf"
             onChange={(file) => handleFileChange(file, "document")}
           />
         </div>
