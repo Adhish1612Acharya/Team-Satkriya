@@ -331,7 +331,7 @@ const PostCard: FC<PostCardProps> = ({
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
                       setAddCommentsLoad(true);
-                      await addCommentPost(post.id, "experts", comment);
+                      await addCommentPost(post.id, localStorage.getItem("userType") as "farmers" | "experts", comment);
                       const postComments = await getPostComments(post.id);
                       setComments(postComments);
                       setAddCommentsLoad(false);

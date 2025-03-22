@@ -91,7 +91,7 @@ const usePost = () => {
             updatedAt: data.updatedAt?.toDate() || new Date(),
             ownerId: data.ownerId || "Unknown",
             role: data.role || "guest",
-            verified:data.verified,
+            verified: data.verified,
             profileData: {
               name: data.profileData?.name || "Anonymous",
               profilePic: data.profileData?.profilePic || "",
@@ -153,7 +153,7 @@ const usePost = () => {
             likesCount: data.likesCount,
             commentsCount: data.commentsCount,
             role: data.role || "guest",
-            verified:data.verified,
+            verified: data.verified,
             profileData: {
               name: data.profileData?.name || "Anonymous",
               profilePic: data.profileData?.profilePic || "",
@@ -178,57 +178,58 @@ const usePost = () => {
   };
 
   const createPost: CreatePostType = async (postData, firebaseDocument) => {
-      if (auth.currentUser) {
-        try {
-          const userData = await getUserInfo(auth.currentUser.uid, firebaseDocument);
-          let imageUrls: string[] = [];
-          let videoUrls: string[] = [];
-          let documentUrls: string[] = [];
-          if (postData.images.length !== 0) {
-            imageUrls = await uploadFilesToCloudinary(postData.images);
-          }
-          if (postData.videos.length !== 0) {
-            videoUrls = await uploadFilesToCloudinary(postData.videos);
-          }
-
-          if (postData.documents.length !== 0) {
-            documentUrls = await uploadFilesToCloudinary(postData.videos);
-          }
-
-          const contentData = {
-            content: postData.content,
-            images: imageUrls,
-            videos: videoUrls,
-            documents: documentUrls,
-            filters: postData.filters,
-            likesCount: 0,
-            commentsCount: 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            ownerId: auth.currentUser.uid,
-            role: userData?.role,
-            profileData: {
-              name: userData?.name,
-              profilePic: userData?.profileData?.profilePic || "",
-            },
-            verified:postData.verified
-          };
-
-          const newPost = await addDoc(collection(db, "posts"), contentData);
-
-          const postRef = doc(db, "experts", auth.currentUser.uid);
-
-          await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
-        } catch (error:any) {
-          console.error("Error updating post:", error);
-          return error;
-          // toast.error(error);
+    if (auth.currentUser) {
+      try {
+        const userData = await getUserInfo(
+          auth.currentUser.uid,
+          firebaseDocument
+        );
+        let imageUrls: string[] = [];
+        let videoUrls: string[] = [];
+        let documentUrls: string[] = [];
+        if (postData.images.length !== 0) {
+          imageUrls = await uploadFilesToCloudinary(postData.images);
         }
-      } else {
-        toast.warn("You need to login");
-        navigate("/expert/login");
+        if (postData.videos.length !== 0) {
+          videoUrls = await uploadFilesToCloudinary(postData.videos);
+        }
+
+        if (postData.documents.length !== 0) {
+          documentUrls = await uploadFilesToCloudinary(postData.videos);
+        }
+
+        const contentData = {
+          content: postData.content,
+          images: imageUrls,
+          videos: videoUrls,
+          documents: documentUrls,
+          filters: postData.filters,
+          likesCount: 0,
+          commentsCount: 0,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ownerId: auth.currentUser.uid,
+          role: userData?.role,
+          profileData: {
+            name: userData?.name,
+            profilePic: userData?.profileData?.profilePic || "",
+          },
+          verified: postData.verified,
+        };
+
+        const newPost = await addDoc(collection(db, "posts"), contentData);
+
+        const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
+
+        await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
+      } catch (error: any) {
+        console.error("Error updating post:", error);
+        toast.error("Post creation error");
       }
-    
+    } else {
+      toast.warn("You need to login");
+      navigate("/expert/login");
+    }
   };
 
   const addCommentPost = async (

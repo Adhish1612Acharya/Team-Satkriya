@@ -116,7 +116,7 @@ export function PostsPage() {
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
           <Card className="mb-8 overflow-hidden">
-            <CreatePostForm firebaseDocuemntType={"experts"} />
+            <CreatePostForm firebaseDocuemntType={localStorage.getItem("userType") as "farmers" | "experts"} />
           </Card>
 
           {/* Posts Feed */}
