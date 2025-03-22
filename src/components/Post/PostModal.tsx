@@ -4,7 +4,9 @@ import { PostModalProps } from "@/pages/Posts/PostsPage/PostsPage.type";
 import { formatDistanceToNow } from "date-fns";
 
 
-export function PostModal({ post, isOpen, onClose, onLike, onComment, onShare }: PostModalProps) {
+export function PostModal({ post, isOpen, onClose, 
+  // onLike, onComment, onShare
+ }: PostModalProps) {
   // const [isLiked, setIsLiked] = useState(false);
   // const [likesCount, setLikesCount] = useState(post?.likes || 0);
   // const [comment, setComment] = useState("");

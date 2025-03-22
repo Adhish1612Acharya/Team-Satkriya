@@ -1,4 +1,6 @@
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, 
+  // updateDoc
+ } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -9,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import {
-  CompleteProfile,
+  // CompleteProfile,
   GoogleLoginProps,
   GoogleSignUpProps,
   SignInWithEmailPasswordProps,

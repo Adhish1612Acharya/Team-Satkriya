@@ -13,7 +13,6 @@ import farmerLoginSchema from "./FarmerLoginSchema";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/Button/Button";
 import { LogIn } from "lucide-react";
-import { CircularProgress } from "@mui/material";
 import useAuth from "@/hooks/farmer/useAuth/useAuth";
 
 const FarmerLoginForm = () => {
@@ -28,10 +27,10 @@ const FarmerLoginForm = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof farmerLoginSchema>) => {
-    const newData = {
-      email: data.phoneNumber + "@gmail.com",
-      password: data.password,
-    };
+    // const newData = {
+    //   email: data.phoneNumber + "@gmail.com",
+    //   password: data.password,
+    // };
 
     await phonePaswordLogin(data.phoneNumber + "@gmail.com", data.password);
   };

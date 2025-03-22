@@ -14,8 +14,8 @@ import impactMetrics from "@/constants/impactMetrics";
 import breeds from "@/constants/breeds";
 import BreedCard from "@/components/BreedCard/BreedCard";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import addFiltersToFirestore from "@/addFilters";
+// import { useEffect } from "react";
+// import addFiltersToFirestore from "@/addFilters";
 
 function Home() {
   const navigate = useNavigate();

@@ -210,9 +210,10 @@ const Filter: FC<FilterProps> = ({ setPosts }) => {
           </ScrollArea>
           <Separator />
           <div className="p-4 flex justify-between">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {/* <Button variant="outline" onClick={() =>
+               onOpenChange(false)}>
               Cancel
-            </Button>
+            </Button> */}
             <Button onClick={applyFilters}>Apply Filters</Button>
           </div>
         </div>

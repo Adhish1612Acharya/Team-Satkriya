@@ -10,7 +10,7 @@ import {
   Calendar,
   FileText,
   ClipboardList,
-  LogOut,
+  // LogOut,
   BookOpen,
   PenTool,
   Home,
@@ -20,7 +20,9 @@ import { useAuthContext } from "@/context/AuthContext";
 import Profile from "./Profile";
 
 const NavBar = () => {
-  const { currentUser, userType } = useAuthContext();
+  const { currentUser, 
+    // userType 
+  } = useAuthContext();
   const location = useLocation();
 
   const navItems = [
