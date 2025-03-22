@@ -8,7 +8,7 @@ import usePost from "@/hooks/usePost/usePost";
 import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleton";
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
-import { useAuthContext } from "@/context/AuthContext";
+// import { useAuthContext } from "@/context/AuthContext";
 import { auth } from "@/firebase";
 
 export function PostsPage() {

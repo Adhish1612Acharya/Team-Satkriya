@@ -6,10 +6,10 @@ import {
 } from "./usePost.types";
 import {
   addDoc,
-  arrayRemove,
+  // arrayRemove,
   arrayUnion,
   collection,
-  deleteDoc,
+  // deleteDoc,
   doc,
   getDoc,
   getDocs,

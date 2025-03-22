@@ -4,7 +4,9 @@ import {
   // signInWithPhoneNumber,
 } from "firebase/auth";
 import { useState } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, 
+  // getDoc,
+   setDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";

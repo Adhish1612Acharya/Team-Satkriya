@@ -144,7 +144,7 @@ const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
 
 
 
-    const categorizedPostData = await createPost(newPost, firebaseDocuemntType);
+     await createPost(newPost, firebaseDocuemntType);
 
     form.reset();
   };
