@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PostModalProps } from "@/pages/Posts/PostsPage/PostsPage.type";
 import { formatDistanceToNow } from "date-fns";
+import { Timestamp } from "firebase/firestore";
 
 export function PostModal({
   post,
@@ -80,9 +81,12 @@ PostModalProps) {
                   <span>{post.role}</span>
                   <span className="mx-1">•</span>
                   <span>
-                    {formatDistanceToNow(new Date(post.createdAt), {
-                      addSuffix: true,
-                    })}
+                    {formatDistanceToNow(
+                      post.createdAt instanceof Timestamp
+                        ? post.createdAt.toDate() // Convert Firestore Timestamp to JS Date
+                        : new Date(post.createdAt),
+                      { addSuffix: true }
+                    )}
                   </span>
                 </div>
               </div>
@@ -109,8 +113,10 @@ PostModalProps) {
           </div>
 
           {/* Content */}
-          <div className="p-4 border-b">
-            <p className="whitespace-pre-line">{post.content}</p>
+          <div className="p-4 border-b overflow-y-auto">
+            <p className="mb-4 whitespace-pre-line  overflow-y-auto">
+              {post.content}
+            </p>
           </div>
 
           {/* Likes and Comments Count */}

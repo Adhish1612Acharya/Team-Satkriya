@@ -8,7 +8,6 @@ import usePost from "@/hooks/usePost/usePost";
 import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleton";
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
-// import { useAuthContext } from "@/context/AuthContext";
 import { auth } from "@/firebase";
 
 export function PostsPage() {
@@ -31,53 +30,12 @@ export function PostsPage() {
           auth.currentUser.uid,
           localStorage.getItem("userType") as "farmers" | "experts"
         );
-        console.log("UserInfo; ", userInfo);
         setUserRole(userInfo?.role);
       }
     }
 
     getPosts();
   }, []);
-
-  const handleLike = (postId: string) => {
-    // In a real app, this would call an API
-    console.log(`Liked post ${postId}`);
-  };
-
-  const handleComment = (postId: string, comment: string) => {
-    // In a real app, this would call an API
-    console.log(`Commented on post ${postId}: ${comment}`);
-
-    // For demo purposes, we'll update the local state
-    const updatedPosts = posts.map((post) => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: [
-            // ...post,
-            {
-              id: `comment-${Date.now()}`,
-              authorId: "volunteer-123", // Assuming the current user is a volunteer
-              authorName: "Amit Patel",
-              authorProfilePhoto:
-                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-              content: comment,
-              createdAt: new Date().toISOString(),
-            },
-          ],
-        };
-      }
-      return post;
-    });
-
-    setPosts(updatedPosts);
-  };
-
-  const handleShare = (postId: string) => {
-    // In a real app, this would open a share dialog
-    console.log(`Shared post ${postId}`);
-    alert("Share functionality would be implemented here!");
-  };
 
   const handlePostClick = (post: Post) => {
     if (post) {
@@ -90,6 +48,46 @@ export function PostsPage() {
     setIsModalOpen(false);
     setSelectedPost(null);
   };
+
+  // const handleLike = (postId: string) => {
+  //   // In a real app, this would call an API
+  //   console.log(`Liked post ${postId}`);
+  // };
+
+  // const handleComment = (postId: string, comment: string) => {
+  //   // In a real app, this would call an API
+  //   console.log(`Commented on post ${postId}: ${comment}`);
+
+  //   // For demo purposes, we'll update the local state
+  //   const updatedPosts = posts.map((post) => {
+  //     if (post.id === postId) {
+  //       return {
+  //         ...post,
+  //         comments: [
+  //           // ...post,
+  //           {
+  //             id: `comment-${Date.now()}`,
+  //             authorId: "volunteer-123", // Assuming the current user is a volunteer
+  //             authorName: "Amit Patel",
+  //             authorProfilePhoto:
+  //               "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
+  //             content: comment,
+  //             createdAt: new Date().toISOString(),
+  //           },
+  //         ],
+  //       };
+  //     }
+  //     return post;
+  //   });
+
+  //   setPosts(updatedPosts);
+  // };
+
+  // const handleShare = (postId: string) => {
+  //   // In a real app, this would open a share dialog
+  //   console.log(`Shared post ${postId}`);
+  //   alert("Share functionality would be implemented here!");
+  // };
 
   // const handleMediaClick = (e: React.MouseEvent) => {
   //   e.stopPropagation();
@@ -116,7 +114,11 @@ export function PostsPage() {
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
           <Card className="mb-8 overflow-hidden">
-            <CreatePostForm firebaseDocuemntType={localStorage.getItem("userType") as "farmers" | "experts"} />
+            <CreatePostForm
+              firebaseDocuemntType={
+                localStorage.getItem("userType") as "farmers" | "experts"
+              }
+            />
           </Card>
 
           {/* Posts Feed */}
@@ -132,9 +134,9 @@ export function PostsPage() {
                 <PostCard
                   key={post.id}
                   post={post}
-                  onComment={handleComment}
                   userRole={userRole}
                   handleMediaClick={handlePostClick}
+                  // onComment={handleComment}
                   // onLike={handleLike}
                   // onShare={handleShare}
                   // onPostClick={handlePostClick}
@@ -148,9 +150,9 @@ export function PostsPage() {
             post={selectedPost}
             isOpen={isModalOpen}
             onClose={handleCloseModal}
-            onLike={handleLike}
-            onComment={handleComment}
-            onShare={handleShare}
+            // onLike={handleLike}
+            // onComment={handleComment}
+            // onShare={handleShare}
           />
         </div>
       </div>

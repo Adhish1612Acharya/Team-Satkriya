@@ -12,7 +12,7 @@ import { z } from "zod";
 import farmerLoginSchema from "./FarmerLoginSchema";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/Button/Button";
-import { LogIn } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import useAuth from "@/hooks/farmer/useAuth/useAuth";
 
 const FarmerLoginForm = () => {
@@ -75,7 +75,7 @@ const FarmerLoginForm = () => {
             className="bg-green-600 hover:bg-green-700"
             disabled={form.formState.isSubmitting}
           >
-            "Sign in"
+            {form.formState.isSubmitting ?<Loader2/>:"Sign in"}
           </Button>
         </div>
       </form>

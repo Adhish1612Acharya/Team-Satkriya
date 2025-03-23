@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FC } from "react";
-import { CheckCircle, X, User } from "lucide-react";
+import { X, User, Loader2 } from "lucide-react";
 import styles from "./VerifyPostButton.module.css";
 import VerifyPostButtonProps from "./VerifyPostButton.types";
 import { auth } from "@/firebase";
@@ -13,41 +13,33 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
 }) => {
   const { verifyPost } = usePost();
 
-  const [verified, setVerified] = useState(
-    verifiedProfiles?.length > 0 &&
-      verifiedProfiles.filter(
-        (eachProfile) => eachProfile.id === auth.currentUser?.uid
-      ).length === 1
-  );
+  const [verified, setVerified] = useState(false);
+
   const [showPopup, setShowPopup] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const [verifyLoad, setVerifyLoad] = useState<boolean>(false);
   const [postVeriedProfiles, setPostVerifiedProfiles] =
     useState<VerifiedPostProfile[]>(verifiedProfiles);
 
-  console.log("Verified : ", verified);
-  console.log("UserRole : ", userRole);
-
-  console.log("Verified Profiles : ",verifiedProfiles);
-
   // Handle initial verification
   const handleVerify = async () => {
-    setVerifyLoad(true);
-    const response = await verifyPost(postId);
-    setVerifyLoad(false);
-    if (response) {
-      setPostVerifiedProfiles((prev) => {
-        return [...prev, response];
-      });
-      setVerified(true);
+    if (!verified) {
+      setVerifyLoad(true);
+      const response = await verifyPost(postId);
+
+      if (response) {
+        setPostVerifiedProfiles((prev) => {
+          return [...prev, response];
+        });
+        setVerified(true);
+      }
+      setVerifyLoad(false);
     }
   };
 
   // Toggle popup when clicking the verified button
   const handleVerifiedClick = () => {
-    if (verified) {
-      setShowPopup(!showPopup);
-    }
+    setShowPopup(!showPopup);
   };
 
   // Close popup when clicking outside
@@ -67,81 +59,70 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (userRole === "doctor" || userRole === "researchInstitution") {
+      setVerified(
+        verifiedProfiles?.some(
+          (eachProfile) => eachProfile.id === auth.currentUser?.uid
+        )
+      );
+    }
+  }, [userRole, verifiedProfiles]);
+
   return (
     <div className="relative inline-block">
-      <button
-        onClick={
-          userRole !== "farmer" &&
-          userRole !== "volunteer" &&
-          userRole !== "ngo" &&
-          !verified
-            ? handleVerify
-            : handleVerifiedClick
-        }
-        className={`
-          flex items-center justify-center gap-2 
-          px-4 py-2 rounded-md font-medium
-          transition-all duration-300 ease-in-out
-          ${
-            verified
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-red-500 hover:bg-red-600 text-white"
+      {userRole && (
+        <button
+          onClick={
+            (userRole !== "doctor" &&
+              userRole !== "researchInstitution" &&
+              verifiedProfiles.length > 0) ||
+            ((userRole === "doctor" || userRole === "researchInstitution") &&
+              verified)
+              ? handleVerifiedClick
+              : handleVerify
           }
-        `}
-        disabled={verifyLoad || verifiedProfiles?.length == 0}
-      >
-        {userRole !== "farmer" &&
-        userRole !== "volunteer" &&
-        userRole !== "ngo" &&
-        verifyLoad ? (
-          <span>Verifying...</span>
-        ) : userRole !== "farmer" &&
-          userRole !== "volunteer" &&
-          userRole !== "ngo" &&
-          !verified ? (
-          <>
-            <span>Verify</span>
-          </>
-        ) :(
-          userRole !== "farmer" &&
-          userRole !== "volunteer" &&
-          userRole !== "ngo" &&
-          verified ||  userRole === "farmer" ||
-          userRole === "volunteer" ||
-          userRole === "ngo" &&
-          verifiedProfiles.length>0?(
+          className={` cursor-pointer
+    flex items-center justify-center gap-2 
+    px-4 py-2 rounded-md font-medium
+    transition-all duration-300 ease-in-out
+    ${
+      ((userRole === "doctor" || userRole === "researchInstitution") &&
+        verified) ||
+      verifiedProfiles.length > 0
+        ? "bg-green-500 hover:bg-green-600 text-white"
+        : "bg-red-500 hover:bg-red-600 text-white"
+    }
+  `}
+          disabled={
+            verifyLoad ||
+            (userRole !== "doctor" &&
+              userRole !== "researchInstitution" &&
+              verifiedProfiles.length == 0)
+          }
+        >
+          {verifyLoad ? (
+            <Loader2 className="animate-spin" /> // Show loader while verifying
+          ) : (
             <>
-              <CheckCircle className="text-white" size={18} />
-              {/* Replaced FaCheckCircle with CheckCircle */}
-              <span>Verified</span>
+              {/* For non-verifiers */}
+              {userRole !== "doctor" && userRole !== "researchInstitution" && (
+                <div>
+                  {verifiedProfiles.length > 0
+                    ? "Verified"
+                    : "Under Verification"}
+                </div>
+              )}
+
+              {/* For verifiers */}
+              {(userRole === "doctor" ||
+                userRole === "researchInstitution") && (
+                <div>{verified ? "Verified By You" : "Not Verified"}</div>
+              )}
             </>
-          ):
-          (
-            <>
-              <CheckCircle className="text-white" size={18} />
-              {/* Replaced FaCheckCircle with CheckCircle */}
-              <span>Under Verification</span>
-            </>
-          )
-        )
-       
-      // userRole === "farmer" ||
-      //     (userRole === "volunteer" && verifiedProfiles?.length == 0) ? (
-      //     <>
-      //       <CheckCircle className="text-white" size={18} />
-      //       {/* Replaced FaCheckCircle with CheckCircle */}
-      //       <span>Under Verification</span>
-      //     </>
-      //   ) : (
-      //     <>
-      //       <CheckCircle className="text-white" size={18} />
-      //       {/* Replaced FaCheckCircle with CheckCircle */}
-      //       <span>Verified</span>
-      //     </>
-      //   )
-        
-        }
-      </button>
+          )}
+        </button>
+      )}
 
       {/* Popup showing verified users */}
       {showPopup && (
@@ -163,7 +144,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               </h3>
               <button
                 onClick={() => setShowPopup(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
                 <X size={14} /> {/* Replaced FaTimes with X */}
               </button>

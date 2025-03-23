@@ -16,7 +16,7 @@ import { CreatePostFormProps } from "./CreatePostForm.types";
 import { PostArgu } from "@/hooks/usePost/usePost.types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, VideoIcon, X, FileText } from "lucide-react";
+import { ImageIcon, VideoIcon, X, FileText, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import filters from "@/constants/filters";
 
@@ -211,7 +211,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0 sm:flex-nowrap">
             <div className="flex items-center space-x-2">
               <Button
                 type="button"
@@ -244,8 +244,8 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
                 <span>Upload Document</span>
               </Button>
             </div>
-            <Button type="submit" disabled={!form.watch("content") && !media}>
-              Post
+            <Button type="submit" disabled={!form.watch("content") && !media || form.formState.isSubmitting}>
+             {form.formState.isSubmitting ? <Loader2/> : "Submit"}
             </Button>
           </div>
 

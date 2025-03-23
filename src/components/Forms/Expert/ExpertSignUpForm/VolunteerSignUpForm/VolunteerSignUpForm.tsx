@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import volunteerSignUpSchema from "./VolunteerSignUpSchema";
 import Button from "@/components/Button/Button";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
@@ -49,7 +49,6 @@ const VolunteerSignUpForm = () => {
   };
 
   const signUpWithGoogle = async () => {
-  
     const profileFields: (keyof z.infer<typeof volunteerSignUpSchema>)[] = [
       "phoneNumber",
       "address",
@@ -148,7 +147,7 @@ const VolunteerSignUpForm = () => {
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
@@ -162,8 +161,15 @@ const VolunteerSignUpForm = () => {
           )}
         />
         <div className="space-y-4">
-          <Button variant="outline" icon={Lock} type="submit" fullWidth>
-            Create Account
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            icon={Lock}
+            disabled={form.formState.isSubmitting}
+            type="submit"
+            fullWidth
+          >
+            {form.formState.isSubmitting ? <Loader2 /> : "Create Account"}
           </Button>
           <Button
             variant="outline"

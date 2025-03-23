@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import researchInstSignUpSchema from "./ResearchInstSignUpSchema";
 import Button from "@/components/Button/Button";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
@@ -162,8 +162,8 @@ const ResearchInstSignUpForm = () => {
           )}
         />
         <div className="space-y-4">
-          <Button variant="outline" icon={Lock} type="submit" fullWidth>
-            Create Account
+        <Button variant="outline" className="cursor-pointer" icon={Lock} disabled={form.formState.isSubmitting} type="submit" fullWidth>
+          {form.formState.isSubmitting ? <Loader2/> : "Create Account"}
           </Button>
           <Button
             variant="outline"
