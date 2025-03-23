@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/components/Button/Button";
 import farmerRegisterSchema from "./FarmerRegisterSchema";
 import useAuth from "@/hooks/farmer/useAuth/useAuth";
+import { Loader2 } from "lucide-react";
 
 export const FarmerRegisterForm = () => {
   const { farmerSignUp } = useAuth();
@@ -150,7 +151,7 @@ export const FarmerRegisterForm = () => {
             className="bg-green-600 hover:bg-green-700"
             disabled={form.formState.isSubmitting}
           >
-            Create Account
+              {form.formState.isSubmitting ?<Loader2/>:"Create Account"}
           </Button>
         </div>
 

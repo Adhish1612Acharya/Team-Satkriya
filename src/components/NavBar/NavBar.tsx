@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import Profile from "./Profile";
+import { CheckCircle } from "lucide-react";
 
 const NavBar = () => {
   const { currentUser, 
@@ -95,6 +96,12 @@ const NavBar = () => {
             icon: <Calendar className="h-4 w-4" />,
             color: "text-red-500",
           },
+          {
+            title:"Solve Query",
+            href:"/solve-query",
+            icon:<CheckCircle/>,
+            color:"text-green-500"
+          }
         ]
       : []),
 

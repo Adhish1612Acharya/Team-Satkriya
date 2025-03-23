@@ -36,10 +36,11 @@ const PostCard: FC<PostCardProps> = ({
 }) => {
   const { getPostComments, addCommentPost, getFilteredComments } = usePost();
 
-  const [comment, setComment] = useState("");
   // const [isLiked, setIsLiked] = useState(false);
   // const [likesCount, setLikesCount] = useState(post.likes);
   // const [isSaved, setIsSaved] = useState(false);
+
+  const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState<boolean>(false);
   const [getCommentsLoad, setGetCommentsLoad] = useState<boolean>(true);
   const [addCommentsLoad, setAddCommentsLoad] = useState<boolean>(false);
@@ -48,8 +49,7 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
-  console.log("Post.verified : ", post);
-
+  console.log("pOST : ", post);
   return (
     <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -70,16 +70,19 @@ const PostCard: FC<PostCardProps> = ({
                 <span>{post.role}</span>
                 <span className="mx-1">•</span>
                 <span>
-                  {formatDistanceToNow(new Date(post.createdAt), {
-                    addSuffix: true,
-                  })}
+                  {formatDistanceToNow(
+                    post.createdAt instanceof Timestamp
+                      ? post.createdAt.toDate() // Convert Firestore Timestamp to JS Date
+                      : new Date(post.createdAt),
+                    { addSuffix: true }
+                  )}
                 </span>
               </div>
             </div>
           </div>
-          {post.verified !== null &&
-            post.role !== "doctor" &&
-            post.role !== "researchInstitution" && (
+          {post.role !== "doctor" &&
+            post.role !== "researchInstitution" &&
+            post.verified !== null && (
               <VerifyPostButton
                 userRole={userRole}
                 verifiedProfiles={post.verified}
@@ -104,7 +107,9 @@ const PostCard: FC<PostCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="pb-3">
-        <p className="mb-4 whitespace-pre-line">{post.content}</p>
+        <p className="mb-4 whitespace-pre-line h-50 overflow-y-auto">
+          {post.content}
+        </p>
 
         <div className="relative cursor-pointer overflow-hidden rounded-md">
           {/* Display Image */}
@@ -127,8 +132,7 @@ const PostCard: FC<PostCardProps> = ({
               controls
               className="w-full h-64 object-contain rounded-md bg-gray-100"
               preload="metadata"
-              onClick={() => handleMediaClick(post)
-                }
+              onClick={() => handleMediaClick(post)}
             />
           )}
 

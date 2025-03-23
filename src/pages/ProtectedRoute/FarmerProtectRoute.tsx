@@ -1,11 +1,12 @@
 import { useAuthContext } from "@/context/AuthContext";
 import getUserInfo from "@/utils/getUserInfo";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const FarmerProtectRoute = () => {
-  const { currentUser, loading, userType, setUserType, setUsername } =
+  const { currentUser, userType,loading, setUserType, setUsername } =
     useAuthContext();
+    const [checkRole,setCheckRole]=useState<boolean>(true);
 
   useEffect(() => {
     async function checkUserRole() {
@@ -17,13 +18,15 @@ const FarmerProtectRoute = () => {
         } else {
           setUserType(null);
         }
+
+        setCheckRole(false);
       }
     }
 
     checkUserRole();
   }, [currentUser, setUserType]); 
 
-  if (loading) return <p>Loading...</p>;
+  if (checkRole || loading) return <p>Loading...</p>;
 
   if (!currentUser) {
     return <Navigate to="/auth" replace />; // Redirect to auth if no user is logged in

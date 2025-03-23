@@ -18,6 +18,9 @@ import NavBar from "./components/NavBar/NavBar";
 import AuthProtectedRoute from "./pages/ProtectedRoute/AuthProtectedRoute";
 import ExpertProtectRoute from "./pages/ProtectedRoute/ExpertProtectRoute";
 import RoleSelection from "./pages/RoleSelection/RoleSelection";
+import FarmerProtectRoute from "./pages/ProtectedRoute/FarmerProtectRoute";
+import AiSolveQuery from "./pages/Farmer/AiSolveQuery/AiSolveQuery";
+import PageNotFound from "./pages/PageNotFound/PageNotFound";
 
 const App = () => {
   return (
@@ -43,10 +46,13 @@ const App = () => {
           <Route path="/farmer/login" element={<LoginFarmer />} />
           <Route path="/farmer/register" element={<RegisterFarmer />} />
           <Route path="/expert/login" element={<LoginExpert />} />
-          <Route path="/auth" element={<RoleSelection/>}/>
+          <Route path="/auth" element={<RoleSelection />} />
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route path="/posts" element={<PostsPage />} />
+        </Route>
+        <Route element={<FarmerProtectRoute />}>
+          <Route path="/solve-query" element={<AiSolveQuery />} />
         </Route>
 
         <Route element={<ExpertProtectRoute />}>
@@ -59,6 +65,7 @@ const App = () => {
           />
           <Route path="/profile/volunteer" element={<VolunteerProfile />} />
         </Route>
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
       <Footer />
     </>

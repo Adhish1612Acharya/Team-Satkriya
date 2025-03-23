@@ -8,10 +8,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogIn } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import CircularProgress from "@mui/material/CircularProgress";
 import GoogleIcon from "@mui/icons-material/Google";
 import { FC } from "react";
 import loginSchema from "./ExpertLoginFormSchema";
@@ -19,7 +18,7 @@ import Button from "@/components/Button/Button";
 import useAuth from "@/hooks/expert/useAuth/useAuth";
 
 const ExpertLoginForm: FC = () => {
-  const { googleLogin, signInWithEmailPassword, gooleLoginLoad } = useAuth();
+  const { googleLogin, signInWithEmailPassword } = useAuth();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -65,18 +64,19 @@ const ExpertLoginForm: FC = () => {
         />
 
         <div className="space-y-4">
-          <Button type="submit" variant="outline" fullWidth icon={LogIn}>
-            {form.formState.isSubmitting ? <CircularProgress /> : "Sign in"}
+          <Button type="submit" className="cursor-pointer" variant="outline" disabled={form.formState.isSubmitting} fullWidth icon={LogIn}>
+            {form.formState.isSubmitting ? <Loader2/> : "Sign in"}
           </Button>
 
           <Button
             type="button"
             onClick={() => googleLogin()}
+            className="cursor-pointer"
             variant="outline"
             fullWidth
             icon={GoogleIcon}
           >
-            {gooleLoginLoad?<CircularProgress />: "Sign In with Google"}
+          Sign In with Google
           </Button>
         </div>
 
