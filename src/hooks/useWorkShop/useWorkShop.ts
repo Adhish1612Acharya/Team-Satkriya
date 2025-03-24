@@ -19,7 +19,7 @@ import {
 import WorkShop from "@/types/workShop.types";
 
 const useWorkShop = () => {
-  const createWorkshop: createWorkShopType = async (workshopData) => {
+  const createWorkshop: createWorkShopType = async (workshopData,filters:string[]) => {
     try {
       if (!auth.currentUser) {
         return null;
@@ -28,6 +28,7 @@ const useWorkShop = () => {
       const uploadedImageUrl = await uploadImageToCloudinary(
         workshopData.thumbnail
       );
+
 
       if (!uploadedImageUrl) {
         toast.error("Image upload failed");
@@ -56,6 +57,7 @@ const useWorkShop = () => {
           workshopData.mode === "offline" ? workshopData.location : null,
         link: workshopData.mode === "online" ? workshopData.link : null,
         thumbnail: uploadedImageUrl,
+        filters:filters,
         owner: auth.currentUser.uid,
         role: userData.role,
         registrations: [],

@@ -8,6 +8,7 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import Post from "@/types/posts.types";
 import { findRelevantContent } from "@/utils/geminiApiCalls";
+import convertToBase64 from "@/utils/covertToBase64";
 
 const AiQueryForm: FC<AiQueryFormProps> = ({
   setResults,
@@ -48,14 +49,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     });
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
 
   const fetchPostsByIds = async (postIds: string[]): Promise<Post[]> => {
     if (postIds.length === 0) return []; // If no IDs, return empty array

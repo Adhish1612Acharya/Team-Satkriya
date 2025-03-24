@@ -1,4 +1,3 @@
-"use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,7 +37,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import workshopSchema from "./WorkShopFormSchema";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
-
+import { validateAndFilterWebinar } from "@/utils/geminiApiCalls";
+import convertToBase64 from "@/utils/covertToBase64";
+import webinarFilters from "@/constants/webinarFilters";
 
 // Generate time options in 12-hour format
 const generateTimeOptions = () => {
@@ -85,7 +86,6 @@ const WorkshopForm = () => {
   const dateTo = form.watch("dateTo");
   const timeFrom = form.watch("timeFrom");
 
-
   const formatTime12Hour = (time24: string) => {
     if (!time24) return "";
     try {
@@ -100,8 +100,37 @@ const WorkshopForm = () => {
 
   const onSubmit = async (data: z.infer<typeof workshopSchema>) => {
     try {
-      // Save the workshop/webinar to Firebase
-      const createdWorkshopId = await createWorkshop(data);
+      data.timeFrom=formatTime12Hour(data.timeFrom);
+      data.timeTo=formatTime12Hour(data.timeTo)
+      const thumnailBase64 = await convertToBase64(data.thumbnail);
+      const validateWebinar = await validateAndFilterWebinar(
+        { title: data.title, description: data.description },
+        thumnailBase64,
+        webinarFilters
+      );
+
+      if(!validateWebinar?.replace(/```json|```/g, "")){
+        toast.error("Some error occured");
+        return;
+      }
+
+      const cleanResponse = validateWebinar?.replace(/```json|```/g, "");
+      const jsonData: { valid: boolean; filters: string[]; error?: string } =
+        JSON.parse(cleanResponse);
+
+        console.log("Ai reponse : ",jsonData);
+
+      if (!jsonData.valid && jsonData.error) {
+        toast.error("Some error occured");
+        return;
+      }else if(!jsonData.valid){
+        toast.error("Webinar not  valid/relevant");
+        return;
+      }
+
+      const filters = jsonData.filters;
+
+      const createdWorkshopId = await createWorkshop(data, filters);
       if (!createdWorkshopId) {
         return;
       }
@@ -421,9 +450,7 @@ const WorkshopForm = () => {
               control={form.control}
               name="thumbnail"
               render={({ field: { value, onChange, ...fieldProps } }) => {
-                const [preview, setPreview] = useState<string | null>(
-                  null
-                );
+                const [preview, setPreview] = useState<string | null>(null);
 
                 const handleFileChange = (
                   e: React.ChangeEvent<HTMLInputElement>

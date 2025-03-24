@@ -1,6 +1,6 @@
 import WorkShop from "@/types/workShop.types";
 
-interface workShopData {
+export interface WorkShopData {
   title: string;
   description: string;
   dateFrom: Date;
@@ -9,12 +9,13 @@ interface workShopData {
   location: string;
   link: string;
   thumbnail: File;
-  timeFrom:string;
-  timeTo:string
+  timeFrom: string;
+  timeTo: string;
 }
 
 export type createWorkShopType = (
-  workshop: workShopData
+  workshop: WorkShopData,
+  filters: string[]
 ) => Promise<string | null>;
 
 export type fetchWorkshopByIdType = (id: string) => Promise<WorkShop | null>;

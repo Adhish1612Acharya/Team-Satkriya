@@ -1,16 +1,14 @@
-import fetchFilters from "@/utils/fetchFilters";
-import fileToBase64 from "./fileToBase64";
 import { classifyContent } from "@/utils/geminiApiCalls";
 import updateFilters from "./updateFilters";
+import convertToBase64 from "@/utils/covertToBase64";
+import filters from "@/constants/filters";
 
 const categorizePost = async (textContent: string, file: File | null) => {
     let base64Media = "";
     if (file) {
       // Convert file to Base64
-      base64Media = await fileToBase64(file);
+      base64Media = await convertToBase64(file);
     }
-
-    const filters = await fetchFilters(); // Fetch available filters
 
 
     const aiResponse = await classifyContent(textContent, base64Media, filters);
