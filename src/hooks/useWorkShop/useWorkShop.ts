@@ -26,7 +26,7 @@ const useWorkShop = () => {
       }
 
       const uploadedImageUrl = await uploadImageToCloudinary(
-        workshopData.thumbnail[0]
+        workshopData.thumbnail
       );
 
       if (!uploadedImageUrl) {
@@ -49,11 +49,13 @@ const useWorkShop = () => {
         description: workshopData.description,
         dateFrom: new Date(workshopData.dateFrom),
         dateTo: new Date(workshopData.dateTo),
+        timeTo: workshopData.timeTo,
+        timeFrom: workshopData.timeFrom,
         mode: workshopData.mode,
         location:
           workshopData.mode === "offline" ? workshopData.location : null,
         link: workshopData.mode === "online" ? workshopData.link : null,
-        thumbnail: uploadImageToCloudinary,
+        thumbnail: uploadedImageUrl,
         owner: auth.currentUser.uid,
         role: userData.role,
         registrations: [],

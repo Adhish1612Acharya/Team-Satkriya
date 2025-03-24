@@ -43,7 +43,14 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       : new Date(workshop.dateTo)
   );
 
-  const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+// Ensure startDate and endDate are valid Date objects
+if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+  throw new Error("Invalid date format");
+}
+
+// Calculate the difference in days
+const timeDiff = endDate.getTime() - startDate.getTime();
+const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
   return (
     <Card className="w-full overflow-hidden transition-all hover:shadow-lg">
@@ -136,4 +143,4 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
 
 
 
-export { WorkshopCard };
+export  default WorkshopCard ;

@@ -109,8 +109,8 @@ const NavBar = () => {
     ...(currentUser && localStorage.getItem("userType") === "experts"
       ? [
           {
-            title: "Create & Educate",
-            href: "/create-educate",
+            title: "Host workshops",
+            href: "/workshop/create",
             icon: <PenTool className="h-4 w-4" />,
             color: "text-indigo-500",
           },

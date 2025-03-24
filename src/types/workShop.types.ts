@@ -12,6 +12,8 @@ interface WorkShop {
   thumbnail: string;
   owner: string;
   role: string;
+  timeFrom:string;
+  timeTo:string;
   profileData: {
     name: string;
     profilePic: string;
