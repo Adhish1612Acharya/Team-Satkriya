@@ -3,12 +3,14 @@ import WorkShop from "@/types/workShop.types";
 interface workShopData {
   title: string;
   description: string;
-  dateFrom: string;
-  dateTo: string;
+  dateFrom: Date;
+  dateTo: Date;
   mode: "online" | "offline";
-  location: string | null;
-  link: string | null;
-  thumbnail: FileList;
+  location: string;
+  link: string;
+  thumbnail: File;
+  timeFrom:string;
+  timeTo:string
 }
 
 export type createWorkShopType = (

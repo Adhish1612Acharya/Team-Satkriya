@@ -21,6 +21,8 @@ import RoleSelection from "./pages/RoleSelection/RoleSelection";
 import FarmerProtectRoute from "./pages/ProtectedRoute/FarmerProtectRoute";
 import AiSolveQuery from "./pages/Farmer/AiSolveQuery/AiSolveQuery";
 import PageNotFound from "./pages/PageNotFound/PageNotFound";
+import WorkshopsPage from "./pages/WorkShops/WorkShops";
+import CreateWorkShop from "./pages/Expert/CreateWorkShop/CreateWorkShop";
 
 const App = () => {
   return (
@@ -50,12 +52,14 @@ const App = () => {
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route path="/posts" element={<PostsPage />} />
+          <Route path="/workshops" element={<WorkshopsPage/>}/>
         </Route>
         <Route element={<FarmerProtectRoute />}>
           <Route path="/solve-query" element={<AiSolveQuery />} />
         </Route>
 
         <Route element={<ExpertProtectRoute />}>
+        <Route path="/workshop/create" element={<CreateWorkShop/>}/>
           <Route path="/profile/farmer" element={<FarmerProfile />} />
           <Route path="/profile/doctor" element={<DoctorProfile />} />
           <Route path="/profile/ngo" element={<NGOProfile />} />
