@@ -15,6 +15,7 @@ import {
   getDocs,
   orderBy,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -217,7 +218,11 @@ const usePost = () => {
           verified: postData.verified,
         };
 
-        const newPost = await addDoc(collection(db, "posts"), contentData);
+        const newPost = await addDoc(collection(db, "posts"), {
+          contentData,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
 
         const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
 
@@ -257,7 +262,6 @@ const usePost = () => {
 
       const newComment = {
         content: commentData,
-        createdAt: new Date(), // Using JavaScript Date
         postId: postId,
         ownerId: user.uid,
         role: userData?.role,
@@ -267,9 +271,19 @@ const usePost = () => {
         },
       };
 
-      await addDoc(collection(db, "comments"), newComment);
+      await addDoc(collection(db, "comments"), {
+        newComment,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      const currentCommentsCount = postSnapshot.exists()
+      ? Number(postSnapshot.data()?.commentsCount || 0)
+      : 0; 
+
       await updateDoc(postRef, {
-        commentsCount: Number(postSnapshot.data().commentsCount || 0) + 1,
+        commentsCount: currentCommentsCount  + 1,
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error("Error creating comment:", error);

@@ -15,18 +15,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import workshopSchema from "./WorkShopFormSchema";
 import { z } from "zod";
-
-
+import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
+import { toast } from "react-toastify";
 
 const WorkshopForm = () => {
   const navigate = useNavigate();
-  
+  const { createWorkshop } = useWorkShop();
+
   // Initialize form
   const form = useForm<z.infer<typeof workshopSchema>>({
     resolver: zodResolver(workshopSchema),
@@ -40,27 +38,19 @@ const WorkshopForm = () => {
       link: "",
     },
   });
-
-  // Watch mode to conditionally render fields
+  
   const mode = form.watch("mode");
 
-  const onSubmit = async (data:z.infer<typeof workshopSchema>) => {
+  const onSubmit = async (data: z.infer<typeof workshopSchema>) => {
     try {
       // Save the workshop/webinar to Firebase
-      const docRef = await addDoc(collection(db, "workshops"), {
-        title: data.title,
-        description: data.description,
-        dateFrom: data.dateFrom,
-        dateTo: data.dateTo,
-        mode: data.mode,
-        location: data.mode === "offline" ? data.location : null,
-        link: data.mode === "online" ? data.link : null,
-        thumbnail: data.thumbnail[0].name, // Save the file name
-      });
-      console.log("Document written with ID: ", docRef.id);
-
+      const createdWorkshopId = await createWorkshop(data);
+      if (!createdWorkshopId) {
+        return;
+      }
+      toast.success("Workshop Created");
       // Redirect to the workshop details page
-      navigate(`/workshops/${docRef.id}`);
+      navigate(`/workshops/${createdWorkshopId}`);
     } catch (error) {
       console.error("Error adding document: ", error);
     }
