@@ -7,8 +7,8 @@ interface WorkShop {
   dateFrom: Date | Timestamp;
   dateTo: Date | Timestamp;
   mode: "online" | "offline";
-  location: string;
-  link: string;
+  location: string | null;
+  link: string | null;
   thumbnail: string;
   owner: string;
   role: string;

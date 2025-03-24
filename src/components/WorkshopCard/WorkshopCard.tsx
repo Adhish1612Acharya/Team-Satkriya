@@ -136,4 +136,4 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
 
 
 
-export { WorkshopCard, WorkshopGrid };
+export { WorkshopCard };

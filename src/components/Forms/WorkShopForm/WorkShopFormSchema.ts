@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Zod schema for form validation
+
 const workshopSchema = z
   .object({
     title: z.string().min(1, "Title is required"),
@@ -10,8 +10,8 @@ const workshopSchema = z
     mode: z.enum(["online", "offline"], {
       required_error: "Mode is required",
     }),
-    location: z.string().optional(),
-    link: z.string().optional(),
+    location: z.string(),
+    link: z.string(),
     thumbnail: z
       .instanceof(FileList)
       .refine((files) => files.length > 0, "Thumbnail is required"),
