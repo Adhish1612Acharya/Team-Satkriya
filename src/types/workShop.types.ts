@@ -9,6 +9,7 @@ interface WorkShop {
   mode: "online" | "offline";
   location: string | null;
   link: string | null;
+  filters:string[];
   thumbnail: string;
   owner: string;
   role: string;

@@ -184,3 +184,93 @@ export const findRelevantContent: findRelavantContentCall = async (
     throw new Error("Failed to find relevant content.");
   }
 };
+
+export const validateAndFilterWebinar = async (
+ webinarDetails:{title:string;description:string},
+  thumbnailBase64: string,
+  webinarFilters: any
+):Promise<string | null> => {
+  try {
+    const prompt = `
+    You are an AI assistant specializing in indigenous cow dairy farming. Your task is to:
+    1. Validate if a webinar is relevant to indigenous cow dairy farming
+    2. If relevant, apply predefined filters to categorize the webinar
+
+    ### Input Data
+    - Webinar Details: ${JSON.stringify(webinarDetails)}
+    - Thumbnail (Base64): ${thumbnailBase64}
+    - Predefined Filters: ${JSON.stringify(webinarFilters)}
+
+    ### Task Instructions
+    1. **Relevance Validation**:
+       - Analyze the webinar title, description, and thumbnail (if provided)
+       - The content must specifically relate to dairy farming through indigenous cows
+       - Specific mention of indigenous/desi cow breeds (Gir, Sahiwal, Red Sindhi, etc.)
+       - Focus on dairy farming aspects (milk production, breeding, health management)
+       - Traditional or sustainable dairy practices
+       - Return \`valid: false\` if:
+         * Content is about general agriculture without dairy focus
+         * Focuses on non-indigenous cattle breeds
+         * Contains irrelevant commercial content
+    
+     2. **Thumbnail Must Show** (if provided):
+       - Indigenous cow breeds (not hybrid or foreign breeds)
+       - Dairy farming scenes (milking, feeding, cattle sheds)
+       - Relevant equipment (traditional milking utensils, organic feed)
+       - Reject if shows:
+         * Poultry or other livestock
+         * Commercial dairy farms with foreign breeds
+         * Unrelated agricultural scenes
+
+    4. **Automatic Rejection For**:
+       - General agriculture without dairy focus
+       - Non-indigenous cattle breeds (Holstein, Jersey, etc.)
+       - Poultry, goat, or other livestock content
+       - Commercial/marketing content without educational value
+
+    5. **Filter Application**:
+       - Only proceed if \`valid: true\`
+       - Match webinar content against all subfilters (ignore main filter categories)
+       - Include all matching subfilters (can be multiple)
+       - Be precise - only include filters that clearly match the content
+
+    6. **Response Format**:
+       - If relevant:
+         {
+           "valid": true,
+           "filters": ["matched_subfilter1", "matched_subfilter2", ...]
+         }
+       - If irrelevant:
+         {
+           "valid": false,
+           "filters": []
+         }
+
+    ### Important Rules
+    - NEVER include main filter categories (TechnologyInnovation, MilkProduction etc.)
+    - ONLY return subfilter values that exactly match the predefined list
+    - Be strict about relevance - false positives are worse than false negatives
+    - Return PURE JSON ONLY - no explanations or markdown formatting
+    `;
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    });
+
+    const response = await result.response;
+    const responseText = response.text();
+    return responseText;
+  } catch (error) {
+    console.error("Error validating webinar:", error);
+    return null;
+  }
+};
