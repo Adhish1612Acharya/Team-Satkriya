@@ -148,7 +148,10 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     const relevantPosts = await fetchPostsByIds(relevantPostIds);
     const relevantWorkShopsAndWebinars=await fetchWebinarsByIds(relevantWebinarIds);
 
-    setResults([...relevantPosts,...relevantWorkShopsAndWebinars]);
+    setResults({
+      posts:relevantPosts || [],
+      workShops:relevantWorkShopsAndWebinars || [],
+    });
 
     setPostFetchLoading(false);
 

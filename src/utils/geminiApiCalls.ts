@@ -32,64 +32,32 @@ export const classifyContent: ClassifyContentCalls = async (
 ) => {
   try {
     const prompt = `
-    You are an AI assistant specializing in content classification.
-    Your task is to categorize a given post into one or more predefined filters.
-
+    You are an AI assistant specializing in content classification.  
+    Your task is to categorize a given post into one or more **predefined filters**.
+    
     ### **Input Data**
     - Post Description: "${content}"
     - Media (image, document, or video): "${media}" 
     - Available Filters: ${JSON.stringify(existingFilters)}
-
+    
     ### **Task Requirements**
-    1. **Match Existing Filters**:  
-       - If the post matches an existing main filter, return only the relevant sub-filters in the "filters" array.
-       - Example: If the post matches "AgriculturalPractices", return ["Zero-Budget Farming", "Natural Fertilizers"].
-
-    2. **Suggest New Sub-Filters (If Necessary)**:  
-       - If the post matches an existing main filter but requires a new sub-filter, return:
-         {
-           "filters": ["Existing Sub-Filter 1", "Existing Sub-Filter 2"],
-           "newFilter": {
-             "selectType": "same as the main filter",
-             "subFilters": ["new-sub-filter-1", "new-sub-filter-2"]
-           }
-         }
-
-    3. **Suggest Completely New Filters (If Necessary)**:  
-       - If the post does not match any existing main filter, suggest a completely new main filter:
-         {
-           "filters": [],
-           "newFilter": {
-             "newMainFilter": {
-               "selectType": "single" || "double",
-               "subFilters": ["new-sub-filter-1", "new-sub-filter-2"]
-             }
-           }
-         }
-
-    4. **Understand selectType**:  
-       - **selectType: "single"**: For this main filter, only **one sub-filter** can be chosen at a time while searching posts.
-       - **selectType: "double"**: For this main filter, **multiple sub-filters** can be chosen at a time while searching posts.
-       - Ensure that any new sub-filters or main filters you suggest respect the \`selectType\` of the existing or new main filter.
-
-    5. **Ensure JSON Validity**:  
-       - **Return only a JSON object** with no additional text, markdown, or formatting.  
-       - The response **must be a parsable JSON** without backticks or code blocks.
-
+    1. **Select Only from Existing Filters**:  
+       - The response **must include at least one filter** from the predefined filters.
+       - **Do not create or suggest new filters.**
+       - Match the post content **only** to the most relevant existing sub-filters.
+    
+    2. **Strictly Return Valid JSON**:  
+       - The response must be a **pure JSON object** with no markdown, explanations, or extra formatting.  
+       - The JSON output **must be parsable** without backticks or surrounding text.
+    
     ### **Expected JSON Response Format**
     {
-        "filters": ["Existing Sub-Filter 1", "Existing Sub-Filter 2"],
-        "newFilter": {
-            "selectType": "same as the main filter" || "single" || "double",
-            "subFilters": ["new-sub-filter-1", "new-sub-filter-2"]
-        }
+      "filters": ["At least one relevant existing sub-filter"]
     }
-
-    - If no new filter is needed, return "newFilter": null.
-    - The "filters" array should only contain **relevant** existing sub-filters.
-    - The response **must not** include explanations, markdown syntax, or introductory text.
-
-    **IMPORTANT:** Do not include any markdown formatting, code blocks, or additional text—return only a pure JSON object without backticks, explanations, or surrounding text.
+    
+    - The **"filters" array must never be empty**.
+    - **Only return predefined sub-filters**—do not generate new ones.
+    - Ensure accuracy—**false positives are worse than false negatives**.
     `;
 
     const result = await model.generateContent({
@@ -107,7 +75,9 @@ export const classifyContent: ClassifyContentCalls = async (
 
     // Extract and return the response
     const response = await result.response;
+    console.log("Filters : ",response.text())
     return response.text(); // Ensure this returns a string
+
   } catch (error) {
     console.error("Error generating content: ", error);
     throw new Error("Failed to classify content.");
@@ -123,8 +93,8 @@ export const findRelevantContent: findRelavantContentCall = async (
   try {
     console.log({
       workshops: webinarsAndWorkShopsData,
-      posts:existingPosts
-    })
+      posts: existingPosts,
+    });
     const prompt = `
     You are an AI assistant specializing in agriculture and indigenous cow farming. Your task is to find the most relevant existing posts and webinars based on a farmer’s query.
 
@@ -132,7 +102,9 @@ export const findRelevantContent: findRelavantContentCall = async (
     - **Farmer's Query**: "${query}"
     - **Uploaded Media (if any)**: "${media}" 
     - **Existing Posts**: ${JSON.stringify(existingPosts)}
-    - **Available Webinars & Workshops**: ${JSON.stringify( webinarsAndWorkShopsData)}
+    - **Available Webinars & Workshops**: ${JSON.stringify(
+      webinarsAndWorkShopsData
+    )}
 
     ### **Task Instructions**
     1. **Find Relevant Posts**  
@@ -194,10 +166,10 @@ export const findRelevantContent: findRelavantContentCall = async (
 };
 
 export const validateAndFilterWebinar = async (
- webinarDetails:{title:string;description:string},
+  webinarDetails: { title: string; description: string },
   thumbnailBase64: string,
   webinarFilters: any
-):Promise<string | null> => {
+): Promise<string | null> => {
   try {
     const prompt = `
     You are an AI assistant specializing in indigenous cow dairy farming. Your task is to:
@@ -279,6 +251,102 @@ export const validateAndFilterWebinar = async (
     return responseText;
   } catch (error) {
     console.error("Error validating webinar:", error);
+    return null;
+  }
+};
+
+export const validateAndVerifyPost = async (
+  postDetails: { content: string },
+  postMediaBase64: string
+): Promise<string | null> => {
+  try {
+    const prompt = `
+    You are an AI assistant specializing in dairy farming using indigenous cows. Your task is to:
+    1. Validate if a post is relevant to indigenous cow dairy farming.
+    2. Determine if the post requires verification from a veterinary doctor or research institution.
+
+    ### Input Data:
+    - Post Details: ${JSON.stringify(postDetails)}
+    - Attached Media (Base64): ${postMediaBase64}
+
+    ### Task Instructions:
+
+    #### **1. Relevance Validation**
+    - Analyze the post description, images, PDFs, or videos.
+    - The content must specifically relate to **dairy farming using indigenous cows**.
+    - Must include **desi breeds** (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.).
+    - Content should focus on **dairy farming**, such as:
+      - Indigenous cow care, health, and breeding
+      - Milk production, nutrition, and feeding
+      - Sustainable and traditional farming practices
+    - **Automatic Rejection For**:
+      - General agriculture without dairy focus
+      - Non-indigenous cattle breeds (Holstein, Jersey, etc.)
+      - Poultry, goat farming, or other livestock topics
+      - Commercial or promotional content without educational value
+
+      #### **2. Strict Media Validation (Images, PDFs, Videos)**
+- **Images must clearly show**:
+  ✅ Indigenous cow breeds (Gir, Sahiwal, etc.)  
+  ✅ Dairy farming activities (milking, feeding, cattle sheds)  
+  ✅ Traditional or sustainable farming methods  
+- **Reject images if they show**:
+  ❌ Poultry, goats, or other livestock  
+  ❌ Foreign cow breeds (Jersey, Holstein, etc.)  
+  ❌ Irrelevant agriculture (crops, tractors, fertilizers, etc.)  
+  ❌ Commercial content (ads, logos, promotions)  
+- **PDFs & Videos**:
+  - Must focus on indigenous cow dairy farming.
+  - Reject if unrelated or promotional.
+
+    #### **3. Verification Requirement**
+    - If **valid**, determine whether the content requires expert verification:
+      ✅ **Requires Verification** (verify: "true") if:
+        - Scientific facts about indigenous cows
+        - Health care routines and disease management
+        - Breeding techniques or veterinary recommendations
+        - Research-backed information on milk production and nutrition
+      ❌ **Does NOT Require Verification** (verify: "false") if:
+        - A farmer is **asking a query** or seeking advice
+        - A webinar or event is being **promoted** 
+        - General discussions on indigenous cow benefits
+
+    ### **Response Format**
+    - If relevant content:
+      {
+        "valid": "true",
+        "verify": "true" or "false"
+      }
+    - If irrelevant content:
+      {
+        "valid": "false",
+        "verify": "null"
+      }
+
+    ### **Important Rules**
+    - STRICTLY return JSON **only** (no extra text, markdown, or explanations).
+    - Maintain high accuracy - **false positives are worse than false negatives**.
+    - Consider all provided content (text, images, PDFs, or videos) before making a decision.
+    `;
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    });
+
+    const response = await result.response;
+    const responseText = response.text();
+    return responseText;
+  } catch (error) {
+    console.error("Error validating post:", error);
     return null;
   }
 };

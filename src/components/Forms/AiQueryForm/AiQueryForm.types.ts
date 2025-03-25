@@ -1,5 +1,11 @@
+import Post from "@/types/posts.types";
+import WorkShop from "@/types/workShop.types";
+
 interface AiQueryFormProps {
-  setResults: (data: any[]) => void;
+  setResults: (data: {
+    posts: Post[];
+    workShops: WorkShop[];
+  }) => void;
   setPostFetchLoading:(laod:boolean)=>void
 }
 

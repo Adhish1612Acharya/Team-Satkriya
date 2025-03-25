@@ -26,6 +26,7 @@ export function PostsPage() {
   useEffect(() => {
     async function getPosts() {
       const postData = await getAllPosts();
+      console.log("Post Data : ", postData);
       setPosts(postData);
       let userInfo;
       if (auth.currentUser) {
@@ -126,6 +127,7 @@ export function PostsPage() {
               firebaseDocuemntType={
                 localStorage.getItem("userType") as "farmers" | "experts"
               }
+              setPosts={setPosts}
             />
           </Card>
 

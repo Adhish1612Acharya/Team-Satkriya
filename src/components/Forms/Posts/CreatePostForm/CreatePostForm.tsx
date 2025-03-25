@@ -19,13 +19,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, VideoIcon, X, FileText, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import filters from "@/constants/filters";
+import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
+import convertToBase64 from "@/utils/covertToBase64";
+import { toast } from "react-toastify";
 
-const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
+const CreatePostForm: FC<CreatePostFormProps> = ({
+  firebaseDocuemntType,
+  setPosts,
+}) => {
+  const { createPost, getAllPosts } = usePost();
+
   const [newPostImage, setNewPostImage] = useState<File[]>([]);
   const [newPostVideo, setNewPostVideo] = useState<File[]>([]);
   const [newPostDocument, setNewPostDocument] = useState<File[]>([]);
-
-  const { createPost } = usePost();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -108,38 +114,74 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
   };
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
-    const postFilters = await categorizePost(data.content, newPostImage[0]);
+    const file =
+      newPostImage.length === 1
+        ? newPostImage[0]
+        : newPostDocument.length === 1
+        ? newPostDocument[0]
+        : newPostVideo.length === 1
+        ? newPostVideo[0]
+        : "";
 
-    console.log("Post Filters : ", postFilters);
+    let base64File = "";
 
-    const hasQueries = hasQueriesOrFarmerQueryType(postFilters);
-
-    console.log("Has Queries : ", hasQueries);
-
-    let newPost: PostArgu;
-
-    if (hasQueries) {
-      newPost = {
-        content: data.content,
-        images: newPostImage,
-        videos: newPostVideo,
-        documents: newPostDocument,
-        filters: postFilters,
-        verified: [],
-      };
-    } else {
-      newPost = {
-        content: data.content,
-        images: newPostImage,
-        videos: newPostVideo,
-        documents: newPostDocument,
-        filters: postFilters,
-        verified: null,
-      };
+    if (file !== "") {
+      base64File = await convertToBase64(file);
     }
 
-    await createPost(newPost, firebaseDocuemntType);
+    const aiVarification = await validateAndVerifyPost(
+      {
+        content: data.content,
+      },
+      base64File
+    );
+    const cleanResponse = aiVarification?.replace(/```json|```/g, "");
 
+    let jsonData;
+
+    if (cleanResponse) {
+      jsonData = JSON.parse(cleanResponse);
+    } else if (!cleanResponse) {
+      toast.error("Post verification error");
+      return;
+    }
+
+    console.log("Ai verification : ", jsonData);
+
+    if (jsonData?.valid==="true") {
+      const postFilters = await categorizePost(data.content, newPostImage[0]);
+
+      let newPost: PostArgu;
+
+      if (jsonData?.verify) {
+        newPost = {
+          content: data.content,
+          images: newPostImage,
+          videos: newPostVideo,
+          documents: newPostDocument,
+          filters: postFilters,
+          verified: [],
+        };
+      } else {
+        newPost = {
+          content: data.content,
+          images: newPostImage,
+          videos: newPostVideo,
+          documents: newPostDocument,
+          filters: postFilters,
+          verified: null,
+        };
+      }
+
+      await createPost(newPost, firebaseDocuemntType);
+
+      const newPosts = await getAllPosts();
+
+      setPosts(newPosts);
+    } else {
+      toast.error("Irrelavant posts");
+      return;
+    }
     form.reset();
   };
 
@@ -244,8 +286,14 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
                 <span>Upload Document</span>
               </Button>
             </div>
-            <Button type="submit" disabled={!form.watch("content") && !media || form.formState.isSubmitting}>
-             {form.formState.isSubmitting ? <Loader2/> : "Submit"}
+            <Button
+              type="submit"
+              disabled={
+                (!form.watch("content") && !media) ||
+                form.formState.isSubmitting
+              }
+            >
+              {form.formState.isSubmitting ? <Loader2 /> : "Submit"}
             </Button>
           </div>
 

@@ -1,40 +1,25 @@
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  AlertCircle,
-  ChevronRight,
-  BarChart,
-  Badge,
-  MapPin,
-  Calendar,
-  User,
-  Clock,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
 import WorkShop from "@/types/workShop.types";
-import { Card, CardContent } from "@/components/ui/card";
 import WorkshopCard from "@/components/WorkshopCard/WorkshopCard";
-import { differenceInMinutes, format, parseISO } from "date-fns";
-import { Timestamp } from "firebase/firestore";
 import WorkshopCardSkeleton from "@/components/WorkShopCardSkeleton/WorkShopCardSkeleton";
+import { toast } from "react-toastify";
 
 const WorkShopDetail = () => {
   const { id } = useParams();
+  const navigate=useNavigate();
   const { fetchWorkshopById } = useWorkShop();
 
   const [workshop, setWorkshop] = useState<WorkShop | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchWorkshopDetails = async () => {
       if (!id) {
-        setError("Workshop ID is missing");
+        toast.error("Some error occured");
         setLoading(false);
+        navigate("/posts");
         return;
       }
 
@@ -44,7 +29,7 @@ const WorkShopDetail = () => {
         setWorkshop(data);
         setLoading(false);
       } catch (err) {
-        setError("Failed to load workshop details. Please try again later.");
+        navigate("/posts");
         setLoading(false);
       }
     };
