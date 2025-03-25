@@ -49,7 +49,6 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
-  console.log("pOST : ", post);
   return (
     <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">

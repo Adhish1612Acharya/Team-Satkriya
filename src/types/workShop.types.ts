@@ -15,10 +15,13 @@ interface WorkShop {
   role: string;
   timeFrom:string;
   timeTo:string;
+  registrations:string[];
   profileData: {
     name: string;
     profilePic: string;
   };
+  createdAt:Date | Timestamp;
+  updatedAt:Date | Timestamp;
 }
 
 export default WorkShop;

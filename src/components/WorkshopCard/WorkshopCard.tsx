@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { format } from "date-fns";
-import { MapPin, Calendar, Globe, User, Clock } from "lucide-react";
+import { MapPin, Calendar, Globe, User, Clock, Hourglass } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,12 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import WorkShopCardProps from "./WorkShopCard.types";
 import { Timestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 // Workshop Card Component
 const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
+  const navigate = useNavigate();
   // Format dates
   const formattedStartDate = format(
     workshop.dateFrom instanceof Timestamp
@@ -43,14 +45,14 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       : new Date(workshop.dateTo)
   );
 
-// Ensure startDate and endDate are valid Date objects
-if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-  throw new Error("Invalid date format");
-}
+  // Ensure startDate and endDate are valid Date objects
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    throw new Error("Invalid date format");
+  }
 
-// Calculate the difference in days
-const timeDiff = endDate.getTime() - startDate.getTime();
-const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+  // Calculate the difference in days
+  const timeDiff = endDate.getTime() - startDate.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
   return (
     <Card className="w-full overflow-hidden transition-all hover:shadow-lg">
@@ -100,10 +102,17 @@ const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
           </span>
           {daysDiff > 0 && (
             <span className="ml-2 flex items-center">
-              <Clock className="mr-1 h-4 w-4" />
+              <Hourglass className="mr-1 h-4 w-4" />
               {daysDiff} {daysDiff === 1 ? "day" : "days"}
             </span>
           )}
+        </CardDescription>
+        {/* Time Range */}
+        <CardDescription className="flex items-center text-sm mt-1">
+          <Clock className="mr-1 h-4 w-4" />
+          <span>
+            {workshop.timeFrom} to {workshop.timeTo}
+          </span>
         </CardDescription>
       </CardHeader>
 
@@ -130,17 +139,13 @@ const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between">
-        <div className="flex items-center text-sm text-gray-500">
-          <User className="mr-1 h-4 w-4" />
-          <span>12 attendees</span>
-        </div>
-        <Button>Register Now</Button>
+      <CardFooter className="flex justify-end">
+        <Button className="cursor-pointer" onClick={() => navigate(`/workshops/${workshop.id}`)}>
+          View
+        </Button>
       </CardFooter>
     </Card>
   );
 };
 
-
-
-export  default WorkshopCard ;
+export default WorkshopCard;

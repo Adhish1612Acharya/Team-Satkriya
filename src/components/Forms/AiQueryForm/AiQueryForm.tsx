@@ -9,11 +9,15 @@ import { db } from "@/firebase";
 import Post from "@/types/posts.types";
 import { findRelevantContent } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
+import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
+import WorkShop from "@/types/workShop.types";
 
 const AiQueryForm: FC<AiQueryFormProps> = ({
   setResults,
   setPostFetchLoading,
 }) => {
+  const { fetchAllWorkshops,fetchWorkshopById } = useWorkShop();
+
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<{ url: string; file: File }[]>([]);
@@ -49,7 +53,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     });
   };
 
-
   const fetchPostsByIds = async (postIds: string[]): Promise<Post[]> => {
     if (postIds.length === 0) return []; // If no IDs, return empty array
 
@@ -69,6 +72,28 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
       ) as Post[];
 
       return posts;
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      return [];
+    }
+  };
+
+  const fetchWebinarsByIds = async (webinarIds: string[]): Promise<WorkShop[]> => {
+    if (webinarIds.length === 0) return []; // If no IDs, return empty array
+
+    try {
+      // Fetch each post individually using getDoc for optimal performance
+      const webinarFetchPromises = webinarIds.map(async (id) => {
+        const webinarSnap = await fetchWorkshopById(id);
+        return  webinarSnap;
+      });
+
+      // Wait for all webinar fetch operations to complete
+      const workShopsAndWebinars = (await Promise.all(webinarFetchPromises)).filter(
+        (webinar) => webinar !== null
+      ) as WorkShop[];
+
+      return workShopsAndWebinars;
     } catch (error) {
       console.error("Error fetching posts:", error);
       return [];
@@ -100,27 +125,33 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
         } as Post)
     );
 
+    const workShops = await fetchAllWorkshops();
+
     const aiRelevantPosts = await findRelevantContent(
       query,
       base64Images,
       posts,
-      []
+      workShops || []
     );
 
     const cleanResponse = aiRelevantPosts.replace(/```json|```/g, "");
     const jsonData = JSON.parse(cleanResponse);
 
+    console.log(jsonData);
 
     setPostFetchLoading(true);
 
     const relevantPostIds: string[] = jsonData.relevantPosts || [];
-    // const relevantWebinarIds: string[] = jsonData.relevantWebinars|| [];
+    const relevantWebinarIds: string[] = jsonData.relevantWebinars|| [];
 
     // Fetch only relevant posts using their IDs
     const relevantPosts = await fetchPostsByIds(relevantPostIds);
+    const relevantWorkShopsAndWebinars=await fetchWebinarsByIds(relevantWebinarIds);
 
-
-    setResults(relevantPosts);
+    setResults({
+      posts:relevantPosts || [],
+      workShops:relevantWorkShopsAndWebinars || [],
+    });
 
     setPostFetchLoading(false);
 

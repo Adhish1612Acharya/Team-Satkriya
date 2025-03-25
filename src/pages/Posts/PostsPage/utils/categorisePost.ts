@@ -1,5 +1,4 @@
 import { classifyContent } from "@/utils/geminiApiCalls";
-import updateFilters from "./updateFilters";
 import convertToBase64 from "@/utils/covertToBase64";
 import filters from "@/constants/filters";
 
@@ -10,34 +9,14 @@ const categorizePost = async (textContent: string, file: File | null) => {
       base64Media = await convertToBase64(file);
     }
 
-
     const aiResponse = await classifyContent(textContent, base64Media, filters);
 
     const cleanResponse = aiResponse.replace(/```json|```/g, "");
     const jsonData = JSON.parse(cleanResponse);
 
+    console.log("Filter JSON data : ",jsonData);
 
-    if (jsonData.newFilter !== null) {
-      await updateFilters(filters, jsonData.newFilter);
-    }
-
-    let aiFilters: string[] = [];
-
-    if (jsonData.newFilter) {
-      Object.keys(jsonData.newFilter).forEach((newMainFilter) => {
-        aiFilters.push(...jsonData.newFilter[newMainFilter].subFilters);
-      });
-    }
-
-    if (jsonData.filters && Array.isArray(jsonData.filters) && jsonData.filters.length>0) {
-      aiFilters.push(...jsonData.filters);
-    }
-
-    const postfilters: string[] = [...new Set(aiFilters)];
-
-    console.log("Post Filters : ", postfilters);
-
-    return postfilters;
+    return jsonData.filters || [];
   };
 
   export default categorizePost;

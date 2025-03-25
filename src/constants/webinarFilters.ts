@@ -1,4 +1,8 @@
 const webinarFilters={
+  UserType: {
+    selectType: "single",
+    subFilters: ["Doctor", "NGO", "Volunteer"],
+  },
     TechnologyInnovation: {
         selectType: "double",
         subFilters: [

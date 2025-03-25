@@ -89,7 +89,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
     ${
       ((userRole === "doctor" || userRole === "researchInstitution") &&
         verified) ||
-      verifiedProfiles.length > 0
+      verifiedProfiles?.length > 0
         ? "bg-green-500 hover:bg-green-600 text-white"
         : "bg-red-500 hover:bg-red-600 text-white"
     }
@@ -98,7 +98,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
             verifyLoad ||
             (userRole !== "doctor" &&
               userRole !== "researchInstitution" &&
-              verifiedProfiles.length == 0)
+              verifiedProfiles?.length == 0)
           }
         >
           {verifyLoad ? (
@@ -108,7 +108,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               {/* For non-verifiers */}
               {userRole !== "doctor" && userRole !== "researchInstitution" && (
                 <div>
-                  {verifiedProfiles.length > 0
+                  {verifiedProfiles?.length > 0
                     ? "Verified"
                     : "Under Verification"}
                 </div>

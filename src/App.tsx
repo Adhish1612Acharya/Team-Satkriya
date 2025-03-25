@@ -23,6 +23,7 @@ import AiSolveQuery from "./pages/Farmer/AiSolveQuery/AiSolveQuery";
 import PageNotFound from "./pages/PageNotFound/PageNotFound";
 import WorkshopsPage from "./pages/WorkShops/WorkShops";
 import CreateWorkShop from "./pages/Expert/CreateWorkShop/CreateWorkShop";
+import WorkShopDetail from "./pages/WorkShopDetails/WorkShopDetail";
 
 const App = () => {
   return (
@@ -53,6 +54,7 @@ const App = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/posts" element={<PostsPage />} />
           <Route path="/workshops" element={<WorkshopsPage/>}/>
+          <Route path="/workshops/:id" element={<WorkShopDetail/>}/>
         </Route>
         <Route element={<FarmerProtectRoute />}>
           <Route path="/solve-query" element={<AiSolveQuery />} />

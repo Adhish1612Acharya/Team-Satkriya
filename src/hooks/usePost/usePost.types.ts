@@ -22,4 +22,6 @@ export type GetFilteredPostType = (
   userType: string | null
 ) => Promise<Post[]>;
 
+export type fetchPostByIdType = (id: string) => Promise<Post | null>;
+
 export type GetYourPostType = () => Promise<Post[]>;
