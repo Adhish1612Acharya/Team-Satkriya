@@ -1,6 +1,6 @@
-import React, { FC } from "react";
+import  { FC } from "react";
 import { format } from "date-fns";
-import { MapPin, Calendar, Globe, User, Clock, Hourglass } from "lucide-react";
+import { MapPin, Calendar, Globe, Clock, Hourglass } from "lucide-react";
 import {
   Card,
   CardContent,
