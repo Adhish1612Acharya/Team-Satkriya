@@ -1,6 +1,6 @@
-import React, { FC } from "react";
+import  { FC } from "react";
 import { format } from "date-fns";
-import { MapPin, Calendar, Globe, User, Clock, Hourglass } from "lucide-react";
+import { MapPin, Calendar, Globe, Clock, Hourglass } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -131,9 +131,9 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
             ))}
           </div>
         )}
-        <p className="line-clamp-3 mb-4 text-sm text-gray-600">
-          {workshop.description}
-        </p>
+        <div className="max-h-[120px] mt-4 overflow-y-auto">
+          <p className="text-sm text-gray-600">{workshop.description}</p>
+        </div>
 
         {/* Location or Link */}
         <div className="mt-4 flex items-start space-x-2 text-sm">

@@ -8,7 +8,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, MessageCircle, Smile } from "lucide-react";
+import {  MessageCircle, Smile } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import PostCardProps from "./PostCard.types";

@@ -1,5 +1,4 @@
 import {
-  Cog as Cow,
   Heart,
   Users,
   ShoppingBag,
