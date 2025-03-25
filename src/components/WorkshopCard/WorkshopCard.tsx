@@ -117,6 +117,20 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       </CardHeader>
 
       <CardContent>
+        {/* Filters Section - Add this */}
+        {workshop.filters && workshop.filters.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {workshop.filters.map((filter, index) => (
+              <Badge
+                key={index}
+                variant="outline"
+                className="text-xs font-normal text-gray-600"
+              >
+                {filter}
+              </Badge>
+            ))}
+          </div>
+        )}
         <p className="line-clamp-3 mb-4 text-sm text-gray-600">
           {workshop.description}
         </p>
@@ -140,7 +154,10 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button className="cursor-pointer" onClick={() => navigate(`/workshops/${workshop.id}`)}>
+        <Button
+          className="cursor-pointer"
+          onClick={() => navigate(`/workshops/${workshop.id}`)}
+        >
           View
         </Button>
       </CardFooter>
