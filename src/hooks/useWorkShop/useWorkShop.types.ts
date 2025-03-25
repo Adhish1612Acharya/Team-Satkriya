@@ -21,3 +21,8 @@ export type createWorkShopType = (
 export type fetchWorkshopByIdType = (id: string) => Promise<WorkShop | null>;
 
 export type fetchAllWorkshopsType = () => Promise<WorkShop[] | null>;
+
+export type GetFilteredWorkshopType = (
+  filters: string[],
+  userType:string | null
+) => Promise<WorkShop[] | null>;

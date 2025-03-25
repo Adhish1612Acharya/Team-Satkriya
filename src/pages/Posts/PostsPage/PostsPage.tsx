@@ -9,10 +9,13 @@ import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleto
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
 import { auth } from "@/firebase";
+import filters from "@/constants/filters";
+import WorkShop from "@/types/workShop.types";
 
 export function PostsPage() {
-  const { getAllPosts, getPostLoading, getFilteredPostLoading } = usePost();
+  const { getAllPosts } = usePost();
 
+  const [loading, setLoading] = useState<boolean>(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,7 +111,12 @@ export function PostsPage() {
 
   return (
     <>
-      <Filter setPosts={setPosts} />
+      <Filter
+        setLoading={setLoading}
+        setData={setPosts as unknown as (data: Post[] | WorkShop[]) => void}
+        filters={filters}
+        isPost={true}
+      />
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
@@ -123,7 +131,7 @@ export function PostsPage() {
 
           {/* Posts Feed */}
           <div>
-            {getPostLoading || getFilteredPostLoading ? (
+            {loading ? (
               <>
                 <PostCardSkeleton />
                 <PostCardSkeleton />

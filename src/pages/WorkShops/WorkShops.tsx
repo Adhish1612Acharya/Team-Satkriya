@@ -1,25 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/firebase"; // Firebase configuration
+import { useEffect, useState } from "react";
 import { Skeleton } from "@mui/material";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import { toast } from "react-toastify";
 import WorkShop from "@/types/workShop.types";
 import WorkshopCardSkeleton from "@/components/WorkShopCardSkeleton/WorkShopCardSkeleton";
 import WorkshopCard from "@/components/WorkshopCard/WorkshopCard";
+import Filter from "@/components/Filter/Filter/Filter";
+import webinarFilters from "@/constants/webinarFilters";
+import Post from "@/types/posts.types";
 
-const WorkshopsPage= () => {
+const WorkshopsPage = () => {
   const { fetchAllWorkshops } = useWorkShop();
 
   const [workshops, setWorkshops] = useState<WorkShop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
 
   useEffect(() => {
     const getWorkshops = async () => {
       try {
         setLoading(true);
         const data = await fetchAllWorkshops();
+        console.log(data);
         if (data === null) {
           setWorkshops([]);
         } else {
@@ -36,12 +37,18 @@ const WorkshopsPage= () => {
     getWorkshops();
   }, []);
 
-
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-8">
         Workshops & Webinars
       </h1>
+
+      <Filter
+        setData={setWorkshops as unknown as (data: Post[] | WorkShop[]) => void}
+        isPost={false}
+        filters={webinarFilters}
+        setLoading={setLoading}
+      />
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -52,9 +59,9 @@ const WorkshopsPage= () => {
             >
               <Skeleton variant="rectangular" width="100%" height={200} />
               <div className="p-4">
-               <WorkshopCardSkeleton/>
-               <WorkshopCardSkeleton/>
-               <WorkshopCardSkeleton/>
+                <WorkshopCardSkeleton />
+                <WorkshopCardSkeleton />
+                <WorkshopCardSkeleton />
               </div>
             </div>
           ))}
@@ -62,7 +69,7 @@ const WorkshopsPage= () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {workshops.map((workshop) => (
-            <WorkshopCard key={workshop.id} workshop={workshop}/>
+            <WorkshopCard key={workshop.id} workshop={workshop} />
           ))}
         </div>
       )}

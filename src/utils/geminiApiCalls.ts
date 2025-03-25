@@ -118,9 +118,13 @@ export const findRelevantContent: findRelavantContentCall = async (
   query,
   media,
   existingPosts,
-  webinars
+  webinarsAndWorkShopsData
 ) => {
   try {
+    console.log({
+      workshops: webinarsAndWorkShopsData,
+      posts:existingPosts
+    })
     const prompt = `
     You are an AI assistant specializing in agriculture and indigenous cow farming. Your task is to find the most relevant existing posts and webinars based on a farmer’s query.
 
@@ -128,7 +132,7 @@ export const findRelevantContent: findRelavantContentCall = async (
     - **Farmer's Query**: "${query}"
     - **Uploaded Media (if any)**: "${media}" 
     - **Existing Posts**: ${JSON.stringify(existingPosts)}
-    - **Available Webinars & Workshops**: ${JSON.stringify(webinars)}
+    - **Available Webinars & Workshops**: ${JSON.stringify( webinarsAndWorkShopsData)}
 
     ### **Task Instructions**
     1. **Find Relevant Posts**  
@@ -136,9 +140,13 @@ export const findRelevantContent: findRelavantContentCall = async (
        - Return **up to 3 posts** sorted by relevance.  
        - If multiple posts are equally relevant, prioritize those **verified by experts** and **highly liked by other farmers**.  
 
-    2. **Find Related Webinars & Workshops**  
-       - Search \`webinars\` for webinars/workshops related to the query.  
-       - If a webinar is **upcoming**, prioritize it over past events.  
+   2. **Find Top 3 Related Events**  
+   - Search both "webinars" and "workshops" collections  from  ${webinarsAndWorkShopsData}
+   - Prioritize:  
+     a) Upcoming events (date >= today)  
+     b) Events with matching titles/descriptions  
+     c) Events by verified organizations  
+   - Return maximum 3 events (mix of webinars/workshops)
 
     3. **Handling No Relevant Posts**  
        - If **no relevant posts exist**, return \`"noPostsExist": true\`.  

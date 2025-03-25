@@ -208,7 +208,7 @@ const usePost = () => {
           likesCount: 0,
           commentsCount: 0,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt:new Date(),
           ownerId: auth.currentUser.uid,
           role: userData?.role,
           profileData: {
@@ -220,8 +220,6 @@ const usePost = () => {
 
         const newPost = await addDoc(collection(db, "posts"), {
           contentData,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
         });
 
         const postRef = doc(db, firebaseDocument, auth.currentUser.uid);

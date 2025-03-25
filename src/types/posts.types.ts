@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import ProfileData from "./profile.types";
 import VerifiedPostProfile from "./verifiedPostProfileInfo";
 
@@ -12,8 +13,8 @@ interface Post {
   likesCount: number;
   commentsCount: number;
   verified:VerifiedPostProfile[] | null
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | Timestamp;
+  updatedAt:Date | Timestamp;
   ownerId: string;
   role: string;
   profileData: ProfileData;
