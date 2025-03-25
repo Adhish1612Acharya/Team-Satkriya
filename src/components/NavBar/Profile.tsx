@@ -22,7 +22,6 @@ const Profile = () => {
       await signOut(auth);
       setCurrentUser(null); // Clear the current user in the context
       setUserType(null); // Clear the user type in the context
-      localStorage.removeItem("userType");
       toast.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout Error:", error);
@@ -36,7 +35,7 @@ const Profile = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2"
+          className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
         >
           <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
             <AvatarImage
@@ -68,7 +67,7 @@ const Profile = () => {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        {/* <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
           <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
@@ -76,7 +75,7 @@ const Profile = () => {
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
           <span>My Publications</span>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={logOut}

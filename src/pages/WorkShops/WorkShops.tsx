@@ -38,41 +38,46 @@ const WorkshopsPage = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-center mb-8">
-        Workshops & Webinars
-      </h1>
-
-      <Filter
-        setData={setWorkshops as unknown as (data: Post[] | WorkShop[]) => void}
-        isPost={false}
-        filters={webinarFilters}
-        setLoading={setLoading}
-      />
-
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, index) => (
-            <div
-              key={index}
-              className="bg-white shadow-md rounded-lg overflow-hidden"
-            >
-              <Skeleton variant="rectangular" width="100%" height={200} />
-              <div className="p-4">
-                <WorkshopCardSkeleton />
-                <WorkshopCardSkeleton />
-                <WorkshopCardSkeleton />
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+      {/* Filter Component for better UI/UX */}
+      <div className="mb-4">
+        <Filter
+          setData={
+            setWorkshops as unknown as (data: Post[] | WorkShop[]) => void
+          }
+          isPost={false}
+          filters={webinarFilters}
+          setLoading={setLoading}
+        />
+      </div>
+      <div className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold text-center mb-8">
+          Workshops & Webinars
+        </h1>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="bg-white shadow-md rounded-lg overflow-hidden"
+              >
+                <Skeleton variant="rectangular" width="100%" height={200} />
+                <div className="p-4">
+                  <WorkshopCardSkeleton />
+                  <WorkshopCardSkeleton />
+                  <WorkshopCardSkeleton />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workshops.map((workshop) => (
-            <WorkshopCard key={workshop.id} workshop={workshop} />
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {workshops.map((workshop) => (
+              <WorkshopCard key={workshop.id} workshop={workshop} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

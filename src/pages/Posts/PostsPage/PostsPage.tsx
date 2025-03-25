@@ -11,8 +11,10 @@ import getUserInfo from "@/utils/getUserInfo";
 import { auth } from "@/firebase";
 import filters from "@/constants/filters";
 import WorkShop from "@/types/workShop.types";
+import { useAuthContext } from "@/context/AuthContext";
 
 export function PostsPage() {
+  const { userType } = useAuthContext();
   const { getAllPosts } = usePost();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -25,21 +27,25 @@ export function PostsPage() {
 
   useEffect(() => {
     async function getPosts() {
+      if (!userType) {
+        return;
+      }
+      setLoading(true);
       const postData = await getAllPosts();
-      console.log("Post Data : ", postData);
       setPosts(postData);
       let userInfo;
       if (auth.currentUser) {
         userInfo = await getUserInfo(
           auth.currentUser.uid,
-          localStorage.getItem("userType") as "farmers" | "experts"
+          userType as "farmers" | "experts"
         );
         setUserRole(userInfo?.role);
       }
+      setLoading(false);
     }
 
     getPosts();
-  }, []);
+  }, [userType]);
 
   const handlePostClick = (post: Post) => {
     if (post) {
@@ -112,22 +118,23 @@ export function PostsPage() {
 
   return (
     <>
-      <Filter
-        setLoading={setLoading}
-        setData={setPosts as unknown as (data: Post[] | WorkShop[]) => void}
-        filters={filters}
-        isPost={true}
-      />
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+        {/* Filter Component for better UI/UX */}
+        <div className="mb-4">
+          <Filter
+            setLoading={setLoading}
+            setData={setPosts as unknown as (data: Post[] | WorkShop[]) => void}
+            filters={filters}
+            isPost={true}
+          />
+        </div>
+
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
           <Card className="mb-8 overflow-hidden">
             <CreatePostForm
-              firebaseDocuemntType={
-                localStorage.getItem("userType") as "farmers" | "experts"
-              }
-              setPosts={setPosts}
+              firebaseDocuemntType={userType as "farmers" | "experts"}
             />
           </Card>
 

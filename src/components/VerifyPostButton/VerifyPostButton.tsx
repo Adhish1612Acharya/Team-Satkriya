@@ -117,7 +117,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               {/* For verifiers */}
               {(userRole === "doctor" ||
                 userRole === "researchInstitution") && (
-                <div>{verified ? "Verified By You" : "Not Verified"}</div>
+                <div>{verified ? "Verified By You" : "Not Verified By you"}</div>
               )}
             </>
           )}
