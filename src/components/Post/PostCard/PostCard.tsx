@@ -8,14 +8,14 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, Smile } from "lucide-react";
+import { Loader2, MessageCircle, Smile } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import PostCardProps from "./PostCard.types";
 import Comment from "@/types/comment.types";
 import usePost from "@/hooks/usePost/usePost";
 import { Skeleton } from "@mui/material";
-import { Timestamp } from "@firebase/firestore";
+import { doc, increment, Timestamp, updateDoc } from "@firebase/firestore";
 import {
   Select,
   SelectContent,
@@ -24,6 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
+import { useAuthContext } from "@/context/AuthContext";
+import { db } from "@/firebase";
+import { toast } from "react-toastify";
 
 const PostCard: FC<PostCardProps> = ({
   post,
@@ -34,6 +37,7 @@ const PostCard: FC<PostCardProps> = ({
   // onShare,
   // onPostClick,
 }) => {
+  const { userType } = useAuthContext();
   const { getPostComments, addCommentPost, getFilteredComments } = usePost();
 
   // const [isLiked, setIsLiked] = useState(false);
@@ -48,6 +52,24 @@ const PostCard: FC<PostCardProps> = ({
   const [postCommentsCount, setPostCommentsCount] = useState<number>(
     post.commentsCount
   );
+
+  const addCommentsFunc = async () => {
+    try {
+      setAddCommentsLoad(true);
+      await addCommentPost(post.id, userType as "farmers" | "experts", comment);
+      await updateDoc(doc(db, "posts", post.id), {
+        commentsCount: increment(1), // Increments the count by 1
+      });
+      const postComments = await getPostComments(post.id);
+      setComments(postComments);
+      setAddCommentsLoad(false);
+      setPostCommentsCount((prev) => prev + 1);
+      setComment("");
+    } catch (err) {
+      console.log(err);
+      toast.error("Add comment error");
+    }
+  };
 
   return (
     <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
@@ -65,13 +87,14 @@ const PostCard: FC<PostCardProps> = ({
             </Avatar>
             <div>
               <p className="font-medium">{post.profileData.name}</p>
-              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+              {/* Header: Role and Time */}
+              <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 flex-wrap">
                 <span>{post.role}</span>
                 <span className="mx-1">•</span>
-                <span>
+                <span className="whitespace-nowrap">
                   {formatDistanceToNow(
                     post.createdAt instanceof Timestamp
-                      ? post.createdAt.toDate() // Convert Firestore Timestamp to JS Date
+                      ? post.createdAt.toDate()
                       : new Date(post.createdAt),
                     { addSuffix: true }
                   )}
@@ -79,9 +102,9 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          {post.role !== "doctor" &&
-            post.role !== "researchInstitution" &&
-            post.verified !== null && (
+          {post.verified !== null &&
+            post.role !== "doctor" &&
+            post.role !== "researchInstitution" && (
               <VerifyPostButton
                 userRole={userRole}
                 verifiedProfiles={post.verified}
@@ -89,7 +112,7 @@ const PostCard: FC<PostCardProps> = ({
               />
             )}
 
-          {/* <DropdownMenu>
+          {/* <DropdownMenu>  
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
                 <MoreHorizontal size={18} />
@@ -106,11 +129,23 @@ const PostCard: FC<PostCardProps> = ({
         </div>
       </CardHeader>
       <CardContent className="pb-3">
-        <p className="mb-4 whitespace-pre-line h-50 overflow-y-auto">
+        {post.filters && post.filters.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {post.filters.map((filter, index) => (
+              <span
+                key={index}
+                className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs sm:text-sm"
+              >
+                {filter}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="text-gray-700 dark:text-gray-300 text-sm mt-4 max-h-40 overflow-y-auto">
           {post.content}
-        </p>
+        </div>
 
-        <div className="relative cursor-pointer overflow-hidden rounded-md">
+        <div className="mt-6 relative cursor-pointer overflow-hidden rounded-md">
           {/* Display Image */}
           {post.images.length > 0 && (
             <img
@@ -178,12 +213,12 @@ const PostCard: FC<PostCardProps> = ({
             )}
           </div> */}
           <div className="flex items-center space-x-1 text-sm text-gray-500">
-            {post.commentsCount > 0 && (
-              <span>
-                {postCommentsCount}{" "}
-                {postCommentsCount === 1 ? "comment" : "comments"}
-              </span>
-            )}
+            <span>
+              {postCommentsCount}{" "}
+              {postCommentsCount === 1 || postCommentsCount === 0
+                ? "comment"
+                : "comments"}
+            </span>
           </div>
         </div>
 
@@ -203,7 +238,7 @@ const PostCard: FC<PostCardProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center space-x-1 flex-1 justify-center"
+            className="flex items-center space-x-1 flex-1 justify-center cursor-pointer"
             onClick={async (e) => {
               e.stopPropagation();
               setShowComments(!showComments);
@@ -362,19 +397,7 @@ const PostCard: FC<PostCardProps> = ({
                   onKeyDown={async (e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      setAddCommentsLoad(true);
-                      await addCommentPost(
-                        post.id,
-                        localStorage.getItem("userType") as
-                          | "farmers"
-                          | "experts",
-                        comment
-                      );
-                      const postComments = await getPostComments(post.id);
-                      setComments(postComments);
-                      setAddCommentsLoad(false);
-                      setPostCommentsCount((prev) => prev + 1);
-                      setComment("");
+                      await addCommentsFunc();
                     }
                   }}
                   onClick={(e) => e.stopPropagation()}
@@ -382,20 +405,11 @@ const PostCard: FC<PostCardProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="ml-2"
+                  className="ml-2 cursor-pointer"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    setAddCommentsLoad(true);
-                    await addCommentPost(
-                      post.id,
-                      localStorage.getItem("userType") as "farmers" | "experts",
-                      comment
-                    );
-                    const postComments = await getPostComments(post.id);
-                    setComments(postComments);
-                    setComment("");
-                    setPostCommentsCount((prev) => prev + 1);
-                    setAddCommentsLoad(false);
+                    e.preventDefault();
+                    await addCommentsFunc();
                   }}
                   disabled={!comment.trim() || addCommentsLoad}
                 >

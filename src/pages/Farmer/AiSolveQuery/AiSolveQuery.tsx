@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, Plane as Plant } from "lucide-react";
 import AiQueryForm from "@/components/Forms/AiQueryForm/AiQueryForm";
@@ -10,8 +9,10 @@ import WorkShop from "@/types/workShop.types";
 import { auth } from "@/firebase";
 import getUserInfo from "@/utils/getUserInfo";
 import WorkshopCard from "@/components/WorkshopCard/WorkshopCard";
+import { useAuthContext } from "@/context/AuthContext";
 
 const AiSolveQuery = () => {
+  const { userType } = useAuthContext();
   const [results, setResults] = useState<{
     posts: Post[];
     workShops: WorkShop[];
@@ -43,12 +44,7 @@ const AiSolveQuery = () => {
       if (!auth.currentUser) return;
 
       try {
-        const userInfo = await getUserInfo(
-          auth.currentUser.uid,
-          localStorage.getItem("userType") as "farmers" | "experts"
-        );
-
-        console.log("UserInfo: ", userInfo);
+        const userInfo = await getUserInfo(auth.currentUser.uid, userType as "farmers" | "experts");
         setUserRole(userInfo?.role || null);
       } catch (error) {
         console.error("Error fetching user info:", error);

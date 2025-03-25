@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   CreatePostType,
   fetchPostByIdType,
@@ -31,20 +30,10 @@ import Comment from "@/types/comment.types";
 const usePost = () => {
   const navigate = useNavigate();
 
-  const [getPostLoading, setGetPostLoading] = useState<boolean>(false);
-  const [getFilteredPostLoading, setGetFilteredPostLoading] =
-    useState<boolean>(false);
-  const [postLoading, setPostLoading] = useState<boolean>(false);
-  const [editPostLoading, setEditPostLoading] = useState<boolean>(false);
-  const [deletePostLoading, setDeletePostLoading] = useState<boolean>(false);
-  const [addPostCommentLoading, setAddPostCommentLoading] =
-    useState<boolean>(false);
-
   const getYourPosts = async () => {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          setGetPostLoading(true);
           const postsRef = collection(db, "posts");
 
           const q = query(
@@ -60,15 +49,13 @@ const usePost = () => {
               postData: doc.data(),
             };
           });
-          setGetPostLoading(false);
+
           return filteredPosts;
         } catch (error) {
-          setGetPostLoading(false);
           console.error("Error fetching filtered posts:", error);
           return [];
         }
       } else {
-        setGetPostLoading(false);
         toast.warn("You need to login");
         navigate("/expert/login");
       }
@@ -106,13 +93,11 @@ const usePost = () => {
           } as Post;
         });
       } catch (error) {
-        setGetPostLoading(false);
         console.error("Error updating post:", error);
         toast.error("Post Creation error");
         return [];
       }
     } else {
-      setGetPostLoading(false);
       toast.warn("You need to login");
       navigate("/expert/login");
 
@@ -126,7 +111,6 @@ const usePost = () => {
   ) => {
     if (auth.currentUser) {
       try {
-        setGetFilteredPostLoading(true);
         const postsRef = collection(db, "posts");
 
         let q;
@@ -177,15 +161,12 @@ const usePost = () => {
           } as Post;
         });
 
-        setGetFilteredPostLoading(false);
         return filteredPosts;
       } catch (error) {
-        setGetFilteredPostLoading(false);
         console.error("Error fetching filtered posts:", error);
         return [];
       }
     } else {
-      setGetFilteredPostLoading(false);
       toast.warn("You need to login");
       navigate("/expert/login");
 
@@ -238,13 +219,16 @@ const usePost = () => {
         const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
 
         await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
+        return newPost.id;
       } catch (error: any) {
         console.error("Error updating post:", error);
         toast.error("Post creation error");
+        return null;
       }
     } else {
       toast.warn("You need to login");
       navigate("/expert/login");
+      return null;
     }
   };
 
@@ -262,7 +246,6 @@ const usePost = () => {
     }
 
     try {
-      setAddPostCommentLoading(true);
       const userData = await getUserInfo(user.uid, firebaseDocument);
       const postRef = doc(db, "posts", postId);
       const postSnapshot = await getDoc(postRef);
@@ -297,8 +280,6 @@ const usePost = () => {
     } catch (error) {
       console.error("Error creating comment:", error);
       toast.error("Comment Creation error");
-    } finally {
-      setAddPostCommentLoading(false);
     }
   };
 
@@ -490,29 +471,17 @@ const usePost = () => {
   // };
 
   return {
-    postLoading,
-    setPostLoading,
-    editPostLoading,
-    setEditPostLoading,
-    deletePostLoading,
-    setDeletePostLoading,
     createPost,
-    // editPost,
-    // deletePost,
     getAllPosts,
     getFilteredPosts,
-    getPostLoading,
-    setGetPostLoading,
-    getFilteredPostLoading,
-    setGetFilteredPostLoading,
     getYourPosts,
-    addPostCommentLoading,
-    setAddPostCommentLoading,
     addCommentPost,
     getPostComments,
     getFilteredComments,
     verifyPost,
     fetchPostById,
+    // editPost,
+    // deletePost,
   };
 };
 

@@ -3,7 +3,6 @@ import {
   signInWithEmailAndPassword,
   // signInWithPhoneNumber,
 } from "firebase/auth";
-import { useState } from "react";
 import { doc, 
   // getDoc,
    setDoc } from "firebase/firestore";
@@ -11,15 +10,11 @@ import { auth, db } from "../../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FarmerSignUp, PhonePasswordLogin } from "./useAuth.types";
-import { useAuthContext } from "@/context/AuthContext";
 // import { setupRecaptcha } from "../../utils/firebaseUtils";
 
 const useAuth = () => {
   const navigate = useNavigate();
-  const {setUserType}=useAuthContext();
 
-  const [loginLoad, setLoginLoad] = useState(false);
-  const [signUpLoad, setSignUpLoad] = useState(false);
   // const [confirmationResult, setConfirmationResult] = useState(null);
   // const sendOtp = async (phone) => {
   //   if (phone.length < 10) {
@@ -53,14 +48,9 @@ const useAuth = () => {
 
   const phonePaswordLogin: PhonePasswordLogin = async (phone, password) => {
     try {
-      setLoginLoad(true);
       await signInWithEmailAndPassword(auth, phone, password);
-      setUserType("farmers");
-      localStorage.setItem("userType", "farmers");
       navigate("/posts");
-      setLoginLoad(false);
     } catch (err) {
-      setLoginLoad(false);
       console.log("Login error : ", err);
       toast.warn("Either phone or passowrd is incorrect");
     }
@@ -68,7 +58,6 @@ const useAuth = () => {
 
   const farmerSignUp: FarmerSignUp = async (data) => {
     try {
-      setSignUpLoad(true);
       await createUserWithEmailAndPassword(
         auth,
         data.phoneNumber + "@gmail.com",
@@ -91,22 +80,14 @@ const useAuth = () => {
           },
         });
       });
-      setUserType("farmers");
-      localStorage.setItem("userType", "experts");
       navigate("/posts");
-      setSignUpLoad(false);
     } catch (err: any) {
-      setSignUpLoad(false);
       console.log(err);
       toast.warn(err);
     }
   };
 
   return {
-    loginLoad,
-    setLoginLoad,
-    signUpLoad,
-    setSignUpLoad,
     phonePaswordLogin,
     farmerSignUp,
   };

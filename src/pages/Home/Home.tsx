@@ -2,51 +2,36 @@ import {
   Cog as Cow,
   Heart,
   Users,
-  Map,
   ShoppingBag,
-  VideoIcon,
-  Activity,
+  ShieldCheck,
+  FileCheck,
+  MessagesSquare,
+  Search,
+  CalendarCheck,
+  Languages,
+  Video,
+  UserSearch,
+  ShoppingCart,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FeatureCard from "@/components/FeatureCard/FeatureCard";
-import impactMetrics from "@/constants/impactMetrics";
 import breeds from "@/constants/breeds";
 import BreedCard from "@/components/BreedCard/BreedCard";
 import { useNavigate } from "react-router-dom";
-// import { useEffect } from "react";
-// import addFiltersToFirestore from "@/addFilters";
+import { useAuthContext } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 function Home() {
   const navigate = useNavigate();
+  const {setNav}=useAuthContext();
 
-  // useEffect(()=>{
-  //   async function addFilters(){
-  //     await addFiltersToFirestore();
-  //   }
-
-  //   addFilters();
-  // },[])
+  useEffect(()=>{
+    setNav(true);
+  },[])
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Cow className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">Indian Cow Revival</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            {["Home", "About", "Services", "Contact"].map((item) => (
-              <Button key={item} variant="ghost">
-                {item}
-              </Button>
-            ))}
-            <Button>Connect Now</Button>
-          </div>
-        </div>
-      </nav>
+     
 
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1598715559054-0dd66c7e811c?auto=format&fit=crop&q=80')] bg-cover bg-center">
@@ -60,13 +45,13 @@ function Home() {
             through sustainable practices and modern technology
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 cursor-pointer">
               <Users className="mr-2 h-5 w-5" /> Connect with Experts
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="bg-white/10 backdrop-blur-sm"
+              className="bg-white/10 backdrop-blur-sm cursor-pointer"
             >
               <Heart className="mr-2 h-5 w-5" /> Adopt a Cow
             </Button>
@@ -75,7 +60,7 @@ function Home() {
       </section>
 
       {/* Impact Metrics */}
-      <section className="py-16 bg-muted">
+      {/* <section className="py-16 bg-muted">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             {impactMetrics.map((metric, index) => (
@@ -90,7 +75,7 @@ function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Main Features */}
       <section className="py-16">
@@ -98,36 +83,77 @@ function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
-              icon={Users}
-              title="Expert Consultation"
-              description="Connect with veterinary experts through live chat and video calls"
+              icon={ShieldCheck}
+              title="Secured User Authentication"
+              description="Safe login for different users"
             />
             <FeatureCard
-              icon={Map}
-              title="Breed Mapping"
-              description="Interactive map showing indigenous cow breed distribution"
+              icon={FileCheck}
+              title="AI-Filtered Posts & Verification"
+              description="Verified posts for accurate information"
             />
             <FeatureCard
-              icon={Heart}
-              title="Cow Adoption"
-              description="Support farmers by virtually adopting indigenous cows"
+              icon={MessagesSquare}
+              title="Categorized Comment System"
+              description="Organized comments by user type"
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <FeatureCard
               icon={ShoppingBag}
-              title="Marketplace"
+              title="Marketing through posts"
               description="Buy and sell organic cow products from verified sellers"
             />
             <FeatureCard
-              icon={VideoIcon}
-              title="Educational Content"
-              description="Access training videos and resources on sustainable farming"
+              icon={Video}
+              title="AI-Verified Webinar Platform"
+              description="Verified webinars for relevant knowledge"
             />
             <FeatureCard
-              icon={Activity}
-              title="Health Tracking"
-              description="Monitor cow health and get timely medical alerts"
+              icon={Search}
+              title="AI-Powered Query Search"
+              description="Smart search for farmer queries."
+            />
+          </div>
+        </div>
+      </section>
+      
+      {/* Main Future Features */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Our Future Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={CalendarCheck}
+              title="Webinar Registration & Management"
+              description="Manage and register for webinars"
+            />
+            <FeatureCard
+              icon={CalendarCheck}
+              title="AI-Generated Expert Queries"
+              description="AI posts unanswered farmer queries"
+            />
+            <FeatureCard
+              icon={Users}
+              title="Finding Volunteers & Helpers"
+              description="Locate nearby farming volunteers easily"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <FeatureCard
+              icon={UserSearch}
+              title="AI-Based Expert Suggestions"
+              description="Smart matching with nearby experts"
+            />
+            <FeatureCard
+              icon={ShoppingCart}
+              title="Online Marketplace for Farmers"
+              description="Buy and sell cow-related products"
+            />
+            <FeatureCard
+              icon={Languages}
+              title="Google Translation"
+              description="Google translation assistance"
             />
           </div>
         </div>

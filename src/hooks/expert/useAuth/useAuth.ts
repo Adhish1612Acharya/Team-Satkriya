@@ -1,6 +1,9 @@
-import { doc, getDoc, setDoc, 
+import {
+  doc,
+  getDoc,
+  setDoc,
   // updateDoc
- } from "firebase/firestore";
+} from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,7 +11,6 @@ import {
 } from "firebase/auth";
 import { auth, db, signInWithGooglePopup } from "@/firebase";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { toast } from "react-toastify";
 import {
   // CompleteProfile,
@@ -17,24 +19,12 @@ import {
   SignInWithEmailPasswordProps,
   SignUpArguProps,
 } from "./useAuth.types";
-import { useAuthContext } from "@/context/AuthContext";
 
 const useAuth = () => {
-  const { setUserType } = useAuthContext();
-
-  const [loginLoading, setLoginLoading] = useState(false);
-
-  const [signUpLoading, setSignUpLoading] = useState(false);
-
-  const [gooleLoginLoad, setGoogleLoginLoad] = useState(false);
-
-  const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const logout = async () => {
     await auth.signOut().then(() => {
-      setUserType(null);
       toast.success("LoggedOut");
       window.location.href = "/";
     });
@@ -42,26 +32,18 @@ const useAuth = () => {
 
   const googleLogin: GoogleLoginProps = async () => {
     try {
-      setGoogleLoginLoad(true);
       await signInWithGooglePopup().then(async (data) => {
         const docRef = doc(db, "experts", `${data.user.uid}`);
 
         const docSnap = await getDoc(docRef);
 
         if (!docSnap.exists()) {
-          setUserType(null);
           await signOut(auth);
           window.location.href = "/expert/register";
-        } else {
-          localStorage.setItem("userType", "experts");
         }
-        setUserType("experts");
-        setGoogleLoginLoad(false);
       });
     } catch (err) {
-      setUserType(null);
       console.log("Error : ", err);
-      setGoogleLoginLoad(false);
     }
   };
 
@@ -72,12 +54,10 @@ const useAuth = () => {
     phoneNumber
   ) => {
     try {
-      setGoogleLoginLoad(true);
       await signInWithGooglePopup().then(async (data) => {
         const docRef = doc(db, "experts", `${data.user.uid}`);
 
         const docSnap = await getDoc(docRef);
-        setUserType("experts");
 
         if (!docSnap.exists()) {
           const user = data.user;
@@ -96,14 +76,11 @@ const useAuth = () => {
         } else {
           toast.success(`Logged IN successfully`);
         }
-        localStorage.setItem("userType", "experts");
-        setGoogleLoginLoad(false);
+
         navigate("/posts");
       });
     } catch (err) {
-      setUserType(null);
       console.log("Error : ", err);
-      setGoogleLoginLoad(false);
     }
   };
 
@@ -112,23 +89,17 @@ const useAuth = () => {
     password
   ) => {
     try {
-      setLoginLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-      setLoginLoading(false);
-      setUserType("experts");
-      localStorage.setItem("userType", "experts");
       navigate("/expert/home");
     } catch (err: any) {
-      setUserType(null);
       console.log(err);
-      setLoginLoading(false);
+
       toast.error(err.message || "Email or password is not correct");
     }
   };
 
   const expertSignUp: SignUpArguProps = async (data) => {
     try {
-      setSignUpLoading(true);
       await createUserWithEmailAndPassword(
         auth,
         data.email,
@@ -147,13 +118,8 @@ const useAuth = () => {
           profileData: data.profileData,
         });
       });
-      setUserType("experts");
-      setSignUpLoading(false);
-      localStorage.setItem("userType", "experts");
       navigate("/expert/home");
     } catch (err: any) {
-      setUserType(null);
-      setSignUpLoading(false);
       console.log(err);
       toast.error(err);
     }
@@ -182,14 +148,6 @@ const useAuth = () => {
   // };
 
   return {
-    loginLoading,
-    signUpLoading,
-    gooleLoginLoad,
-    completeProfileLoading,
-    setLoginLoading,
-    setSignUpLoading,
-    setGoogleLoginLoad,
-    setCompleteProfileLoading,
     googleLogin,
     googleSignUp,
     logout,

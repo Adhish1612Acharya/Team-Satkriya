@@ -18,16 +18,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, VideoIcon, X, FileText, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import filters from "@/constants/filters";
 import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-const CreatePostForm: FC<CreatePostFormProps> = ({
-  firebaseDocuemntType,
-  setPosts,
-}) => {
-  const { createPost, getAllPosts } = usePost();
+const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
+  const navigate = useNavigate();
+  const { createPost } = usePost();
 
   const [newPostImage, setNewPostImage] = useState<File[]>([]);
   const [newPostVideo, setNewPostVideo] = useState<File[]>([]);
@@ -73,10 +71,16 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
     if (file) {
       if (mediaType === "image") {
         setNewPostImage([file]);
+        setNewPostVideo([]);
+        setNewPostDocument([]);
       } else if (mediaType === "video") {
         setNewPostVideo([file]);
+        setNewPostImage([]);
+        setNewPostDocument([]);
       } else {
         setNewPostDocument([file]);
+        setNewPostImage([]);
+        setNewPostVideo([]);
       }
       const url = URL.createObjectURL(file);
       form.setValue("media", { url, type: mediaType });
@@ -94,23 +98,6 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
-  };
-
-  const hasQueriesOrFarmerQueryType = (subFilters: string[]): boolean => {
-    if (!subFilters || subFilters.length === 0) return false;
-
-    // Check if "Queries" is present in the subFilters array
-    if (subFilters.includes("Queries")) {
-      return true;
-    }
-
-    // Check if any FarmerQueryType sub-filters are present
-    const farmerQuerySubFilters = filters.FarmerQueryType.subFilters;
-    const hasFarmerQueryType = subFilters.some((filter) =>
-      farmerQuerySubFilters.includes(filter)
-    );
-
-    return hasFarmerQueryType;
   };
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
@@ -146,9 +133,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
       return;
     }
 
-    console.log("Ai verification : ", jsonData);
-
-    if (jsonData?.valid==="true") {
+    if (jsonData?.valid === "true") {
       const postFilters = await categorizePost(data.content, newPostImage[0]);
 
       let newPost: PostArgu;
@@ -173,11 +158,10 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
         };
       }
 
-      await createPost(newPost, firebaseDocuemntType);
-
-      const newPosts = await getAllPosts();
-
-      setPosts(newPosts);
+      const newPostId = await createPost(newPost, firebaseDocuemntType);
+      if (newPostId) {
+        navigate(`/posts/${newPostId}`);
+      }
     } else {
       toast.error("Irrelavant posts");
       return;
@@ -190,7 +174,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="p-4">
           <div className="flex items-start space-x-3 mb-4">
-            <Avatar>
+            <Avatar className="w-10 h-10">
               <AvatarImage
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
                 alt="Your profile"
@@ -206,7 +190,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
                     <Textarea
                       {...field}
                       placeholder="Share your thoughts about Indian cow conservation..."
-                      className="resize-none"
+                      className="resize-none min-h-[100px] sm:min-h-[120px]"
                     />
                   </FormControl>
                   <FormMessage />
@@ -216,7 +200,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
           </div>
 
           {media && (
-            <div className="relative mb-4 rounded-md overflow-hidden h-64 w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+            <div className="relative mb-4 rounded-md overflow-hidden h-48 sm:h-64 w-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
               {media.type === "image" ? (
                 <img
                   src={media.url}
@@ -240,7 +224,6 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
                 </a>
               )}
 
-              {/* Delete Button */}
               <Button
                 variant="destructive"
                 size="icon"
@@ -253,14 +236,14 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-between space-y-2 sm:space-y-0 sm:flex-nowrap">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleAddImage}
-                className="flex items-center"
+                className="flex items-center text-xs sm:text-sm"
               >
                 <ImageIcon size={16} className="mr-1" />
                 <span>Image</span>
@@ -270,7 +253,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleAddVideo}
-                className="flex items-center"
+                className="flex items-center text-xs sm:text-sm"
               >
                 <VideoIcon size={16} className="mr-1" />
                 <span>Video</span>
@@ -280,24 +263,24 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleAddDocument}
-                className="flex items-center"
+                className="flex items-center text-xs sm:text-sm"
               >
                 <FileText size={16} className="mr-1" />
-                <span>Upload Document</span>
+                <span>Document</span>
               </Button>
             </div>
             <Button
               type="submit"
-              disabled={
-                (!form.watch("content") && !media) ||
-                form.formState.isSubmitting
-              }
-            >
-              {form.formState.isSubmitting ? <Loader2 /> : "Submit"}
+              className="w-full sm:w-auto"
+                  disabled={
+               (!form.watch("content") && !media) ||
+               form.formState.isSubmitting
+             }
+           >
+             {form.formState.isSubmitting ? <Loader2 /> : "Submit"}
             </Button>
           </div>
 
-          {/* Hidden file inputs */}
           <input
             type="file"
             ref={fileInputRef}

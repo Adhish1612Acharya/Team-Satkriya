@@ -24,11 +24,15 @@ import PageNotFound from "./pages/PageNotFound/PageNotFound";
 import WorkshopsPage from "./pages/WorkShops/WorkShops";
 import CreateWorkShop from "./pages/Expert/CreateWorkShop/CreateWorkShop";
 import WorkShopDetail from "./pages/WorkShopDetails/WorkShopDetail";
+import { useAuthContext } from "./context/AuthContext";
+import PostDetailPage from "./pages/Posts/PostDetailPage/PostDetailPage";
 
 const App = () => {
+  const { nav } = useAuthContext();
   return (
     <>
-      <NavBar />
+      {nav && <NavBar />}
+
       <ToastContainer
         position="top-right"
         autoClose={1500}
@@ -42,38 +46,42 @@ const App = () => {
         theme="light"
         style={{ marginTop: "5rem" }}
       />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route element={<AuthProtectedRoute />}>
-          <Route path="/expert/register" element={<RegisterExpert />} />
-          <Route path="/farmer/login" element={<LoginFarmer />} />
-          <Route path="/farmer/register" element={<RegisterFarmer />} />
-          <Route path="/expert/login" element={<LoginExpert />} />
-          <Route path="/auth" element={<RoleSelection />} />
-        </Route>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/posts" element={<PostsPage />} />
-          <Route path="/workshops" element={<WorkshopsPage/>}/>
-          <Route path="/workshops/:id" element={<WorkShopDetail/>}/>
-        </Route>
-        <Route element={<FarmerProtectRoute />}>
-          <Route path="/solve-query" element={<AiSolveQuery />} />
-        </Route>
+      <div className="main-container">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route element={<AuthProtectedRoute />}>
+            <Route path="/expert/register" element={<RegisterExpert />} />
+            <Route path="/farmer/login" element={<LoginFarmer />} />
+            <Route path="/farmer/register" element={<RegisterFarmer />} />
+            <Route path="/expert/login" element={<LoginExpert />} />
+            <Route path="/auth" element={<RoleSelection />} />
+          </Route>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/posts" element={<PostsPage />} />
+            <Route path="/posts/:id" element={<PostDetailPage />} />
+            <Route path="/workshops" element={<WorkshopsPage />} />
+            <Route path="/workshops/:id" element={<WorkShopDetail />} />
+          </Route>
+          <Route element={<FarmerProtectRoute />}>
+            <Route path="/solve-query" element={<AiSolveQuery />} />
+          </Route>
 
-        <Route element={<ExpertProtectRoute />}>
-        <Route path="/workshop/create" element={<CreateWorkShop/>}/>
-          <Route path="/profile/farmer" element={<FarmerProfile />} />
-          <Route path="/profile/doctor" element={<DoctorProfile />} />
-          <Route path="/profile/ngo" element={<NGOProfile />} />
-          <Route
-            path="/profile/researchinsti"
-            element={<ResearchInstituteProfile />}
-          />
-          <Route path="/profile/volunteer" element={<VolunteerProfile />} />
-        </Route>
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-      <Footer />
+          <Route element={<ExpertProtectRoute />}>
+            <Route path="/workshops/create" element={<CreateWorkShop />} />
+            <Route path="/profile/farmer" element={<FarmerProfile />} />
+            <Route path="/profile/doctor" element={<DoctorProfile />} />
+            <Route path="/profile/ngo" element={<NGOProfile />} />
+            <Route
+              path="/profile/researchinsti"
+              element={<ResearchInstituteProfile />}
+            />
+            <Route path="/profile/volunteer" element={<VolunteerProfile />} />
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </div>
+
+      {nav && <Footer />}
     </>
   );
 };

@@ -13,7 +13,7 @@ export interface PostArgu {
 export type CreatePostType = (
   postData: PostArgu,
   firebaseDocument: "experts" | "farmers"
-) => Promise<void>;
+) => Promise<string | null>;
 
 export type GetAllPostType = () => Promise<Post[]>;
 

@@ -1,37 +1,41 @@
+import PageLoader from "@/components/PageLoader/loader";
 import { useAuthContext } from "@/context/AuthContext";
 import getUserInfo from "@/utils/getUserInfo";
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ExpertProtectRoute = () => {
-  const { currentUser, loading, userType, setUserType,setUsername } = useAuthContext();
-  const [checkRole,setCheckRole]=useState<boolean>(true);
+  const { currentUser, loading, userType, setUserType, setUsername, setNav } =
+    useAuthContext();
+  const [checkRole, setCheckRole] = useState<boolean>(true);
+
 
   useEffect(() => {
     async function checkUserRole() {
       if (currentUser) {
         const userInfo = await getUserInfo(currentUser.uid, "experts");
         if (userInfo !== null) {
-          setUserType(userInfo.role);
+          setUserType("experts");
           setUsername(userInfo.name);
         } else {
-          setUserType(null);
+          setUserType("farmers");
         }
         setCheckRole(false);
+        setNav(true);
       }
     }
 
     checkUserRole();
-  }, [currentUser, setUserType]); // Add currentUser and setUserType as dependencies
+  }, [currentUser]);
 
-  if (checkRole || loading) return <p>Loading...</p>;
+  if (checkRole || loading) return <PageLoader />;
 
   if (!currentUser) {
     return <Navigate to="/auth" replace />; // Redirect to auth if no user is logged in
   }
 
-  if (userType === "farmer") {
-    return <Navigate to="/farmer/home" replace />; // Allow access if the user is a farmer
+  if (userType === "farmers") {
+    return <Navigate to="/" replace />; // Allow access if the user is a farmer
   }
 
   return <Outlet />;

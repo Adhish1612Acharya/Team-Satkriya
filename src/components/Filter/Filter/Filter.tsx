@@ -78,7 +78,6 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
     appliedFilters = [...new Set(appliedFilters)];
 
     let userTypeSelected = selectedFilters["UserType"];
-    
 
     if (appliedFilters.length > 0 || userTypeSelected !== null) {
       let responseData;
@@ -111,11 +110,16 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          Filter{" "}
-          {Object.values(selectedFilters).flat().length > 0 &&
-            `(${Object.values(selectedFilters).flat().length})`}
-        </Button>
+        <div className="mb-4 flex justify-center">
+          <Button
+            variant="outline"
+            className="w-full cursor-pointer py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-300 shadow-lg"
+          >
+            Filter{" "}
+            {Object.values(selectedFilters).flat().length > 0 &&
+              `(${Object.values(selectedFilters).flat().length})`}
+          </Button>
+        </div>
       </DialogTrigger>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col md:flex-row gap-0 p-0 overflow-hidden transition-all duration-200 ease-in-out">
         <div className="w-full md:w-1/3 border-r">

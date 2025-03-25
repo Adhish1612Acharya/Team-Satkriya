@@ -12,6 +12,8 @@ interface AuthContextType {
   setUserType: (userType: string | null) => void;
   username: string | null;
   setUsername: (username: string | null) => void;
+  nav: boolean;
+  setNav: (value: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +32,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<string | null>(null);
-  const [username,setUsername]=useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [nav, setNav] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -46,8 +49,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-
-
   return (
     <AuthContext.Provider
       value={{
@@ -59,6 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading,
         username,
         setUsername,
+        nav,
+        setNav,
       }}
     >
       {children}
