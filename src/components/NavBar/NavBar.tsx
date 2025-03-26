@@ -98,32 +98,30 @@ const NavBar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/10 via-indigo-50/5 to-purple-50/10 dark:from-blue-900/10 dark:via-indigo-900/5 dark:to-purple-900/10"></div>
       <div className="container flex h-16 items-center justify-between px-6 lg:px-8 relative z-10">
-        {/* Logo */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           className="flex items-center gap-4"
-        >
-          <Link to="/" className="flex items-center gap-2">
-            <Avatar
-              sx={{
-               
-                width: 60,
-                height: 60,
-                padding:0.2, // Adds space around the logo
-              }}
-              src={logo}
-              alt="GoPushti Logo"
-            >
-              {/* Fallback if image fails to load */}
-              <span className="text-white font-bold text-sm">GP</span>
-            </Avatar>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-              GoPushti
-            </span>
-          </Link>
-        </motion.div>
+        > */}
+        <Link to="/" className="flex items-center gap-2">
+          <Avatar
+            sx={{
+              width: 60,
+              height: 60,
+              padding: 0.2, // Adds space around the logo
+            }}
+            src={logo}
+            alt="GoPushti Logo"
+          >
+            {/* Fallback if image fails to load */}
+            <span className="text-white font-bold text-sm">GP</span>
+          </Avatar>
+          <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            GoPushti
+          </span>
+        </Link>
+        {/* </motion.div> */}
 
         {/* Mobile Navigation */}
         <div className="flex items-center gap-4 lg:hidden">

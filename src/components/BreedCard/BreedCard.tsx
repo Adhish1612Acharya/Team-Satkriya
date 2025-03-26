@@ -15,7 +15,14 @@ const BreedCard: FC<BreedCardProps> = ({
   const navigate = useNavigate();
   return (
     <Card className="overflow-hidden transition-transform hover:scale-105">
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
+      <div className="w-full h-48 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+        <img
+          src={image}
+          alt={name}
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
+
       <CardContent className="p-6">
         <h3 className="text-2xl font-bold text-primary mb-2">{name}</h3>
         <p className="text-muted-foreground mb-4">{description}</p>

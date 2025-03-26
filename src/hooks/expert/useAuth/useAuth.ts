@@ -69,6 +69,7 @@ const useAuth = () => {
             role: role,
             profileData: profileData,
             posts: [],
+            workshops:[]
           });
           toast.success(
             `Welcome ${role === "doctor" && `Dr.`}${user.displayName}`
@@ -114,6 +115,7 @@ const useAuth = () => {
           contactNo: data.contactNo,
           address: data.address,
           posts: [],
+          workshops:[],
           role: data.role,
           profileData: data.profileData,
         });
@@ -125,34 +127,11 @@ const useAuth = () => {
     }
   };
 
-  // const completeProfile: CompleteProfile = async (profileData) => {
-  //   try {
-  //     auth.onAuthStateChanged(async (user) => {
-  //       setCompleteProfileLoading(true);
-  //       if (user?.uid) {
-  //         const expertDocRef = doc(db, "experts", user.uid);
-  //         await updateDoc(expertDocRef, {
-  //           profileData: profileData,
-  //         });
-  //       } else {
-  //         console.error("User ID is undefined, cannot update document.");
-  //       }
-  //       setUserType("experts");
-  //       setCompleteProfileLoading(false);
-  //     });
-  //   } catch (err) {
-  //     setUserType(null);
-  //     console.log(err);
-  //     toast.error("Some error occured");
-  //   }
-  // };
-
   return {
     googleLogin,
     googleSignUp,
     logout,
     signInWithEmailPassword,
-    // completeProfile,
     expertSignUp,
   };
 };

@@ -1,11 +1,11 @@
 import { LogOut } from "lucide-react";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase";
 import { useAuthContext } from "@/context/AuthContext";
@@ -31,11 +31,13 @@ const Profile = () => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <div onClick={() => console.log("Clicked")}>
+      <DropdownMenuTrigger >
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
+   className="relative z-50 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
+          onClick={() => console.log("Clicked")}
         >
           <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
             <AvatarImage
@@ -48,7 +50,13 @@ const Profile = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56 dark:bg-gray-900 mr-4">
+      </div>
+
+      <DropdownMenuContent
+        side="bottom"
+        align="end"
+        className="w-56 dark:bg-gray-900 mr-4"
+      >
         <div className="flex items-center gap-2 p-2">
           <Avatar className="h-8 w-8">
             <AvatarImage
@@ -68,14 +76,14 @@ const Profile = () => {
         </div>
         <DropdownMenuSeparator />
         {/* <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-          <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-          <span>Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-          <span>My Publications</span>
-        </DropdownMenuItem> */}
+        <span>Profile</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        <span>Settings</span>
+      </DropdownMenuItem>
+      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+        <span>My Publications</span>
+      </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={logOut}
