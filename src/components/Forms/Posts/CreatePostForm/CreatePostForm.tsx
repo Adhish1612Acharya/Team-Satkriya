@@ -277,7 +277,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
                form.formState.isSubmitting
              }
            >
-             {form.formState.isSubmitting ? <Loader2 /> : "Submit"}
+             {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Submit"}
             </Button>
           </div>
 

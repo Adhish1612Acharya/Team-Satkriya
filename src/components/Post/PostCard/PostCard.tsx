@@ -8,7 +8,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import {  MessageCircle, Smile } from "lucide-react";
+import { Loader2, MessageCircle, Smile } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import PostCardProps from "./PostCard.types";
@@ -27,6 +27,7 @@ import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 import { useAuthContext } from "@/context/AuthContext";
 import { db } from "@/firebase";
 import { toast } from "react-toastify";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const PostCard: FC<PostCardProps> = ({
   post,
@@ -322,6 +323,7 @@ const PostCard: FC<PostCardProps> = ({
                 </SelectContent>
               </Select>
             </div>
+            <ScrollArea className="h-[200px] mb-4 pr-4">
             {getCommentsLoad ? (
               <div className="space-y-4">
                 {[...Array(2)].map((_, index) => (
@@ -379,6 +381,7 @@ const PostCard: FC<PostCardProps> = ({
                 </p>
               </div>
             )}
+            </ScrollArea>
 
             <div className="flex items-start space-x-2 mt-3">
               <Avatar className="h-8 w-8">
@@ -403,7 +406,7 @@ const PostCard: FC<PostCardProps> = ({
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   className="ml-2 cursor-pointer"
                   onClick={async (e) => {
@@ -413,7 +416,7 @@ const PostCard: FC<PostCardProps> = ({
                   }}
                   disabled={!comment.trim() || addCommentsLoad}
                 >
-                  Post
+                  {addCommentsLoad ? <Loader2  className="mr-2 h-4 w-4 animate-spin"/> : "Post"}
                 </Button>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { uploadImageToCloudinary } from "./useWorkShopUtility";
 import { auth, db } from "@/firebase";
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
   getDoc,
@@ -16,6 +17,7 @@ import {
   orderBy,
   query,
   Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import WorkShop from "@/types/workShop.types";
@@ -73,6 +75,10 @@ const useWorkShop = () => {
         updatedAt: new Date(),
       };
       const workShopAdded = await addDoc(collection(db, "workshops"), data);
+
+      await updateDoc(userDocRef, {
+        workshops: arrayUnion(workShopAdded.id),
+      });
 
       return workShopAdded.id;
     } catch (err) {
