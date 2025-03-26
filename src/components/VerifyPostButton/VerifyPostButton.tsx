@@ -89,7 +89,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
     ${
       ((userRole === "doctor" || userRole === "researchInstitution") &&
         verified) ||
-      verifiedProfiles?.length > 0
+        (userRole === "farmer" || userRole === "volunteer"  || userRole === "ngo") && verifiedProfiles?.length > 0
         ? "bg-green-500 hover:bg-green-600 text-white"
         : "bg-red-500 hover:bg-red-600 text-white"
     }

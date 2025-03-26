@@ -3,13 +3,16 @@ import { Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BreedCardProps from "./BreedCard.types";
+import { useNavigate } from "react-router-dom";
 
 const BreedCard: FC<BreedCardProps> = ({
   name,
   image,
   description,
   traits,
+  navigateLink,
 }) => {
+  const navigate = useNavigate();
   return (
     <Card className="overflow-hidden transition-transform hover:scale-105">
       <img src={image} alt={name} className="w-full h-48 object-cover" />
@@ -24,7 +27,9 @@ const BreedCard: FC<BreedCardProps> = ({
             </div>
           ))}
         </div>
-        <Button className="mt-4 w-full">Learn More</Button>
+        <Button className="mt-4 w-full" onClick={() => navigate(navigateLink)}>
+          Learn More
+        </Button>
       </CardContent>
     </Card>
   );

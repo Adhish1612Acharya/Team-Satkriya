@@ -90,7 +90,7 @@ const useAuth = () => {
   ) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/expert/home");
+      navigate("/posts");
     } catch (err: any) {
       console.log(err);
 
@@ -118,7 +118,7 @@ const useAuth = () => {
           profileData: data.profileData,
         });
       });
-      navigate("/expert/home");
+      navigate("/posts");
     } catch (err: any) {
       console.log(err);
       toast.error(err);

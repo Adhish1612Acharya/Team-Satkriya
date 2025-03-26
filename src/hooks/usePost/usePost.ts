@@ -211,7 +211,11 @@ const usePost = () => {
             name: userData?.name,
             profilePic: userData?.profileData?.profilePic || "",
           },
-          verified: postData.verified,
+          verified:
+            userData?.role === "doctor" ||
+            userData?.role === "researchInstitution"
+              ? null
+              : postData.verified,
         };
 
         const newPost = await addDoc(collection(db, "posts"), contentData);
