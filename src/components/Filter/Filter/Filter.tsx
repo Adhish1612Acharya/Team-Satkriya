@@ -26,21 +26,21 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
     Object.keys(filters)[0]
   );
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
-    Object.keys(filters).reduce((acc, key) => ({ ...acc, [key]: false }), {})
-  );
+  const [expandedCategories, setExpandedCategories] = useState<
+    Record<string, boolean>
+  >(Object.keys(filters).reduce((acc, key) => ({ ...acc, [key]: false }), {}));
 
-    // Auto-close other dropdowns when one is opened
-    const toggleCategory = (category: string) => {
-      setExpandedCategories(prev => {
-        const newState = { ...prev };
-        // Close all other categories
-        Object.keys(newState).forEach(key => {
-          newState[key] = key === category ? !newState[key] : false;
-        });
-        return newState;
+  // Auto-close other dropdowns when one is opened
+  const toggleCategory = (category: string) => {
+    setExpandedCategories((prev) => {
+      const newState = { ...prev };
+      // Close all other categories
+      Object.keys(newState).forEach((key) => {
+        newState[key] = key === category ? !newState[key] : false;
       });
-    };
+      return newState;
+    });
+  };
 
   const handleFilterSelect = (category: string, filter: string) => {
     setSelectedFilters((prev) => {
@@ -128,7 +128,10 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="relative">
+        <Button
+          variant="outline"
+          className="w-full cursor-pointer py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-300 shadow-lg"
+        >
           Filter
           {totalSelected > 0 && (
             <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -233,7 +236,7 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
 
                   {expandedCategories[category] && (
                     <div className="p-4 space-y-3 border-t">
-                      {filters[category].subFilters.map((filter:any) => {
+                      {filters[category].subFilters.map((filter: any) => {
                         const isMultiple =
                           filters[category].selectType === "double";
 
@@ -357,7 +360,7 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
             </DialogHeader>
             <ScrollArea className="flex-1">
               <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {filters[activeCategory].subFilters.map((filter:any) => {
+                {filters[activeCategory].subFilters.map((filter: any) => {
                   const isMultiple =
                     filters[activeCategory].selectType === "double";
 
