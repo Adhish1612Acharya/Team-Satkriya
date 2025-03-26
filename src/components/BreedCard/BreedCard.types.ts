@@ -3,6 +3,7 @@ interface BreedCardProps {
   image: string;
   description: string;
   traits: string[];
+  navigateLink:string;
 }
 
 export default BreedCardProps;

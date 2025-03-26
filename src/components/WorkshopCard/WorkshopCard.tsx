@@ -91,7 +91,13 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
               {workshop.profileData.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <div className="text-sm font-medium">{workshop.profileData.name}</div>
+          <div>
+    <div className="text-sm font-medium">{workshop.profileData.name}</div>
+    <div className="text-xs text-muted-foreground">
+      {workshop.role}
+    </div>
+  </div>
+          
         </div>
         <CardTitle className="line-clamp-2 text-xl">{workshop.title}</CardTitle>
         <CardDescription className="flex items-center text-sm">
@@ -154,12 +160,14 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       </CardContent>
 
       <CardFooter className="flex justify-end">
-        <Button
-          className="cursor-pointer"
-          onClick={() => navigate(`/workshops/${workshop.id}`)}
-        >
-          View
-        </Button>
+      {window.location.pathname.endsWith("/workshops") && (
+  <Button
+    className="cursor-pointer"
+    onClick={() => navigate(`/workshops/${workshop.id}`)}
+  >
+    View
+  </Button>
+)}
       </CardFooter>
     </Card>
   );

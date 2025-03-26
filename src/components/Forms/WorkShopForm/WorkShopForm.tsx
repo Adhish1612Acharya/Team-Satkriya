@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -100,8 +99,8 @@ const WorkshopForm = () => {
 
   const onSubmit = async (data: z.infer<typeof workshopSchema>) => {
     try {
-      data.timeFrom=formatTime12Hour(data.timeFrom);
-      data.timeTo=formatTime12Hour(data.timeTo)
+      data.timeFrom = formatTime12Hour(data.timeFrom);
+      data.timeTo = formatTime12Hour(data.timeTo);
       const thumnailBase64 = await convertToBase64(data.thumbnail);
       const validateWebinar = await validateAndFilterWebinar(
         { title: data.title, description: data.description },
@@ -109,7 +108,7 @@ const WorkshopForm = () => {
         webinarFilters
       );
 
-      if(!validateWebinar?.replace(/```json|```/g, "")){
+      if (!validateWebinar?.replace(/```json|```/g, "")) {
         toast.error("Some error occured");
         return;
       }
@@ -118,12 +117,12 @@ const WorkshopForm = () => {
       const jsonData: { valid: boolean; filters: string[]; error?: string } =
         JSON.parse(cleanResponse);
 
-        console.log("Ai reponse : ",jsonData);
+      console.log("Ai reponse : ", jsonData);
 
       if (!jsonData.valid && jsonData.error) {
         toast.error("Some error occured");
         return;
-      }else if(!jsonData.valid){
+      } else if (!jsonData.valid) {
         toast.error("Webinar not  valid/relevant");
         return;
       }
@@ -223,6 +222,17 @@ const WorkshopForm = () => {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
+                      {/* <Input 
+                type="calendar" 
+                value={selectedDate} 
+                onChange={(e) =>  if (e.target.value) {
+                  field.onChange(e.target.value);
+                  if (dateTo < date) {
+                    form.setValue("dateTo", date); // Correct way to set "dateTo"
+                  }
+                }} 
+                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} 
+            /> */}
                         <Calendar
                           mode="single"
                           selected={field.value}

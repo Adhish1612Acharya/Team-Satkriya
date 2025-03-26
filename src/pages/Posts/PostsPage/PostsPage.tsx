@@ -12,6 +12,8 @@ import { auth } from "@/firebase";
 import filters from "@/constants/filters";
 import WorkShop from "@/types/workShop.types";
 import { useAuthContext } from "@/context/AuthContext";
+import { AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function PostsPage() {
   const { userType } = useAuthContext();
@@ -146,6 +148,25 @@ export function PostsPage() {
                 <PostCardSkeleton />
                 <PostCardSkeleton />
               </>
+            ) : posts.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
+              >
+                <AlertCircle
+                  size={48}
+                  className="text-gray-500 dark:text-gray-400"
+                />
+                <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                  No Posts Found
+                </h2>
+                <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
+                  It looks like there are no posts available at the moment. Be
+                  the first to share something useful!
+                </p>
+              </motion.div>
             ) : (
               posts.map((post) => (
                 <PostCard

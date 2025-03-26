@@ -8,6 +8,8 @@ import WorkshopCard from "@/components/WorkshopCard/WorkshopCard";
 import Filter from "@/components/Filter/Filter/Filter";
 import webinarFilters from "@/constants/webinarFilters";
 import Post from "@/types/posts.types";
+import { AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const WorkshopsPage = () => {
   const { fetchAllWorkshops } = useWorkShop();
@@ -72,9 +74,29 @@ const WorkshopsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
-            {workshops.map((workshop) => (
-              <WorkshopCard key={workshop.id} workshop={workshop} />
-            ))}
+            {workshops.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
+              >
+                <AlertCircle
+                  size={48}
+                  className="text-gray-500 dark:text-gray-400"
+                />
+                <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                  No Workshops/webinars Found
+                </h2>
+                <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
+                  It looks like there are no Workshops/webinars available at the moment
+                </p>
+              </motion.div>
+            ) : (
+              workshops.map((workshop) => (
+                <WorkshopCard key={workshop.id} workshop={workshop} />
+              ))
+            )}
           </div>
         )}
       </div>
