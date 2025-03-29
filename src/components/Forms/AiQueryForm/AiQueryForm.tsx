@@ -189,7 +189,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
         </div>
       )}
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <input
           type="file"
           ref={fileInputRef}
@@ -206,7 +206,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
           disabled={images.length === 3}
         >
           <Upload className="mr-2 h-4 w-4" />
-          Upload Image(Max 3 images)
+          Upload (Max 3 images)
         </Button>
         <Button
           type="submit"

@@ -218,6 +218,8 @@ const usePost = () => {
               : postData.verified,
         };
 
+        console.log("Post content in firebase :",contentData);
+
         const newPost = await addDoc(collection(db, "posts"), contentData);
 
         const postRef = doc(db, firebaseDocument, auth.currentUser.uid);

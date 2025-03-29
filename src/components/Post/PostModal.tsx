@@ -41,25 +41,24 @@ PostModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogOverlay className="bg-black/80" />
-      <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-0 overflow-hidden flex">
+      <DialogContent className="max-w-6xl w-[90vw] h-[90vh] p-0 overflow-hidden flex flex-col md:flex-row">
         {/* Media Section */}
-
         <div className="flex-1 bg-black flex items-center justify-center">
-          {post.images.length > 0 ? (
-            <img
-              src={post.images[0]}
-              alt="Post content"
-              className="h-full w-full object-contain" // Fixed height and width, entire image visible
-            />
-          ) : (
-            <video
-              src={post.videos[0]}
-              controls
-              className="h-full w-full object-contain" // Fixed height and width, entire video visible
-              autoPlay
-            />
-          )}
-        </div>
+  {post.images.length > 0 ? (
+    <img
+      src={post.images[0]}
+      alt="Post content"
+      className="w-full h-full max-w-full max-h-full object-contain"
+    />
+  ) : (
+    <video
+      src={post.videos[0]}
+      controls
+      className="w-full h-full max-w-full max-h-full object-contain"
+      autoPlay
+    />
+  )}
+</div>
 
         {/* Comments Section */}
         <div className="w-[350px] bg-white dark:bg-gray-900 flex flex-col">

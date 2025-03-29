@@ -12,27 +12,29 @@ import { auth } from "@/firebase";
 import filters from "@/constants/filters";
 import WorkShop from "@/types/workShop.types";
 import { useAuthContext } from "@/context/AuthContext";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import { Fab } from "@mui/material";
+import CreatePostDialog from "@/components/CreatePostDialog/CreatePostDialog";
 
 export function PostsPage() {
   const { userType } = useAuthContext();
   const { getAllPosts } = usePost();
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userRole, setUserRole] = useState<
     "farmer" | "doctor" | "ngo" | "volunteer" | "researchInstitution" | null
   >(null);
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     async function getPosts() {
       if (!userType) {
         return;
       }
-      setLoading(true);
       const postData = await getAllPosts();
       setPosts(postData);
       let userInfo;
@@ -148,7 +150,7 @@ export function PostsPage() {
                 <PostCardSkeleton />
                 <PostCardSkeleton />
               </>
-            ) : posts.length === 0 ? (
+            ) : !loading &&  posts.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -193,6 +195,22 @@ export function PostsPage() {
             // onShare={handleShare}
           />
         </div>
+
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            right: 16,
+            zIndex: 1,
+          }}
+          onClick={() => setOpen(true)}
+        >
+          <Plus />
+        </Fab>
+
+        <CreatePostDialog userType={userType as "farmers" | "experts"} open={open} setOpen={setOpen} />
       </div>
     </>
   );

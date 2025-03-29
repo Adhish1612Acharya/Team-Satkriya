@@ -158,6 +158,9 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
         };
       }
 
+      console.log("Content : ",data.content);
+      console.log("New Post : ",newPost);
+
       const newPostId = await createPost(newPost, firebaseDocuemntType);
       if (newPostId) {
         navigate(`/posts/${newPostId}`);
@@ -166,7 +169,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
       toast.error("Irrelavant posts");
       return;
     }
-    form.reset();
+    // form.reset();
   };
 
   return (
