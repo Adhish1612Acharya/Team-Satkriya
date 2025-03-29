@@ -143,7 +143,7 @@ const PostCard: FC<PostCardProps> = ({
           </div>
         )}
         <div className="text-gray-700 dark:text-gray-300 text-sm mt-4 max-h-40 overflow-y-auto">
-          {post.content}
+          <p className="whitespace-pre-wrap">{post.content.replace(/\\n/g, "\n")}</p>
         </div>
 
         <div className="mt-6 relative cursor-pointer overflow-hidden rounded-md">
@@ -324,63 +324,63 @@ const PostCard: FC<PostCardProps> = ({
               </Select>
             </div>
             <ScrollArea className="h-[200px] mb-4 pr-4">
-            {getCommentsLoad ? (
-              <div className="space-y-4">
-                {[...Array(2)].map((_, index) => (
-                  <div key={index} className="flex items-start space-x-2">
-                    <Skeleton className="h-8 w-8 rounded-full" />{" "}
-                    {/* Avatar Skeleton */}
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-[100px]" />{" "}
-                      {/* Name Skeleton */}
-                      <Skeleton className="h-4 w-[200px]" />{" "}
-                      {/* Content Skeleton */}
-                      <Skeleton className="h-3 w-[150px]" />{" "}
-                      {/* Timestamp Skeleton */}
+              {getCommentsLoad ? (
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, index) => (
+                    <div key={index} className="flex items-start space-x-2">
+                      <Skeleton className="h-8 w-8 rounded-full" />{" "}
+                      {/* Avatar Skeleton */}
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-[100px]" />{" "}
+                        {/* Name Skeleton */}
+                        <Skeleton className="h-4 w-[200px]" />{" "}
+                        {/* Content Skeleton */}
+                        <Skeleton className="h-3 w-[150px]" />{" "}
+                        {/* Timestamp Skeleton */}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : comments.length > 0 ? (
+                comments?.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="flex items-start space-x-2 mb-3"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={comment.profileData.profilePic}
+                        alt={comment.profileData.name}
+                      />
+                      <AvatarFallback>
+                        {comment.profileData?.name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
+                      <p className="text-sm font-medium">
+                        {comment.profileData.name}
+                      </p>
+                      <p className="text-sm">{comment.content}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formatDistanceToNow(
+                          comment.createdAt instanceof Timestamp
+                            ? comment.createdAt.toDate() // Convert Firebase Timestamp
+                            : comment.createdAt,
+                          { addSuffix: true }
+                        )}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : comments.length > 0 ? (
-              comments?.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="flex items-start space-x-2 mb-3"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={comment.profileData.profilePic}
-                      alt={comment.profileData.name}
-                    />
-                    <AvatarFallback>
-                      {comment.profileData?.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-2 rounded-md">
-                    <p className="text-sm font-medium">
-                      {comment.profileData.name}
-                    </p>
-                    <p className="text-sm">{comment.content}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {formatDistanceToNow(
-                        comment.createdAt instanceof Timestamp
-                          ? comment.createdAt.toDate() // Convert Firebase Timestamp
-                          : comment.createdAt,
-                        { addSuffix: true }
-                      )}
-                    </p>
-                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 space-y-2">
+                  <Smile className="h-8 w-8 text-gray-400 dark:text-gray-500" />{" "}
+                  {/* Icon */}
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    No comments yet. Be the first to comment!
+                  </p>
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-6 space-y-2">
-                <Smile className="h-8 w-8 text-gray-400 dark:text-gray-500" />{" "}
-                {/* Icon */}
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No comments yet. Be the first to comment!
-                </p>
-              </div>
-            )}
+              )}
             </ScrollArea>
 
             <div className="flex items-start space-x-2 mt-3">
@@ -416,7 +416,11 @@ const PostCard: FC<PostCardProps> = ({
                   }}
                   disabled={!comment.trim() || addCommentsLoad}
                 >
-                  {addCommentsLoad ? <Loader2  className="mr-2 h-4 w-4 animate-spin"/> : "Post"}
+                  {addCommentsLoad ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Post"
+                  )}
                 </Button>
               </div>
             </div>

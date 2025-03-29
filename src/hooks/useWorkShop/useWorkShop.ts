@@ -139,7 +139,6 @@ const useWorkShop = () => {
         ...doc.data(),
       })) as WorkShop[];
 
-      console.log("Workshops:", workshops);
 
       return workshops;
     } catch (error) {

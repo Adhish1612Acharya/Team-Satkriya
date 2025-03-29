@@ -114,7 +114,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     );
 
     setSavedQuery({ query, images });
-    console.log("Saved Query : ", savedQuery);
 
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const posts: Post[] = postsSnapshot.docs.map(
@@ -136,8 +135,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
 
     const cleanResponse = aiRelevantPosts.replace(/```json|```/g, "");
     const jsonData = JSON.parse(cleanResponse);
-
-    console.log(jsonData);
 
     setPostFetchLoading(true);
 

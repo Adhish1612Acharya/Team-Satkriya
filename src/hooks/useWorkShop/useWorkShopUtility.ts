@@ -12,7 +12,6 @@ export const uploadImageToCloudinary = async (
 
   try {
     const response = await axios.post(cloudinaryUrl, formData);
-    console.log("Cloudonary repaonse : ", response);
     return response.data.secure_url;
   } catch (error) {
     console.error("Image upload failed:", error);

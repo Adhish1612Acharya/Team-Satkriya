@@ -218,7 +218,6 @@ const usePost = () => {
               : postData.verified,
         };
 
-        console.log("Post content in firebase :",contentData);
 
         const newPost = await addDoc(collection(db, "posts"), contentData);
 
@@ -312,8 +311,6 @@ const usePost = () => {
         id: doc.id,
         ...doc.data(),
       }));
-
-      console.log("Comments : ", comments);
 
       return comments as Comment[];
     } catch (error) {

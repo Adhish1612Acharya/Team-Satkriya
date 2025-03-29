@@ -14,7 +14,6 @@ const categorizePost = async (textContent: string, file: File | null) => {
     const cleanResponse = aiResponse.replace(/```json|```/g, "");
     const jsonData = JSON.parse(cleanResponse);
 
-    console.log("Filter JSON data : ",jsonData);
 
     return jsonData.filters || [];
   };

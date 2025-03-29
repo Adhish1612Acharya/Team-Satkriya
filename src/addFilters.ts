@@ -7,7 +7,6 @@ import filters from "./constants/filters";
   try {
     const filterDocRef = doc(db, "filters", "masterFilters"); // Single document
     await setDoc(filterDocRef, filters);
-    console.log(" Filters successfully added to Firestore!");
   } catch (error) {
     console.error(" Error adding filters:", error);
   }

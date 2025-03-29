@@ -140,7 +140,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
 
       if (jsonData?.verify) {
         newPost = {
-          content: data.content,
+          content: data.content.replace(/\n/g, "\\n"),
           images: newPostImage,
           videos: newPostVideo,
           documents: newPostDocument,
@@ -149,7 +149,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
         };
       } else {
         newPost = {
-          content: data.content,
+          content: data.content.replace(/\n/g, "\\n"),
           images: newPostImage,
           videos: newPostVideo,
           documents: newPostDocument,
@@ -157,9 +157,6 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
           verified: null,
         };
       }
-
-      console.log("Content : ",data.content);
-      console.log("New Post : ",newPost);
 
       const newPostId = await createPost(newPost, firebaseDocuemntType);
       if (newPostId) {

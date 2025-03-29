@@ -34,8 +34,6 @@ const ProtectedRoute = () => {
     checkUserRole();
   }, [currentUser]);
 
-  console.log("Protected Route UserType : ", userType);
-
   if (loading || !isRoleChecked) {
     return <PageLoader />; // Show loading indicator until role check is complete
   }

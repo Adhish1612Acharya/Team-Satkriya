@@ -117,8 +117,6 @@ const WorkshopForm = () => {
       const jsonData: { valid: boolean; filters: string[]; error?: string } =
         JSON.parse(cleanResponse);
 
-      console.log("Ai reponse : ", jsonData);
-
       if (!jsonData.valid && jsonData.error) {
         toast.error("Some error occured");
         return;

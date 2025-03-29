@@ -75,7 +75,6 @@ export const classifyContent: ClassifyContentCalls = async (
 
     // Extract and return the response
     const response = await result.response;
-    console.log("Filters : ",response.text())
     return response.text(); // Ensure this returns a string
 
   } catch (error) {
@@ -91,10 +90,6 @@ export const findRelevantContent: findRelavantContentCall = async (
   webinarsAndWorkShopsData
 ) => {
   try {
-    console.log({
-      workshops: webinarsAndWorkShopsData,
-      posts: existingPosts,
-    });
     const prompt = `
     You are an AI assistant specializing in agriculture and indigenous cow farming. Your task is to find the most relevant existing posts and webinars based on a farmer’s query.
 
