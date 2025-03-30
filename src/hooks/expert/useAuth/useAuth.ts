@@ -69,7 +69,9 @@ const useAuth = () => {
             role: role,
             profileData: profileData,
             posts: [],
-            workshops:[]
+            workshops: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
           });
           toast.success(
             `Welcome ${role === "doctor" && `Dr.`}${user.displayName}`
@@ -115,9 +117,11 @@ const useAuth = () => {
           contactNo: data.contactNo,
           address: data.address,
           posts: [],
-          workshops:[],
+          workshops: [],
           role: data.role,
           profileData: data.profileData,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       });
       navigate("/posts");

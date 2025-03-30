@@ -23,13 +23,23 @@ import convertToBase64 from "@/utils/covertToBase64";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
-const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
+const CreatePostForm: FC<CreatePostFormProps> = ({
+  firebaseDocuemntType,
+  post,
+  editForm,
+}) => {
   const navigate = useNavigate();
-  const { createPost } = usePost();
+  const { editPost, createPost } = usePost();
 
-  const [newPostImage, setNewPostImage] = useState<File[]>([]);
-  const [newPostVideo, setNewPostVideo] = useState<File[]>([]);
-  const [newPostDocument, setNewPostDocument] = useState<File[]>([]);
+  const [newPostImage, setNewPostImage] = useState<File[] | string[]>(
+    editForm && post ? post.images : []
+  );
+  const [newPostVideo, setNewPostVideo] = useState<File[] | string[]>(
+    editForm && post ? post.videos : []
+  );
+  const [newPostDocument, setNewPostDocument] = useState<File[] | string[]>(
+    editForm && post ? post.documents : []
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -101,72 +111,91 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
   };
 
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
-    const file =
-      newPostImage.length === 1
-        ? newPostImage[0]
-        : newPostDocument.length === 1
-        ? newPostDocument[0]
-        : newPostVideo.length === 1
-        ? newPostVideo[0]
-        : "";
-
-    let base64File = "";
-
-    if (file !== "") {
-      base64File = await convertToBase64(file);
-    }
-
-    const aiVarification = await validateAndVerifyPost(
-      {
+    if (editForm && post) {
+      const updatedData = {
         content: data.content,
-      },
-      base64File
-    );
-    const cleanResponse = aiVarification?.replace(/```json|```/g, "");
-
-    let jsonData;
-
-    if (cleanResponse) {
-      jsonData = JSON.parse(cleanResponse);
-    } else if (!cleanResponse) {
-      toast.error("Post verification error");
-      return;
-    }
-
-    if (jsonData?.valid === "true") {
-      const postFilters = await categorizePost(data.content, newPostImage[0]);
-
-      let newPost: PostArgu;
-
-      if (jsonData?.verify) {
-        newPost = {
-          content: data.content.replace(/\n/g, "\\n"),
-          images: newPostImage,
-          videos: newPostVideo,
-          documents: newPostDocument,
-          filters: postFilters,
-          verified: [],
-        };
-      } else {
-        newPost = {
-          content: data.content.replace(/\n/g, "\\n"),
-          images: newPostImage,
-          videos: newPostVideo,
-          documents: newPostDocument,
-          filters: postFilters,
-          verified: null,
-        };
-      }
-
-      const newPostId = await createPost(newPost, firebaseDocuemntType);
-      if (newPostId) {
-        navigate(`/posts/${newPostId}`);
-      }
+        images: newPostImage,
+        videos: newPostVideo,
+        documents: newPostDocument,
+      };
+      await editPost(
+        post.id,
+        post.ownerId,
+        updatedData,
+        post.filters
+      );
     } else {
-      toast.error("Irrelavant posts");
-      return;
+      const file =
+        newPostImage.length === 1
+          ? newPostImage[0]
+          : newPostDocument.length === 1
+          ? newPostDocument[0]
+          : newPostVideo.length === 1
+          ? newPostVideo[0]
+          : "";
+
+      let base64File = "";
+
+      if (file !== "") {
+        base64File = await convertToBase64(file as File);
+      }
+
+      const aiVarification = await validateAndVerifyPost(
+        {
+          content: data.content,
+        },
+        base64File
+      );
+      const cleanResponse = aiVarification?.replace(/```json|```/g, "");
+
+      let jsonData;
+
+      if (cleanResponse) {
+        jsonData = JSON.parse(cleanResponse);
+      } else if (!cleanResponse) {
+        toast.error("Post verification error");
+        return;
+      }
+
+      if (jsonData?.valid === "true") {
+        const postFilters = await categorizePost(
+          data.content,
+          newPostImage[0] as File
+        );
+
+        let newPost: PostArgu;
+
+        if (jsonData?.verify) {
+          newPost = {
+            content: data.content.replace(/\n/g, "\\n"),
+            images: newPostImage as File[],
+            videos: newPostVideo as File[],
+            documents: newPostDocument as File[],
+            filters: postFilters,
+            verified: [],
+          };
+        } else {
+          newPost = {
+            content: data.content.replace(/\n/g, "\\n"),
+            images: newPostImage as File[],
+            videos: newPostVideo as File[],
+            documents: newPostDocument as File[],
+            filters: postFilters,
+            verified: null,
+          };
+        }
+
+        const newPostId = await createPost(newPost, firebaseDocuemntType);
+        if (newPostId) {
+          navigate(`/posts/${newPostId}`);
+        }
+      } else {
+        toast.error("Irrelavant posts");
+        return;
+      }
     }
-    // form.reset();
+
+    form.reset();
   };
 
   return (
@@ -272,12 +301,16 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
             <Button
               type="submit"
               className="w-full sm:w-auto"
-                  disabled={
-               (!form.watch("content") && !media) ||
-               form.formState.isSubmitting
-             }
-           >
-             {form.formState.isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Submit"}
+              disabled={
+                (!form.watch("content") && !media) ||
+                form.formState.isSubmitting
+              }
+            >
+              {form.formState.isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Submit"
+              )}
             </Button>
           </div>
 

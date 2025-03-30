@@ -3,9 +3,11 @@ import {
   signInWithEmailAndPassword,
   // signInWithPhoneNumber,
 } from "firebase/auth";
-import { doc, 
+import {
+  doc,
   // getDoc,
-   setDoc } from "firebase/firestore";
+  setDoc,
+} from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -78,6 +80,8 @@ const useAuth = () => {
             city: data.city,
             experience: data.experience,
           },
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       });
       navigate("/posts");

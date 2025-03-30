@@ -8,7 +8,19 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, MessageCircle, Smile } from "lucide-react";
+import {
+  Bookmark,
+  EyeOff,
+  Flag,
+  Loader2,
+  MessageCircle,
+  MoreHorizontal,
+  Pencil,
+  Share,
+  Smile,
+  ThumbsUp,
+  Trash,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 import PostCardProps from "./PostCard.types";
@@ -25,14 +37,18 @@ import {
 } from "@/components/ui/select";
 import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 import { useAuthContext } from "@/context/AuthContext";
-import { db } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { toast } from "react-toastify";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 const PostCard: FC<PostCardProps> = ({
   post,
   handleMediaClick,
   userRole,
+  setAlertDialog,
+  setDeletePostId,
+
   // onLike,
   // onComment,
   // onShare,
@@ -41,9 +57,9 @@ const PostCard: FC<PostCardProps> = ({
   const { userType } = useAuthContext();
   const { getPostComments, addCommentPost, getFilteredComments } = usePost();
 
-  // const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   // const [likesCount, setLikesCount] = useState(post.likes);
-  // const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState<boolean>(false);
@@ -73,7 +89,7 @@ const PostCard: FC<PostCardProps> = ({
   };
 
   return (
-    <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="mb-6 overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -103,30 +119,39 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          {post.verified !== null &&
-            post.role !== "doctor" &&
-            post.role !== "researchInstitution" && (
-              <VerifyPostButton
-                userRole={userRole}
-                verifiedProfiles={post.verified}
-                postId={post.id}
-              />
+          <div className="flex items-center space-x-2">
+            {post.verified !== null &&
+              post.role !== "doctor" &&
+              post.role !== "researchInstitution" && (
+                <VerifyPostButton
+                  userRole={userRole}
+                  verifiedProfiles={post.verified}
+                  postId={post.id}
+                />
+              )}
+            {post.ownerId === auth?.currentUser?.uid && (
+              <>
+                <Button
+                  className="cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                  variant="outline"
+                  size="sm"
+                >
+                  <Pencil className="w-4 h-4 mr-1" /> Edit
+                </Button>
+                <Button
+                  className="cursor-pointer text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setDeletePostId(post.id);
+                    setAlertDialog(true);
+                  }}
+                >
+                  <Trash className="w-4 h-4 mr-1" /> Delete
+                </Button>
+              </>
             )}
-
-          {/* <DropdownMenu>  
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-                <MoreHorizontal size={18} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleSave}>
-                {isSaved ? "Unsave post" : "Save post"}
-              </DropdownMenuItem>
-              <DropdownMenuItem>Report post</DropdownMenuItem>
-              <DropdownMenuItem>Hide post</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
@@ -143,7 +168,9 @@ const PostCard: FC<PostCardProps> = ({
           </div>
         )}
         <div className="text-gray-700 dark:text-gray-300 text-sm mt-4 max-h-40 overflow-y-auto">
-          <p className="whitespace-pre-wrap">{post.content.replace(/\\n/g, "\n")}</p>
+          <p className="whitespace-pre-wrap">
+            {post.content.replace(/\\n/g, "\n")}
+          </p>
         </div>
 
         <div className="mt-6 relative cursor-pointer overflow-hidden rounded-md">
@@ -200,7 +227,7 @@ const PostCard: FC<PostCardProps> = ({
       </CardContent>
       <CardFooter className="flex flex-col pt-0">
         <div className="flex items-center justify-between w-full pb-3 border-b">
-          {/* <div className="flex items-center space-x-1 text-sm text-gray-500">
+          <div className="flex items-center space-x-1 text-sm text-gray-500">
             {post.likesCount > 0 && (
               <>
                 <ThumbsUp
@@ -212,7 +239,7 @@ const PostCard: FC<PostCardProps> = ({
                 </span>
               </>
             )}
-          </div> */}
+          </div>
           <div className="flex items-center space-x-1 text-sm text-gray-500">
             <span>
               {postCommentsCount}{" "}
@@ -224,7 +251,7 @@ const PostCard: FC<PostCardProps> = ({
         </div>
 
         <div className="flex items-center justify-between w-full py-2">
-          {/* <Button
+          <Button
             variant="ghost"
             size="sm"
             className={cn(
@@ -235,7 +262,7 @@ const PostCard: FC<PostCardProps> = ({
           >
             <ThumbsUp size={18} className={isLiked ? "fill-blue-500" : ""} />
             <span>Like</span>
-          </Button> */}
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -255,7 +282,7 @@ const PostCard: FC<PostCardProps> = ({
             <MessageCircle size={18} />
             <span>Comment</span>
           </Button>
-          {/* <Button
+          <Button
             variant="ghost"
             size="sm"
             className="flex items-center space-x-1 flex-1 justify-center"
@@ -275,7 +302,7 @@ const PostCard: FC<PostCardProps> = ({
           >
             <Bookmark size={18} className={isSaved ? "fill-blue-500" : ""} />
             <span>Save</span>
-          </Button> */}
+          </Button>
         </div>
 
         {showComments && (

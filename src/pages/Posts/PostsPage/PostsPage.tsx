@@ -16,6 +16,7 @@ import { AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Fab } from "@mui/material";
 import CreatePostDialog from "@/components/CreatePostDialog/CreatePostDialog";
+import AlertDialogBox from "@/components/AlertDialogBox/AlertDialogBox";
 
 export function PostsPage() {
   const { userType } = useAuthContext();
@@ -29,6 +30,8 @@ export function PostsPage() {
     "farmer" | "doctor" | "ngo" | "volunteer" | "researchInstitution" | null
   >(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
+  const [deletePostId,setDeletePostId]=useState<string>("");
 
   useEffect(() => {
     async function getPosts() {
@@ -150,7 +153,7 @@ export function PostsPage() {
                 <PostCardSkeleton />
                 <PostCardSkeleton />
               </>
-            ) : !loading &&  posts.length === 0 ? (
+            ) : !loading && posts.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -172,10 +175,12 @@ export function PostsPage() {
             ) : (
               posts.map((post) => (
                 <PostCard
+                  setAlertDialog={setAlertDialogOpen}
                   key={post.id}
                   post={post}
                   userRole={userRole}
                   handleMediaClick={handlePostClick}
+                  setDeletePostId={setDeletePostId}
                   // onComment={handleComment}
                   // onLike={handleLike}
                   // onShare={handleShare}
@@ -210,7 +215,21 @@ export function PostsPage() {
           <Plus />
         </Fab>
 
-        <CreatePostDialog userType={userType as "farmers" | "experts"} open={open} setOpen={setOpen} />
+        <CreatePostDialog
+          userType={userType as "farmers" | "experts"}
+          open={open}
+          setOpen={setOpen}
+        />
+        <AlertDialogBox
+          title="Are you sure?"
+          description="This is not irresversible"
+          open={alertDialogOpen}
+          setOpen={setAlertDialogOpen}
+          postId={deletePostId}
+          userType={userType as "farmers" | "experts"}
+          setPosts={setPosts}
+          setPostLoading={setLoading}
+        />
       </div>
     </>
   );
