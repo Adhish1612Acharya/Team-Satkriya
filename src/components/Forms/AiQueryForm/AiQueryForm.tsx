@@ -114,7 +114,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     );
 
     setSavedQuery({ query, images });
-    console.log("Saved Query : ", savedQuery);
 
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const posts: Post[] = postsSnapshot.docs.map(
@@ -136,8 +135,6 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
 
     const cleanResponse = aiRelevantPosts.replace(/```json|```/g, "");
     const jsonData = JSON.parse(cleanResponse);
-
-    console.log(jsonData);
 
     setPostFetchLoading(true);
 
@@ -189,7 +186,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
         </div>
       )}
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <input
           type="file"
           ref={fileInputRef}
@@ -206,7 +203,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
           disabled={images.length === 3}
         >
           <Upload className="mr-2 h-4 w-4" />
-          Upload Image(Max 3 images)
+          Upload (Max 3 images)
         </Button>
         <Button
           type="submit"

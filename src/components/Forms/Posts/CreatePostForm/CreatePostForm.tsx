@@ -140,7 +140,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
 
       if (jsonData?.verify) {
         newPost = {
-          content: data.content,
+          content: data.content.replace(/\n/g, "\\n"),
           images: newPostImage,
           videos: newPostVideo,
           documents: newPostDocument,
@@ -149,7 +149,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
         };
       } else {
         newPost = {
-          content: data.content,
+          content: data.content.replace(/\n/g, "\\n"),
           images: newPostImage,
           videos: newPostVideo,
           documents: newPostDocument,
@@ -166,7 +166,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({ firebaseDocuemntType }) => {
       toast.error("Irrelavant posts");
       return;
     }
-    form.reset();
+    // form.reset();
   };
 
   return (

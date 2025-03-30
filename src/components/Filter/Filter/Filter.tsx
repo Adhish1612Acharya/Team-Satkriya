@@ -108,7 +108,6 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
           userTypeSelected?.[0].toLowerCase() || null
         );
       }
-      console.log("Reponse Data : ", responseData);
       if (responseData) {
         setData(responseData);
       }

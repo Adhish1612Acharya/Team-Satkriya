@@ -22,7 +22,6 @@ const WorkshopsPage = () => {
       try {
         setLoading(true);
         const data = await fetchAllWorkshops();
-        console.log(data);
         if (data === null) {
           setWorkshops([]);
         } else {

@@ -218,6 +218,7 @@ const usePost = () => {
               : postData.verified,
         };
 
+
         const newPost = await addDoc(collection(db, "posts"), contentData);
 
         const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
@@ -310,8 +311,6 @@ const usePost = () => {
         id: doc.id,
         ...doc.data(),
       }));
-
-      console.log("Comments : ", comments);
 
       return comments as Comment[];
     } catch (error) {
