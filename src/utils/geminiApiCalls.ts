@@ -76,7 +76,6 @@ export const classifyContent: ClassifyContentCalls = async (
     // Extract and return the response
     const response = await result.response;
     return response.text(); // Ensure this returns a string
-
   } catch (error) {
     console.error("Error generating content: ", error);
     throw new Error("Failed to classify content.");
@@ -343,5 +342,126 @@ export const validateAndVerifyPost = async (
   } catch (error) {
     console.error("Error validating post:", error);
     return null;
+  }
+};
+
+export const verifyAndValidateAndFilterEditedPost = async (
+  postDetails: { content: string; existingFilters: string[] },
+  postMedia: { base64: string | null; cloudinaryUrl: string | null },
+  predefinedFilters: any // Pass the filters object you provided
+): Promise<{
+  valid: true | false;
+  verification: true | false;
+  filters: string[];
+}> => {
+  try {
+    const prompt = `
+    You are an AI assistant specializing in dairy farming using indigenous cows. Your task is to:
+    1. Validate if an edited post is relevant to indigenous cow dairy farming
+    2. Determine if it requires expert verification
+    3. Assign appropriate filters from predefined categories while preserving relevant existing filters
+
+    ### Input Data:
+    - Post Content: ${JSON.stringify(postDetails.content)}
+    - Existing Filters: ${JSON.stringify(postDetails.existingFilters)}
+    - Media: ${
+      postMedia.base64
+        ? `${postMedia.base64} [NEW MEDIA]`
+        : postMedia.cloudinaryUrl
+        ? `${postMedia.cloudinaryUrl}[EXISTING MEDIA]`
+        : "No media"
+    }
+
+    ### Task Instructions:
+
+    #### 1. Relevance Validation (STRICT)
+    - Content must specifically relate to dairy farming using indigenous cows (Gir, Sahiwal, Red Sindhi, Tharparkar)
+    - Automatic rejection for:
+      * Non-dairy topics
+      * Foreign breeds (Jersey, Holstein)
+      * Other livestock (poultry, goats)
+      * Commercial/promotional content
+
+    #### 2. Verification Check (if valid)
+    ✅ Requires verification ("true") for:
+      - Scientific/medical claims
+      - Disease treatments
+      - Breeding techniques
+      - Research-backed nutrition advice
+    ❌ No verification ("false") for:
+      - Farmer queries
+      - Event announcements
+      - General discussions
+
+    #### 3. Filter Assignment (if valid)
+    - Analyze content to match with THESE SPECIFIC FILTER CATEGORIES ONLY:
+      ${predefinedFilters}
+    - PRESERVE existing filters that still match the edited content
+    - ONLY include sub-filters from the predefined list
+    - NEVER include UserType filters
+    - For SuccessStoryType, only include specific achievement filters
+
+    ### Response Format:
+    - If INVALID:
+    {
+      "valid": "false",
+      "verification": "false",
+      "filters": []
+    }
+
+    - If VALID:
+    {
+      "valid": "true",
+      "verification": "true"|"false",
+      "filters": ["sub-filter1", "sub-filter2"] // Existing+new matching filters
+    }
+
+    ### Rules:
+    - STRICTLY return valid JSON (no markdown/text)
+    - Filter names must EXACTLY match predefined subFilters
+    - False positives are worse than false negatives
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    });
+
+    const response = await result.response;
+    const responseText = response.text();
+
+    const cleanResponse = responseText?.replace(/```json|```/g, "");
+
+    // Parse and validate response
+    let parsed;
+    if (cleanResponse) {
+      parsed = JSON.parse(cleanResponse);
+    } else {
+      parsed = JSON.parse(responseText);
+    }
+
+    if (parsed.valid === "false" || parsed.valid === false) {
+      return { valid: false, verification: false, filters: [] };
+    }
+
+    // Validate filters against predefined list
+    const validSubFilters = Object.values(predefinedFilters).flatMap(
+      (category: any) => category.subFilters
+    );
+
+    const filteredFilters = parsed.filters.filter((f: string) =>
+      validSubFilters.includes(f)
+    );
+
+    return {
+      valid: parsed.valid === "true" || parsed.valid === true ? true : false,
+      verification:
+        parsed.verification === "true" || parsed.verification === true
+          ? true
+          : false,
+      filters: Array.from(new Set(filteredFilters)), // Remove duplicates
+    };
+  } catch (error) {
+    console.error("Validation error:", error);
+    return { valid: false, verification: false, filters: [] };
   }
 };
