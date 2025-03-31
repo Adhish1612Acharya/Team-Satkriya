@@ -20,6 +20,7 @@ import {
   increment,
   orderBy,
   query,
+  QueryConstraint,
   serverTimestamp,
   updateDoc,
   where,
@@ -40,95 +41,144 @@ const usePost = () => {
   const navigate = useNavigate();
 
   const getYourPosts = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        try {
-          const postsRef = collection(db, "posts");
+    try {
+      const user = auth.currentUser;
 
-          const q = query(
-            postsRef,
-            where("ownerId", "==", user.uid),
-            orderBy("createdAt", "desc")
-          );
-
-          const querySnapshot = await getDocs(q);
-          const filteredPosts = querySnapshot.docs.map((doc) => {
-            return {
-              id: doc.id,
-              postData: doc.data(),
-            };
-          });
-
-          return filteredPosts;
-        } catch (error) {
-          console.error("Error fetching filtered posts:", error);
-          return [];
-        }
-      } else {
-        toast.warn("You need to login");
-        navigate("/expert/login");
-      }
-    });
-  };
-
-  const getAllPosts: GetAllPostType = async () => {
-    if (auth.currentUser) {
-      try {
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-
-        const querySnapshot = await getDocs(q);
-
-        return querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.title || "Untitled",
-            content: data.content || "No content available",
-            images: data.images || [],
-            videos: data.videos || [],
-            documents: data.documents || [],
-            filters: data.filters || [],
-            likesCount: data.likesCount,
-            commentsCount: data.commentsCount,
-            createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore Timestamp to Date
-            updatedAt: data.updatedAt?.toDate() || new Date(),
-            ownerId: data.ownerId || "Unknown",
-            role: data.role || "guest",
-            verified: data.verified,
-            profileData: {
-              name: data.profileData?.name || "Anonymous",
-              profilePic: data.profileData?.profilePic || "",
-            },
-          } as Post;
-        });
-      } catch (error) {
-        console.error("Error updating post:", error);
-        toast.error("Post Creation error");
+      // 1. Authentication Check
+      if (!user) {
+        toast.warn("Please login to view your posts");
+        navigate("/auth");
         return [];
       }
-    } else {
-      toast.warn("You need to login");
-      navigate("/expert/login");
 
+      // 2. Parallel Data Fetching (Posts + Likes)
+      const [postsQuery, likesQuery] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, "posts"),
+            where("ownerId", "==", user.uid),
+            orderBy("createdAt", "desc")
+          )
+        ),
+        getDocs(
+          query(
+            collection(db, "likes"),
+            where("ownerId", "==", user.uid),
+            orderBy("createdAt", "desc")
+          )
+        ),
+      ]);
+
+      // 3. Pre-process likes data for O(1) lookups
+      const likedPostIds = new Set<string>();
+      likesQuery.docs.forEach((doc) => {
+        likedPostIds.add(doc.data().postId);
+      });
+
+      // 4. Combine Posts with Like Status
+      const userPosts = postsQuery.docs.map((postDoc) => {
+        const postId = postDoc.id;
+        // Check if current user liked this post
+        const currUserLiked = likedPostIds.has(postId);
+
+        return {
+          id: postId,
+          currUserLiked,
+          ...postDoc.data(),
+        } as Post;
+      });
+
+      return userPosts;
+    } catch (error) {
+      // 5. Error Handling
+      console.error("Failed to fetch user posts:", error);
+      toast.error("Could not load your posts. Please try again.");
       return [];
     }
   };
 
-  const fetchPostById: fetchPostByIdType = async (id) => {
-    try {
-      if (!auth.currentUser) {
-        return null;
-      }
-      const docRef = doc(db, "posts", id);
-      const docSnap = await getDoc(docRef);
+  const getAllPosts: GetAllPostType = async () => {
+    // Validate user authentication first
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.warn("You need to login to view posts");
+      navigate("/expert/login");
+      return [];
+    }
 
-      if (!docSnap.exists()) {
-        console.error("Post not found!");
+    try {
+      // Fetch posts and likes in parallel to improve performance
+      const [postsQuery, likesQuery] = await Promise.all([
+        getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"))),
+        getDocs(
+          query(
+            collection(db, "likes"),
+            where("ownerId", "==", currentUser.uid) // Only get likes by current user
+          )
+        ),
+      ]);
+
+      // Pre-process likes data for O(1) lookups
+      const likedPostIds = new Set<string>();
+      likesQuery.docs.forEach((doc) => {
+        likedPostIds.add(doc.data().postId);
+      });
+
+      // Transform posts data with additional metadata
+      return postsQuery.docs.map((doc) => {
+        const data = doc.data();
+        const postId = doc.id;
+
+        // Check if current user liked this post
+        const currUserLiked = likedPostIds.has(postId);
+
+        // Safely extract post data with defaults
+        return {
+          id: postId,
+          currUserLiked,
+          ...data,
+        } as Post;
+      });
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      toast.error("Failed to load posts. Please try again later.");
+      // Consider returning an error object or throwing for better error handling
+      return [];
+    }
+  };
+
+  const fetchPostById: fetchPostByIdType = async (id: string) => {
+    if (!auth.currentUser) {
+      toast.warn("You need to login to view posts");
+      return null;
+    }
+
+    try {
+      // Fetch post and like status in parallel for better performance
+      const [postDoc, likeQuery] = await Promise.all([
+        getDoc(doc(db, "posts", id)),
+        getDocs(
+          query(
+            collection(db, "likes"),
+            where("postId", "==", id),
+            where("ownerId", "==", auth.currentUser.uid)
+          )
+        ),
+      ]);
+
+      if (!postDoc.exists()) {
         toast.error("Post not found");
         return null;
       }
 
-      return { id: docSnap.id, ...docSnap.data() } as Post;
+      const postData = postDoc.data();
+      const currUserLiked = !likeQuery.empty;
+
+      return {
+        id: postDoc.id,
+        currUserLiked,
+        ...postData,
+      } as Post;
     } catch (error) {
       console.error("Error fetching post:", error);
       toast.error("Failed to fetch post");
@@ -140,67 +190,65 @@ const usePost = () => {
     filters: string[],
     userType: string | null
   ) => {
-    if (auth.currentUser) {
-      try {
-        const postsRef = collection(db, "posts");
-
-        let q;
-
-        if (userType !== null && filters.length > 0) {
-          q = query(
-            postsRef,
-            where("filters", "array-contains-any", filters),
-            where("role", "==", userType),
-            orderBy("createdAt", "desc")
-          );
-        } else if (userType === null && filters.length > 0) {
-          q = query(
-            postsRef,
-            where("filters", "array-contains-any", filters),
-            orderBy("createdAt", "desc")
-          );
-        } else {
-          q = query(
-            postsRef,
-            where("role", "==", userType),
-            orderBy("createdAt", "desc")
-          );
-        }
-        const querySnapshot = await getDocs(q);
-
-        const filteredPosts = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.title || "Untitled",
-            content: data.content || "No content available",
-            images: data.images || [],
-            videos: data.videos || [],
-            documents: data.documents || [],
-            filters: data.filters || [],
-            createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore Timestamp to Date
-            updatedAt: data.updatedAt?.toDate() || new Date(),
-            ownerId: data.ownerId || "Unknown",
-            likesCount: data.likesCount,
-            commentsCount: data.commentsCount,
-            role: data.role || "guest",
-            verified: data.verified,
-            profileData: {
-              name: data.profileData?.name || "Anonymous",
-              profilePic: data.profileData?.profilePic || "",
-            },
-          } as Post;
-        });
-
-        return filteredPosts;
-      } catch (error) {
-        console.error("Error fetching filtered posts:", error);
-        return [];
-      }
-    } else {
-      toast.warn("You need to login");
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast.warn("You need to login to view posts");
       navigate("/expert/login");
+      return [];
+    }
 
+    try {
+      // Base query components
+      const queryConstraints: QueryConstraint[] = [
+        orderBy("createdAt", "desc"),
+      ];
+
+      // Add filters based on parameters
+      if (filters.length > 0) {
+        queryConstraints.push(where("filters", "array-contains-any", filters));
+      }
+
+      if (userType !== null) {
+        queryConstraints.push(where("role", "==", userType));
+      }
+
+      // Execute the query
+      const postsQuery = await getDocs(
+        query(collection(db, "posts"), ...queryConstraints)
+      );
+
+      // Get user's likes in parallel with posts query for better performance
+      const [likesQuery] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, "likes"),
+            where("ownerId", "==", currentUser.uid)
+          )
+        ),
+        // Could add other parallel queries here if needed
+      ]);
+
+      // Create lookup for liked posts
+      const likedPostIds = new Set<string>();
+      likesQuery.docs.forEach((doc) => {
+        likedPostIds.add(doc.data().postId);
+      });
+
+      // Transform and return posts
+      return postsQuery.docs.map((doc) => {
+        const data = doc.data();
+        const postId = doc.id;
+        const currUserLiked = likedPostIds.has(postId);
+
+        return {
+          id: postId,
+          currUserLiked,
+          ...data,
+        } as Post;
+      });
+    } catch (error) {
+      console.error("Error fetching filtered posts:", error);
+      toast.error("Failed to load filtered posts");
       return [];
     }
   };
@@ -559,8 +607,9 @@ const usePost = () => {
 
   const likePost = async (
     postId: string,
-    likeTimeout: NodeJS.Timeout | null,
-    setLikeTimeout: (timeout: NodeJS.Timeout | null) => void
+    likeTimeoutRef: { current: NodeJS.Timeout | null },
+    setIsLiked: React.Dispatch<React.SetStateAction<boolean>>,
+    setLikesCount: React.Dispatch<React.SetStateAction<number>>
   ) => {
     const user = auth.currentUser;
 
@@ -570,11 +619,23 @@ const usePost = () => {
       return;
     }
 
-    // Clear any previous pending Firebase request
-    if (likeTimeout) clearTimeout(likeTimeout);
+    // Clear any previous pending like action
+    if (likeTimeoutRef.current) {
+      clearTimeout(likeTimeoutRef.current);
+      likeTimeoutRef.current = null;
+    }
 
-    // Set a new timeout to delay Firebase request
-    const newTimeout = setTimeout(async () => {
+    // Optimistically update UI immediately
+    setIsLiked((prev) => {
+      const newIsLiked = !prev;
+      setLikesCount((prevCount) =>
+        newIsLiked ? prevCount + 1 : prevCount - 1
+      );
+      return newIsLiked;
+    });
+
+    // Set new timeout for the actual Firebase operation
+    likeTimeoutRef.current = setTimeout(async () => {
       try {
         const likesRef = collection(db, "likes");
 
@@ -587,37 +648,38 @@ const usePost = () => {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-          // Remove like from Firestore
+          // User had previously liked - now removing like
           const likeDoc = querySnapshot.docs[0];
           await deleteDoc(doc(db, "likes", likeDoc.id));
-
-          // Decrement like count in posts
           await updateDoc(doc(db, "posts", postId), {
             likesCount: increment(-1),
           });
-
-          console.log("Like removed");
+          console.log("Likes removed");
         } else {
-          // Add new like to Firestore
+          // User hadn't liked - now adding like
           await addDoc(likesRef, {
             postId,
             ownerId: user.uid,
             createdAt: new Date(),
           });
-
-          // Increment like count in posts
           await updateDoc(doc(db, "posts", postId), {
             likesCount: increment(1),
           });
-
-          console.log("Like added");
+          console.log("Likes added");
         }
       } catch (error) {
         console.error("Error toggling like:", error);
+        // Revert UI if Firebase operation fails
+        setIsLiked((prev) => {
+          const revertTo = !prev;
+          setLikesCount((prevCount) =>
+            revertTo ? prevCount - 1 : prevCount + 1
+          );
+          return revertTo;
+        });
+        toast.error("Failed to update like");
       }
-    }, 1000); // Debounce delay (500ms)
-
-    setLikeTimeout(newTimeout);
+    }, 500); // 500ms debounce delay
   };
 
   const verifyPost = async (postId: string) => {

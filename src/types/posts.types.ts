@@ -11,10 +11,11 @@ interface Post {
   documents: string[];
   filters: string[];
   likesCount: number;
+  currUserLiked: boolean;
   commentsCount: number;
-  verified:VerifiedPostProfile[] | null
+  verified: VerifiedPostProfile[] | null;
   createdAt: Date | Timestamp;
-  updatedAt:Date | Timestamp;
+  updatedAt: Date | Timestamp;
   ownerId: string;
   role: string;
   profileData: ProfileData;
