@@ -78,6 +78,7 @@ const PostDetailPage = () => {
        post={post}
        handleMediaClick={handlePostClick}
        userRole={userRole}
+
      />: <PostCardSkeleton/>
       }
 

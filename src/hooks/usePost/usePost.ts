@@ -12,10 +12,12 @@ import {
   // arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   // deleteDoc,
   doc,
   getDoc,
   getDocs,
+  increment,
   orderBy,
   query,
   serverTimestamp,
@@ -109,6 +111,28 @@ const usePost = () => {
       navigate("/expert/login");
 
       return [];
+    }
+  };
+
+  const fetchPostById: fetchPostByIdType = async (id) => {
+    try {
+      if (!auth.currentUser) {
+        return null;
+      }
+      const docRef = doc(db, "posts", id);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error("Post not found!");
+        toast.error("Post not found");
+        return null;
+      }
+
+      return { id: docSnap.id, ...docSnap.data() } as Post;
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      toast.error("Failed to fetch post");
+      return null;
     }
   };
 
@@ -243,6 +267,179 @@ const usePost = () => {
     }
   };
 
+  const editPost: EditPostType = async (
+    postId,
+    postOwnerId,
+    updatedPostData,
+    existingFilters
+  ) => {
+    try {
+      // 1. Authentication & Authorization Checks
+      if (!auth.currentUser) {
+        toast.warn("Please login to edit posts");
+        navigate("/auth");
+        return;
+      }
+
+      // 2. Verify Post Existence and Ownership
+      if (auth.currentUser.uid !== postOwnerId) {
+        toast.error("Ownership verification failed");
+        return navigate("/posts");
+      }
+
+      // 3. Initialize media arrays
+      let images: string[] = [];
+      let documents: string[] = [];
+      let videos: string[] = [];
+      let base64MediaUrl: string | null = null;
+      let uploadedMedia: string | File | null =
+        updatedPostData.images[0] ||
+        updatedPostData.documents[0] ||
+        updatedPostData.videos[0] ||
+        null;
+
+      // 4. Handle Media Conversion (if new media is uploaded)
+      if (uploadedMedia && uploadedMedia instanceof File) {
+        try {
+          base64MediaUrl = await convertToBase64(uploadedMedia);
+        } catch (error) {
+          console.error("Media conversion error:", error);
+          toast.error("Failed to process media file");
+          return;
+        }
+      }
+
+      // 5. AI Content Validation & Filtering
+      let aiVerificationResponse;
+      try {
+        aiVerificationResponse = await verifyAndValidateAndFilterEditedPost(
+          { content: updatedPostData.content, existingFilters },
+          {
+            base64: base64MediaUrl,
+            cloudinaryUrl:
+              (typeof uploadedMedia === "string" && uploadedMedia) || null,
+          },
+          filters
+        );
+
+        if (!aiVerificationResponse.valid) {
+          toast.error("Post content doesn't meet community guidelines");
+          return;
+        }
+      } catch (error) {
+        console.error("AI validation error:", error);
+        toast.error("Content validation service unavailable");
+        return;
+      }
+
+      // 6. Upload New Media Files (if any)
+      try {
+        if (
+          uploadedMedia &&
+          uploadedMedia instanceof File &&
+          uploadedMedia.type.startsWith("image/")
+        ) {
+          const imageUrls = await uploadFilesToCloudinary([uploadedMedia]);
+          images = imageUrls.filter((url) => url);
+        }
+
+        if (
+          uploadedMedia &&
+          uploadedMedia instanceof File &&
+          uploadedMedia.type.startsWith("video/")
+        ) {
+          const videoUrls = await uploadFilesToCloudinary([uploadedMedia]);
+          videos = videoUrls.filter((url) => url);
+        }
+
+        if (
+          uploadedMedia &&
+          uploadedMedia instanceof File &&
+          uploadedMedia.type.startsWith("application/pdf")
+        ) {
+          const documentUrls = await uploadFilesToCloudinary([uploadedMedia]);
+          documents = documentUrls.filter((url) => url);
+        }
+      } catch (uploadError) {
+        console.error("Media upload failed:", uploadError);
+        toast.error("Failed to upload media files");
+        return;
+      }
+
+      // 7. Prepare Update Data Object
+      const updatedData = {
+        content: updatedPostData.content.trim(),
+        images: images,
+        videos: videos,
+        documents: documents,
+        filters: aiVerificationResponse.filters,
+        verified: aiVerificationResponse.verification ? [] : null,
+        updatedAt: new Date(),
+      };
+
+      // 8. Database Update Operation
+      try {
+        const postRef = doc(db, "posts", postId);
+        await updateDoc(postRef, updatedData);
+        toast.success("Post updated successfully");
+        navigate(`/posts/${postId}`);
+      } catch (dbError) {
+        console.error("Database update failed:", dbError);
+        toast.error("Failed to save changes");
+        navigate("/posts");
+      }
+    } catch (error) {
+      console.error("Unexpected error in editPost:", error);
+      toast.error("An unexpected error occurred");
+      navigate("/posts");
+    }
+  };
+
+  const deletePost: deletePostType = async (
+    postId,
+    postOwnerId,
+    firebaseDocument
+  ) => {
+    try {
+      // 1. Authentication & Authorization Validation
+      const user = auth.currentUser;
+
+      if (!user) {
+        toast.warn("Please login to delete posts");
+        navigate("/auth");
+        return;
+      }
+
+      if (user.uid !== postOwnerId) {
+        toast.warn("Unauthorized: You can only delete your own posts");
+        navigate("/posts");
+        return;
+      }
+
+      // 2. Database References
+      const postRef = doc(db, "posts", postId);
+      const userRef = doc(db, firebaseDocument, user.uid);
+
+      // 3. Atomic Deletion Operation
+      const batch = writeBatch(db);
+      batch.delete(postRef);
+      batch.update(userRef, {
+        posts: arrayRemove(postId),
+        updatedAt: new Date(), // Maintain audit trail
+      });
+
+      await batch.commit();
+
+      // 4. Success Handling
+      toast.success("Post deleted successfully");
+    } catch (error) {
+      // Global error handler
+      console.error("Unexpected error in deletePost:", error);
+      toast.error("An unexpected error occurred");
+      return;
+    }
+  };
+
   const addCommentPost = async (
     postId: string,
     firebaseDocument: "farmers" | "experts",
@@ -360,26 +557,67 @@ const usePost = () => {
     }
   };
 
-  const fetchPostById: fetchPostByIdType = async (id) => {
-    try {
-      if (!auth.currentUser) {
-        return null;
-      }
-      const docRef = doc(db, "posts", id);
-      const docSnap = await getDoc(docRef);
+  const likePost = async (
+    postId: string,
+    likeTimeout: NodeJS.Timeout | null,
+    setLikeTimeout: (timeout: NodeJS.Timeout | null) => void
+  ) => {
+    const user = auth.currentUser;
 
-      if (!docSnap.exists()) {
-        console.error("Post not found!");
-        toast.error("Post not found");
-        return null;
-      }
-
-      return { id: docSnap.id, ...docSnap.data() } as Post;
-    } catch (error) {
-      console.error("Error fetching post:", error);
-      toast.error("Failed to fetch post");
-      return null;
+    if (!user) {
+      toast.warn("You need to login");
+      navigate("/expert/login");
+      return;
     }
+
+    // Clear any previous pending Firebase request
+    if (likeTimeout) clearTimeout(likeTimeout);
+
+    // Set a new timeout to delay Firebase request
+    const newTimeout = setTimeout(async () => {
+      try {
+        const likesRef = collection(db, "likes");
+
+        // Check if user has already liked the post
+        const q = query(
+          likesRef,
+          where("postId", "==", postId),
+          where("ownerId", "==", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // Remove like from Firestore
+          const likeDoc = querySnapshot.docs[0];
+          await deleteDoc(doc(db, "likes", likeDoc.id));
+
+          // Decrement like count in posts
+          await updateDoc(doc(db, "posts", postId), {
+            likesCount: increment(-1),
+          });
+
+          console.log("Like removed");
+        } else {
+          // Add new like to Firestore
+          await addDoc(likesRef, {
+            postId,
+            ownerId: user.uid,
+            createdAt: new Date(),
+          });
+
+          // Increment like count in posts
+          await updateDoc(doc(db, "posts", postId), {
+            likesCount: increment(1),
+          });
+
+          console.log("Like added");
+        }
+      } catch (error) {
+        console.error("Error toggling like:", error);
+      }
+    }, 1000); // Debounce delay (500ms)
+
+    setLikeTimeout(newTimeout);
   };
 
   const verifyPost = async (postId: string) => {
@@ -420,181 +658,6 @@ const usePost = () => {
     }
   };
 
-  const editPost: EditPostType = async (
-    postId,
-    postOwnerId,
-    updatedPostData,
-    existingFilters,
-    firebaseDocument
-  ) => {
-    try {
-      // 1. Authentication & Authorization Checks
-      if (!auth.currentUser) {
-        toast.warn("Please login to edit posts");
-        navigate("/auth");
-        return;
-      }
-
-      // 2. Verify Post Existence and Ownership
-      if (auth.currentUser.uid !== postOwnerId) {
-        toast.error("Ownership verification failed");
-        return navigate("/posts");
-      }
-
-      // 3. Initialize media arrays
-      let images: string[] = [];
-      let documents: string[] = [];
-      let videos: string[] = [];
-      let base64MediaUrl: string | null = null;
-      let uploadedMedia: string | File =
-        updatedPostData.images[0] ||
-        updatedPostData.documents[0] ||
-        updatedPostData.videos[0] ||
-        null;
-
-      // 4. Handle Media Conversion (if new media is uploaded)
-      if (
-        (updatedPostData.images.length === 1 &&
-          updatedPostData.images[0] instanceof File) ||
-        (updatedPostData.documents.length === 1 &&
-          updatedPostData.documents[0] instanceof File) ||
-        (updatedPostData.videos.length === 1 &&
-          updatedPostData.videos[0] instanceof File)
-      ) {
-        try {
-          base64MediaUrl = await convertToBase64(uploadedMedia);
-        } catch (error) {
-          console.error("Media conversion error:", error);
-          toast.error("Failed to process media file");
-          return;
-        }
-      }
-
-      // 5. AI Content Validation & Filtering
-      let aiVerificationResponse;
-      try {
-        aiVerificationResponse = await verifyAndValidateAndFilterEditedPost(
-          { content: updatedPostData.content, existingFilters },
-          {
-            base64: base64MediaUrl,
-            cloudinaryUrl:
-              (typeof uploadedMedia === "string" && uploadedMedia) || null,
-          },
-          filters
-        );
-
-        if (!aiVerificationResponse.valid) {
-          toast.error("Post content doesn't meet community guidelines");
-          return;
-        }
-      } catch (error) {
-        console.error("AI validation error:", error);
-        toast.error("Content validation service unavailable");
-        return;
-      }
-
-      // 6. Upload New Media Files (if any)
-      try {
-        if (updatedPostData.images.length === 1) {
-          const imageUrls = await uploadFilesToCloudinary(
-            updatedPostData.images
-          );
-          images = imageUrls.filter((url) => url);
-        }
-
-        if (updatedPostData.videos.length === 1) {
-          const videoUrls = await uploadFilesToCloudinary(
-            updatedPostData.videos
-          );
-          videos = videoUrls.filter((url) => url);
-        }
-
-        if (updatedPostData.documents.length === 1) {
-          const documentUrls = await uploadFilesToCloudinary(
-            updatedPostData.documents
-          );
-          documents = documentUrls.filter((url) => url);
-        }
-      } catch (uploadError) {
-        console.error("Media upload failed:", uploadError);
-        toast.error("Failed to upload media files");
-        return;
-      }
-
-      // 7. Prepare Update Data Object
-      const updatedData = {
-        content: updatedPostData.content.trim(),
-        images: images,
-        videos: videos,
-        documents: documents,
-        filters: aiVerificationResponse.filters,
-        verified: aiVerificationResponse.verification ? [] : null,
-        updatedAt: new Date(),
-      };
-
-      // 8. Database Update Operation
-      try {
-        const postRef = doc(db, "posts", postId);
-        await updateDoc(postRef, updatedData);
-        toast.success("Post updated successfully");
-        navigate(`/posts/${postId}`);
-      } catch (dbError) {
-        console.error("Database update failed:", dbError);
-        toast.error("Failed to save changes");
-        navigate("/posts");
-      }
-    } catch (error) {
-      console.error("Unexpected error in editPost:", error);
-      toast.error("An unexpected error occurred");
-      navigate("/posts");
-    }
-  };
-
-  const deletePost: deletePostType = async (
-    postId,
-    postOwnerId,
-    firebaseDocument
-  ) => {
-    try {
-      // 1. Authentication & Authorization Validation
-      const user = auth.currentUser;
-
-      if (!user) {
-        toast.warn("Please login to delete posts");
-        navigate("/auth");
-        return;
-      }
-
-      if (user.uid !== postOwnerId) {
-        toast.warn("Unauthorized: You can only delete your own posts");
-        navigate("/posts");
-        return;
-      }
-
-      // 2. Database References
-      const postRef = doc(db, "posts", postId);
-      const userRef = doc(db, firebaseDocument, user.uid);
-
-      // 3. Atomic Deletion Operation
-      const batch = writeBatch(db);
-      batch.delete(postRef);
-      batch.update(userRef, {
-        posts: arrayRemove(postId),
-        updatedAt: new Date(), // Maintain audit trail
-      });
-
-      await batch.commit();
-
-      // 4. Success Handling
-      toast.success("Post deleted successfully");
-    } catch (error) {
-      // Global error handler
-      console.error("Unexpected error in deletePost:", error);
-      toast.error("An unexpected error occurred");
-      return;
-    }
-  };
-
   return {
     createPost,
     getAllPosts,
@@ -607,6 +670,7 @@ const usePost = () => {
     fetchPostById,
     editPost,
     deletePost,
+    likePost,
   };
 };
 

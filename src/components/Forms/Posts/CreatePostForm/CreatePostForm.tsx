@@ -31,6 +31,18 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
   const navigate = useNavigate();
   const { editPost, createPost } = usePost();
 
+  const editPostMedia: {
+    type: "image" | "video" | "document";
+    url: string;
+  } | null =
+    post?.images?.length === 1
+      ? { type: "image", url: post.images[0] }
+      : post?.videos?.length === 1
+      ? { type: "video", url: post.videos[0] }
+      : post?.documents?.length === 1
+      ? { type: "document", url: post.documents[0] }
+      : null;
+
   const [newPostImage, setNewPostImage] = useState<File[] | string[]>(
     editForm && post ? post.images : []
   );
@@ -48,8 +60,8 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      content: "",
-      media: null,
+      content: editForm ? post?.content : "",
+      media: editPostMedia
     },
   });
 
@@ -118,12 +130,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
         videos: newPostVideo,
         documents: newPostDocument,
       };
-      await editPost(
-        post.id,
-        post.ownerId,
-        updatedData,
-        post.filters
-      );
+      await editPost(post.id, post.ownerId, updatedData, post.filters);
     } else {
       const file =
         newPostImage.length === 1
@@ -203,13 +210,6 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="p-4">
           <div className="flex items-start space-x-3 mb-4">
-            <Avatar className="w-10 h-10">
-              <AvatarImage
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
-                alt="Your profile"
-              />
-              <AvatarFallback>YP</AvatarFallback>
-            </Avatar>
             <FormField
               control={form.control}
               name="content"

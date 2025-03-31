@@ -27,7 +27,6 @@ export type EditPostType = (
   postOwnerId:string,
   updatedPostData: EditPostArgu,
   existingFilters: string[],
-  firebaseDocument: "experts" | "farmers"
 ) => Promise<string | void>;
 
 export type deletePostType = (
