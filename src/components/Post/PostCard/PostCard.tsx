@@ -10,11 +10,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Bookmark,
-  EyeOff,
-  Flag,
+
   Loader2,
   MessageCircle,
-  MoreHorizontal,
+
   Pencil,
   Share,
   Smile,
@@ -27,7 +26,7 @@ import PostCardProps from "./PostCard.types";
 import Comment from "@/types/comment.types";
 import usePost from "@/hooks/usePost/usePost";
 import { Skeleton } from "@mui/material";
-import { doc, increment, Timestamp, updateDoc } from "@firebase/firestore";
+import {Timestamp } from "@firebase/firestore";
 import {
   Select,
   SelectContent,
@@ -37,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 import { useAuthContext } from "@/context/AuthContext";
-import { auth, db } from "@/firebase";
+import { auth} from "@/firebase";
 import { toast } from "react-toastify";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";

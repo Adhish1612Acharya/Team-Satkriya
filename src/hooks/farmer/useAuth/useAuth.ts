@@ -80,6 +80,7 @@ const useAuth = () => {
             city: data.city,
             experience: data.experience,
           },
+          registrations: [],
           createdAt: new Date(),
           updatedAt: new Date(),
         });

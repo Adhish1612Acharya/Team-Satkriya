@@ -5,10 +5,12 @@ import WorkShop from "@/types/workShop.types";
 import WorkshopCard from "@/components/WorkshopCard/WorkshopCard";
 import WorkshopCardSkeleton from "@/components/WorkShopCardSkeleton/WorkShopCardSkeleton";
 import { toast } from "react-toastify";
+import { useAuthContext } from "@/context/AuthContext";
 
 const WorkShopDetail = () => {
+  const { userType } = useAuthContext();
   const { id } = useParams();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const { fetchWorkshopById } = useWorkShop();
 
   const [workshop, setWorkshop] = useState<WorkShop | null>(null);
@@ -40,7 +42,10 @@ const WorkShopDetail = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       {!loading && workshop ? (
-        <WorkshopCard workshop={workshop} />
+        <WorkshopCard
+          userType={userType as "farmers" | "experts"}
+          workshop={workshop}
+        />
       ) : (
         <WorkshopCardSkeleton />
       )}
