@@ -10,8 +10,10 @@ import webinarFilters from "@/constants/webinarFilters";
 import Post from "@/types/posts.types";
 import { AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuthContext } from "@/context/AuthContext";
 
 const WorkshopsPage = () => {
+  const { userType } = useAuthContext();
   const { fetchAllWorkshops } = useWorkShop();
 
   const [workshops, setWorkshops] = useState<WorkShop[]>([]);
@@ -88,12 +90,17 @@ const WorkshopsPage = () => {
                   No Workshops/webinars Found
                 </h2>
                 <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
-                  It looks like there are no Workshops/webinars available at the moment
+                  It looks like there are no Workshops/webinars available at the
+                  moment
                 </p>
               </motion.div>
             ) : (
               workshops.map((workshop) => (
-                <WorkshopCard key={workshop.id} workshop={workshop} />
+                <WorkshopCard
+                  key={workshop.id}
+                  userType={userType as "farmers" | "experts"}
+                  workshop={workshop}
+                />
               ))
             )}
           </div>

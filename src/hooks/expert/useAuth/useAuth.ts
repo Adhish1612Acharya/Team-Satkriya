@@ -70,6 +70,7 @@ const useAuth = () => {
             profileData: profileData,
             posts: [],
             workshops: [],
+            registrations: [],
             createdAt: new Date(),
             updatedAt: new Date(),
           });
@@ -118,6 +119,7 @@ const useAuth = () => {
           address: data.address,
           posts: [],
           workshops: [],
+          registrations: [],
           role: data.role,
           profileData: data.profileData,
           createdAt: new Date(),

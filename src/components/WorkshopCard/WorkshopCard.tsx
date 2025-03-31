@@ -1,6 +1,13 @@
-import  { FC } from "react";
+import { FC, useState } from "react";
 import { format } from "date-fns";
-import { MapPin, Calendar, Globe, Clock, Hourglass } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  Globe,
+  Clock,
+  Hourglass,
+  Loader2,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -15,10 +22,16 @@ import WorkShopCardProps from "./WorkShopCard.types";
 import { Timestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 
 // Workshop Card Component
-const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
+const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
+  const { registerWorkShop } = useWorkShop();
+
   const navigate = useNavigate();
+
+  const [registerLoading, setRegisterLoading] = useState<boolean>(false);
+
   // Format dates
   const formattedStartDate = format(
     workshop.dateFrom instanceof Timestamp
@@ -53,6 +66,12 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
   // Calculate the difference in days
   const timeDiff = endDate.getTime() - startDate.getTime();
   const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  const register = async () => {
+    setRegisterLoading(true);
+    await registerWorkShop(workshop.id, userType);
+    setRegisterLoading(false);
+  };
 
   return (
     <Card className="w-full overflow-hidden transition-all hover:shadow-lg">
@@ -92,12 +111,11 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
             </AvatarFallback>
           </Avatar>
           <div>
-    <div className="text-sm font-medium">{workshop.profileData.name}</div>
-    <div className="text-xs text-muted-foreground">
-      {workshop.role}
-    </div>
-  </div>
-          
+            <div className="text-sm font-medium">
+              {workshop.profileData.name}
+            </div>
+            <div className="text-xs text-muted-foreground">{workshop.role}</div>
+          </div>
         </div>
         <CardTitle className="line-clamp-2 text-xl">{workshop.title}</CardTitle>
         <CardDescription className="flex items-center text-sm">
@@ -160,14 +178,17 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop }) => {
       </CardContent>
 
       <CardFooter className="flex justify-end">
-      {window.location.pathname.endsWith("/workshops") && (
-  <Button
-    className="cursor-pointer"
-    onClick={() => navigate(`/workshops/${workshop.id}`)}
-  >
-    View
-  </Button>
-)}
+        {window.location.pathname.endsWith("/workshops") && (
+          <Button
+            className="cursor-pointer"
+            onClick={() => navigate(`/workshops/${workshop.id}`)}
+          >
+            View
+          </Button>
+        )}
+        <Button className="cursor-pointer" onClick={() => register()}>
+          {registerLoading ? <Loader2 className="animate-spin" /> : "Register"}
+        </Button>
       </CardFooter>
     </Card>
   );

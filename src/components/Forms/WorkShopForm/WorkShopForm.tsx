@@ -209,6 +209,7 @@ const WorkshopForm = () => {
                               "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
+                            onClick={()=>console.log("Clicked")}
                           >
                             {field.value ? (
                               format(field.value, "PPP")

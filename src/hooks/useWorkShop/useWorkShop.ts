@@ -4,6 +4,8 @@ import {
   fetchAllWorkshopsType,
   fetchWorkshopByIdType,
   GetFilteredWorkshopType,
+  GetWorkshopRegistrationDetailsType,
+  RegisterWorkshopType,
 } from "./useWorkShop.types";
 import { uploadImageToCloudinary } from "./useWorkShopUtility";
 import { auth, db } from "@/firebase";
@@ -21,8 +23,11 @@ import {
   where,
 } from "firebase/firestore";
 import WorkShop from "@/types/workShop.types";
+import { useNavigate } from "react-router-dom";
 
 const useWorkShop = () => {
+  const navigate = useNavigate();
+
   const createWorkshop: createWorkShopType = async (
     workshopData,
     filters: string[]
@@ -139,7 +144,6 @@ const useWorkShop = () => {
         ...doc.data(),
       })) as WorkShop[];
 
-
       return workshops;
     } catch (error) {
       console.error("Error fetching workshops:", error);
@@ -191,11 +195,115 @@ const useWorkShop = () => {
     }
   };
 
+  const registerWorkShop: RegisterWorkshopType = async (
+    workshopId,
+    userType
+  ) => {
+    try {
+      // Validate current user
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("You must login to register for workshops");
+        navigate("/auth");
+        return;
+      }
+
+      // Get user document reference and snapshot
+      const userDocRef = doc(db, userType, user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      // Verify user exists
+      if (!userDocSnap.exists()) {
+        toast.error("User account not found");
+        return;
+      }
+
+      const userData = userDocSnap.data();
+
+      // Prepare registration data
+      const registrationData = {
+        id: user.uid,
+        name: userData.name,
+        contactNo: userData.contactNo,
+        role: userData.role,
+      };
+
+      // Get workshop document reference
+      const workshopDocRef = doc(db, "workshops", workshopId);
+
+      // Execute both updates in parallel for better performance
+      await Promise.all([
+        // Add user to workshop registrations
+        updateDoc(workshopDocRef, {
+          registrations: arrayUnion(registrationData),
+        }),
+
+        // Add workshop to user's registrations
+        updateDoc(userDocRef, {
+          registrations: arrayUnion(workshopId),
+        }),
+      ]);
+
+      toast.success("Successfully registered for the workshop!");
+    } catch (error) {
+      console.error("Workshop registration failed:", error);
+      toast.error("Failed to register for workshop");
+    }
+  };
+
+
+  const getWorkshopRegistrationDetails:GetWorkshopRegistrationDetailsType = async (
+    workshopId,
+    ownerId
+  ) => {
+    try {
+      // Validate current user
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("Authentication required to view registrations");
+        navigate("/auth");
+        return;
+      }
+
+      // Verify user is the workshop owner
+      if (user.uid !== ownerId) {
+        toast.warn("Only the workshop owner can view registration details");
+        navigate("/workshops");
+        return;
+      }
+
+      // Get workshop document
+      const workshopDoc = await getDoc(doc(db, "workshops", workshopId));
+
+      // Verify workshop exists
+      if (!workshopDoc.exists()) {
+        toast.warn("The requested workshop does not exist");
+        navigate("/workshops");
+        return;
+      }
+
+      // Type-safe extraction of workshop data
+      const workshopData = {
+        id: workshopDoc.id,
+        ...workshopDoc.data(),
+      } as WorkShop;
+
+      // Return registration details if they exist, otherwise empty array
+      return workshopData.registrations || [];
+    } catch (error) {
+      console.error("Failed to fetch registration details:", error);
+      toast.error("Error loading registration information");
+      return []; // Return empty array on failure
+    }
+  };
+
   return {
     createWorkshop,
     fetchWorkshopById,
     fetchAllWorkshops,
     fetchFilteredWorkshops,
+    registerWorkShop,
+    getWorkshopRegistrationDetails,
   };
 };
 
