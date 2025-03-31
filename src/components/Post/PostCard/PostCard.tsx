@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,9 +60,10 @@ const PostCard: FC<PostCardProps> = ({
   const { getPostComments, addCommentPost, getFilteredComments, likePost } =
     usePost();
 
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(post.currUserLiked);
   const [likesCount, setLikesCount] = useState(post.likesCount);
-  const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
+  const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const [isSaved, setIsSaved] = useState(false);
 
   const [comment, setComment] = useState("");
@@ -74,18 +75,17 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
-  const handleLike = async () => {
-    setIsLiked((prev) => {
-      if (!prev === false) {
-        setLikesCount((prev) => prev - 1);
-      } else {
-        setLikesCount((prev) => prev + 1);
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (likeTimeoutRef.current) {
+        clearTimeout(likeTimeoutRef.current);
       }
-      return !prev;
-    });
+    };
+  }, []);
 
-    await likePost(post.id,likeTimeout,setLikeTimeout)
-
+  const handleLike = async () => {
+    await likePost(post.id, likeTimeoutRef, setIsLiked, setLikesCount);
   };
 
   const addCommentsFunc = async () => {
@@ -249,14 +249,14 @@ const PostCard: FC<PostCardProps> = ({
       <CardFooter className="flex flex-col pt-0">
         <div className="flex items-center justify-between w-full pb-3 border-b">
           <div className="flex items-center space-x-1 text-sm text-gray-500">
-            {post.likesCount > 0 && (
+            {likesCount > 0 && (
               <>
                 <ThumbsUp
                   size={14}
                   className={isLiked ? "text-blue-500" : ""}
                 />
                 <span>
-                  {post.likesCount} {post.likesCount === 1 ? "like" : "likes"}
+                  {likesCount} {likesCount === 1 ? "like" : "likes"}
                 </span>
               </>
             )}
@@ -267,10 +267,6 @@ const PostCard: FC<PostCardProps> = ({
               {postCommentsCount === 1 || postCommentsCount === 0
                 ? "comment"
                 : "comments"}
-            </span>
-            <span>
-              {likesCount}{" "}
-              {likesCount === 1 || likesCount === 0 ? "like" : "likes"}
             </span>
           </div>
         </div>
