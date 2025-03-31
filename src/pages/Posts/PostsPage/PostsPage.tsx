@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PostCard from "@/components/Post/PostCard/PostCard";
 import { PostModal } from "@/components/Post/PostModal";
-import { Card } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import Post from "@/types/posts.types";
 import CreatePostForm from "@/components/Forms/Posts/CreatePostForm/CreatePostForm";
 import usePost from "@/hooks/usePost/usePost";
@@ -31,7 +31,9 @@ export function PostsPage() {
   >(null);
   const [open, setOpen] = useState<boolean>(false);
   const [alertDialogOpen, setAlertDialogOpen] = useState<boolean>(false);
-  const [deletePostId,setDeletePostId]=useState<string>("");
+  const [deletePostId, setDeletePostId] = useState<string>("");
+  const [editForm, setEditForm] = useState<boolean>(false);
+  const [editPostInfo, setEditPostInfo] = useState<Post | null>(null);
 
   useEffect(() => {
     async function getPosts() {
@@ -66,10 +68,7 @@ export function PostsPage() {
     setSelectedPost(null);
   };
 
-  // const handleLike = (postId: string) => {
-  //   // In a real app, this would call an API
-  //   console.log(`Liked post ${postId}`);
-  // };
+  
 
   // const handleComment = (postId: string, comment: string) => {
   //   // In a real app, this would call an API
@@ -140,8 +139,11 @@ export function PostsPage() {
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
           <Card className="mb-8 overflow-hidden">
+            <CardTitle>Create Post</CardTitle>
             <CreatePostForm
               firebaseDocuemntType={userType as "farmers" | "experts"}
+              post={null}
+              editForm={false}
             />
           </Card>
 
@@ -181,6 +183,9 @@ export function PostsPage() {
                   userRole={userRole}
                   handleMediaClick={handlePostClick}
                   setDeletePostId={setDeletePostId}
+                  setEditPostDialogOpen={setOpen}
+                  setEditForm={setEditForm}
+                  setEditPost={setEditPostInfo}
                   // onComment={handleComment}
                   // onLike={handleLike}
                   // onShare={handleShare}
@@ -219,6 +224,10 @@ export function PostsPage() {
           userType={userType as "farmers" | "experts"}
           open={open}
           setOpen={setOpen}
+          editForm={editForm}
+          editPost={editPostInfo}
+          setEditForm={setEditForm}
+          setEditPost={setEditPostInfo}
         />
         <AlertDialogBox
           title="Are you sure?"

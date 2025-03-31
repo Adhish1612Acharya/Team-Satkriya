@@ -48,17 +48,21 @@ const PostCard: FC<PostCardProps> = ({
   userRole,
   setAlertDialog,
   setDeletePostId,
-
+  setEditPostDialogOpen,
+  setEditForm,
+  setEditPost,
   // onLike,
   // onComment,
   // onShare,
   // onPostClick,
 }) => {
   const { userType } = useAuthContext();
-  const { getPostComments, addCommentPost, getFilteredComments } = usePost();
+  const { getPostComments, addCommentPost, getFilteredComments, likePost } =
+    usePost();
 
   const [isLiked, setIsLiked] = useState(false);
-  // const [likesCount, setLikesCount] = useState(post.likes);
+  const [likesCount, setLikesCount] = useState(post.likesCount);
+  const [likeTimeout, setLikeTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
   const [comment, setComment] = useState("");
@@ -70,13 +74,24 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
+  const handleLike = async () => {
+    setIsLiked((prev) => {
+      if (!prev === false) {
+        setLikesCount((prev) => prev - 1);
+      } else {
+        setLikesCount((prev) => prev + 1);
+      }
+      return !prev;
+    });
+
+    await likePost(post.id,likeTimeout,setLikeTimeout)
+
+  };
+
   const addCommentsFunc = async () => {
     try {
       setAddCommentsLoad(true);
       await addCommentPost(post.id, userType as "farmers" | "experts", comment);
-      await updateDoc(doc(db, "posts", post.id), {
-        commentsCount: increment(1), // Increments the count by 1
-      });
       const postComments = await getPostComments(post.id);
       setComments(postComments);
       setAddCommentsLoad(false);
@@ -129,28 +144,34 @@ const PostCard: FC<PostCardProps> = ({
                   postId={post.id}
                 />
               )}
-            {post.ownerId === auth?.currentUser?.uid && (
-              <>
-                <Button
-                  className="cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
-                  variant="outline"
-                  size="sm"
-                >
-                  <Pencil className="w-4 h-4 mr-1" /> Edit
-                </Button>
-                <Button
-                  className="cursor-pointer text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setDeletePostId(post.id);
-                    setAlertDialog(true);
-                  }}
-                >
-                  <Trash className="w-4 h-4 mr-1" /> Delete
-                </Button>
-              </>
-            )}
+            {post.ownerId === auth?.currentUser?.uid &&
+              !window.location.pathname.startsWith("/posts/") && (
+                <>
+                  <Button
+                    className="cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditPost?.(post);
+                      setEditForm?.(true);
+                      setEditPostDialogOpen?.(true);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button
+                    className="cursor-pointer text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setDeletePostId?.(post.id);
+                      setAlertDialog?.(true);
+                    }}
+                  >
+                    <Trash className="w-4 h-4 mr-1" /> Delete
+                  </Button>
+                </>
+              )}
           </div>
         </div>
       </CardHeader>
@@ -247,6 +268,10 @@ const PostCard: FC<PostCardProps> = ({
                 ? "comment"
                 : "comments"}
             </span>
+            <span>
+              {likesCount}{" "}
+              {likesCount === 1 || likesCount === 0 ? "like" : "likes"}
+            </span>
           </div>
         </div>
 
@@ -258,7 +283,7 @@ const PostCard: FC<PostCardProps> = ({
               "flex items-center space-x-1 flex-1 justify-center",
               isLiked && "text-blue-500"
             )}
-            // onClick={handleLike}
+            onClick={handleLike}
           >
             <ThumbsUp size={18} className={isLiked ? "fill-blue-500" : ""} />
             <span>Like</span>

@@ -10,8 +10,11 @@ interface PostCardProps {
     | "researchInstitution"
     | null;
   handleMediaClick: (post: Post) => void;
-  setAlertDialog: (value: boolean) => void;
-  setDeletePostId: (value: string) => void;
+  setAlertDialog?: (value: boolean) => void;
+  setDeletePostId?: (value: string) => void;
+  setEditPostDialogOpen?: (value: boolean) => void | null;
+  setEditForm?: (value: boolean) => void | null;
+  setEditPost?: (value: Post | null) => void;
   // onComment: (postId: string, comment: string) => void;
   // likeCount:number;
   // onLike: (postId: string) => void;
