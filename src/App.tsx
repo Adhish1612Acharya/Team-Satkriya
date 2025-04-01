@@ -26,6 +26,7 @@ import CreateWorkShop from "./pages/Expert/CreateWorkShop/CreateWorkShop";
 import WorkShopDetail from "./pages/WorkShopDetails/WorkShopDetail";
 import { useAuthContext } from "./context/AuthContext";
 import PostDetailPage from "./pages/Posts/PostDetailPage/PostDetailPage";
+import WorkshopRegistration from "./pages/Expert/WorkShopRegistration/WorkShopRegistration";
 
 const App = () => {
   const { nav } = useAuthContext();
@@ -68,14 +69,15 @@ const App = () => {
 
           <Route element={<ExpertProtectRoute />}>
             <Route path="/workshops/create" element={<CreateWorkShop />} />
-            <Route path="/profile/farmer" element={<FarmerProfile />} />
+            <Route path="/workshops/:id/registration" element={<WorkshopRegistration/>}/>
+            {/* <Route path="/profile/farmer" element={<FarmerProfile />} />
             <Route path="/profile/doctor" element={<DoctorProfile />} />
             <Route path="/profile/ngo" element={<NGOProfile />} />
             <Route
               path="/profile/researchinsti"
               element={<ResearchInstituteProfile />}
             />
-            <Route path="/profile/volunteer" element={<VolunteerProfile />} />
+            <Route path="/profile/volunteer" element={<VolunteerProfile />} /> */}
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>
