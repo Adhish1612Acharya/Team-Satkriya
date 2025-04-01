@@ -21,6 +21,7 @@ import {
   Timestamp,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import WorkShop from "@/types/workShop.types";
 import { useNavigate } from "react-router-dom";
@@ -28,89 +29,144 @@ import { useNavigate } from "react-router-dom";
 const useWorkShop = () => {
   const navigate = useNavigate();
 
-  const createWorkshop: createWorkShopType = async (
-    workshopData,
-    filters: string[]
-  ) => {
+  const getAllYourWorkshops = async (): Promise<WorkShop[] | null> => {
     try {
-      if (!auth.currentUser) {
+      // Check authentication
+      const user = auth.currentUser;
+      if (!user) {
+        toast.warn("Please login to view your workshops");
         return null;
       }
 
-      const uploadedImageUrl = await uploadImageToCloudinary(
-        workshopData.thumbnail
+      // Create query for workshops owned by current user
+      const workshopsQuery = query(
+        collection(db, "workshops"),
+        where("owner", "==", user.uid), // Changed from "ownerId" to match your createWorkshop field
+        orderBy("createdAt", "desc") // Added sorting by creation date
       );
 
-      if (!uploadedImageUrl) {
-        toast.error("Image upload failed");
-        return null;
-      }
+      // Execute query
+      const querySnapshot = await getDocs(workshopsQuery);
 
-      const userDocRef = doc(db, "experts", auth.currentUser.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      // Transform documents into Workshop objects
+      const workshops = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as WorkShop)
+      );
 
-      if (!userDocSnap.exists()) {
-        toast.error("User not found");
-        return null;
-      }
-
-      const userData = userDocSnap.data();
-
-      const data = {
-        title: workshopData.title,
-        description: workshopData.description,
-        dateFrom: new Date(workshopData.dateFrom),
-        dateTo: new Date(workshopData.dateTo),
-        timeTo: workshopData.timeTo,
-        timeFrom: workshopData.timeFrom,
-        mode: workshopData.mode,
-        location:
-          workshopData.mode === "offline" ? workshopData.location : null,
-        link: workshopData.mode === "online" ? workshopData.link : null,
-        thumbnail: uploadedImageUrl,
-        filters: filters,
-        owner: auth.currentUser.uid,
-        role: userData.role,
-        registrations: [],
-        profileData: {
-          name: userData.name,
-          profilePic: userData.profilePic || "",
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      const workShopAdded = await addDoc(collection(db, "workshops"), data);
-
-      await updateDoc(userDocRef, {
-        workshops: arrayUnion(workShopAdded.id),
-      });
-
-      return workShopAdded.id;
-    } catch (err) {
-      console.log(err);
-      toast.error("Create wrokshop error");
+      return workshops;
+    } catch (error) {
+      console.error("Error fetching workshops:", error);
+      toast.error("Failed to load your workshops");
       return null;
     }
   };
 
-  const fetchWorkshopById: fetchWorkshopByIdType = async (id) => {
+  const createWorkshop: createWorkShopType = async (workshopData, filters) => {
+    // Early exit if unauthenticated
+    const user = auth.currentUser;
+    if (!user) {
+      toast.warn("Authentication required");
+      return null;
+    }
+
     try {
-      if (!auth.currentUser) {
+      // Parallelize independent operations
+      const [uploadedImageUrl, userDocSnap] = await Promise.all([
+        uploadImageToCloudinary(workshopData.thumbnail),
+        getDoc(doc(db, "experts", user.uid)),
+      ]);
+
+      // Validate prerequisites
+      if (!uploadedImageUrl) {
+        toast.error("Image upload failed");
         return null;
       }
-      const docRef = doc(db, "workshops", id);
-      const docSnap = await getDoc(docRef);
+      if (!userDocSnap.exists()) {
+        toast.error("Expert profile missing");
+        return null;
+      }
 
-      if (!docSnap.exists()) {
-        console.error("Workshop not found!");
+      // Prepare data with atomic writes
+      const batch = writeBatch(db);
+      const workshopRef = doc(collection(db, "workshops"));
+
+      const workshopDoc = {
+        title: workshopData.title.trim(),
+        description: workshopData.description.trim(),
+        dateFrom: new Date(workshopData.dateFrom),
+        dateTo: new Date(workshopData.dateTo),
+        timeFrom: workshopData.timeFrom,
+        timeTo: workshopData.timeTo,
+        mode: workshopData.mode,
+        location:
+          workshopData.mode === "offline"
+            ? workshopData.location?.trim()
+            : null,
+        link: workshopData.mode === "online" ? workshopData.link?.trim() : null,
+        thumbnail: uploadedImageUrl,
+        filters,
+        owner: user.uid,
+        role: userDocSnap.data().role,
+        registrations: [],
+        profileData: {
+          name: userDocSnap.data().name.trim(),
+          profilePic: userDocSnap.data().profilePic || "",
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // Atomic write operations
+      batch.set(workshopRef, workshopDoc);
+      batch.update(doc(db, "experts", user.uid), {
+        workshops: arrayUnion(workshopRef.id),
+      });
+
+      await batch.commit();
+      toast.success("Workshop created!");
+      return workshopRef.id;
+    } catch (error) {
+      console.error("Workshop creation failed:", error);
+      toast.error(error instanceof Error ? error.message : "Creation error");
+      return null;
+    }
+  };
+
+  const fetchWorkshopById: fetchWorkshopByIdType = async (id: string) => {
+    try {
+      // 1. Authentication Check
+      const user = auth.currentUser;
+      if (!user) {
+        toast.warn("Please login to view workshop details");
+        return null;
+      }
+
+      // 2. Document Reference
+      const workshopRef = doc(db, "workshops", id);
+      const workshopSnap = await getDoc(workshopRef);
+
+      // 3. Existence Check
+      if (!workshopSnap.exists()) {
         toast.error("Workshop not found");
         return null;
       }
 
-      return { id: docSnap.id, ...docSnap.data() } as WorkShop;
+      // 4. Data Processing
+      const workshopData = workshopSnap.data();
+
+      // 5. Return Typed Workshop Object
+      return {
+        id: workshopSnap.id,
+        ...workshopData,
+      } as WorkShop;
     } catch (error) {
-      console.error("Error fetching workshop:", error);
-      toast.error("Failed to fetch workshop");
+      // 6. Error Handling
+      console.error(`Failed to fetch workshop ${id}:`, error);
+      toast.error("Error loading workshop details");
       return null;
     }
   };
@@ -251,51 +307,48 @@ const useWorkShop = () => {
     }
   };
 
+  const getWorkshopRegistrationDetails: GetWorkshopRegistrationDetailsType =
+    async (workshopId) => {
+      try {
+        // Validate current user
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error("Authentication required to view registrations");
+          navigate("/auth");
+          return;
+        }
 
-  const getWorkshopRegistrationDetails:GetWorkshopRegistrationDetailsType = async (
-    workshopId,
-    ownerId
-  ) => {
-    try {
-      // Validate current user
-      const user = auth.currentUser;
-      if (!user) {
-        toast.error("Authentication required to view registrations");
-        navigate("/auth");
-        return;
+        // Get workshop document
+        const workshopDoc = await getDoc(doc(db, "workshops", workshopId));
+
+        // Verify workshop exists
+        if (!workshopDoc.exists()) {
+          toast.warn("The requested workshop does not exist");
+          navigate("/workshops");
+          return;
+        }
+
+          // Verify user is the workshop owner
+          if (user.uid !== workshopDoc.data().ownerId) {
+            toast.warn("Only the workshop owner can view registration details");
+            navigate("/workshops");
+            return;
+          }
+
+        // Type-safe extraction of workshop data
+        const workshopData = {
+          id: workshopDoc.id,
+          ...workshopDoc.data(),
+        } as WorkShop;
+
+        // Return registration details if they exist, otherwise empty array
+        return workshopData;
+      } catch (error) {
+        console.error("Failed to fetch registration details:", error);
+        toast.error("Error loading registration information");
+        return; // Return empty array on failure
       }
-
-      // Verify user is the workshop owner
-      if (user.uid !== ownerId) {
-        toast.warn("Only the workshop owner can view registration details");
-        navigate("/workshops");
-        return;
-      }
-
-      // Get workshop document
-      const workshopDoc = await getDoc(doc(db, "workshops", workshopId));
-
-      // Verify workshop exists
-      if (!workshopDoc.exists()) {
-        toast.warn("The requested workshop does not exist");
-        navigate("/workshops");
-        return;
-      }
-
-      // Type-safe extraction of workshop data
-      const workshopData = {
-        id: workshopDoc.id,
-        ...workshopDoc.data(),
-      } as WorkShop;
-
-      // Return registration details if they exist, otherwise empty array
-      return workshopData.registrations || [];
-    } catch (error) {
-      console.error("Failed to fetch registration details:", error);
-      toast.error("Error loading registration information");
-      return []; // Return empty array on failure
-    }
-  };
+    };
 
   return {
     createWorkshop,
@@ -304,6 +357,7 @@ const useWorkShop = () => {
     fetchFilteredWorkshops,
     registerWorkShop,
     getWorkshopRegistrationDetails,
+    getAllYourWorkshops,
   };
 };
 

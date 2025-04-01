@@ -1,4 +1,4 @@
-import WorkShop, { Registration } from "@/types/workShop.types";
+import WorkShop from "@/types/workShop.types";
 
 export interface WorkShopData {
   title: string;
@@ -36,5 +36,4 @@ export type RegisterWorkshopType = (
 // Type for getWorkshopRegistrationDetails function
 export type GetWorkshopRegistrationDetailsType = (
   workshopId: string,
-  ownerId: string
-) => Promise<Registration[] | undefined>;
+) => Promise<WorkShop | void>;
