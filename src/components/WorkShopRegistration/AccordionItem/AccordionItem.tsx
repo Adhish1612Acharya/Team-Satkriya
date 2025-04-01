@@ -7,7 +7,7 @@ import AccordionItemProps from "./AccordionItem.types";
 import { useNavigate } from "react-router-dom";
 
 // Accordion Item Component
-const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail }) => {
+const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail,index }) => {
   const navigate = useNavigate();
 
   const [openItem, setOpenItem] = useState<string>("");
@@ -26,7 +26,7 @@ const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail }) => {
       >
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-medium">
-            {registrantDetail?.id}
+            {index + 1}
           </div>
           <div>
             <h3 className="font-medium">{registrantDetail?.name}</h3>
@@ -60,13 +60,6 @@ const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail }) => {
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span>{registrantDetail?.contactNo}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span>
-                ID: WS-2025-{registrantDetail?.id.toString().padStart(4, "0")}
-              </span>
             </div>
 
             <Button

@@ -23,6 +23,7 @@ interface WorkShop {
   timeFrom: string;
   timeTo: string;
   registrations: Registration[];
+  currUserRegistered:boolean;
   profileData: {
     name: string;
     profilePic: string;
