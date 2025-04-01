@@ -6,7 +6,8 @@ export interface Registrant {
 }
 
 interface AccordionItemProps {
-  registrantDetail: Registrant | null; 
+  registrantDetail: Registrant | null;
+  index: number;
 }
 
 export default AccordionItemProps;

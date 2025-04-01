@@ -23,7 +23,7 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import WorkShop from "@/types/workShop.types";
+import WorkShop, { Registration } from "@/types/workShop.types";
 import { useNavigate } from "react-router-dom";
 
 const useWorkShop = () => {
@@ -96,7 +96,7 @@ const useWorkShop = () => {
 
       const workshopDoc = {
         title: workshopData.title.trim(),
-        description: workshopData.description.trim(),
+        description: workshopData.description.trim().replace(/\n/g, "\\n"),
         dateFrom: new Date(workshopData.dateFrom),
         dateTo: new Date(workshopData.dateTo),
         timeFrom: workshopData.timeFrom,
@@ -158,9 +158,14 @@ const useWorkShop = () => {
       // 4. Data Processing
       const workshopData = workshopSnap.data();
 
+        // Check if current user is registered
+        const isRegistered =
+        workshopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid)
+
       // 5. Return Typed Workshop Object
       return {
         id: workshopSnap.id,
+        currUserRegistered: isRegistered,
         ...workshopData,
       } as WorkShop;
     } catch (error) {
@@ -172,38 +177,50 @@ const useWorkShop = () => {
   };
 
   const fetchAllWorkshops: fetchAllWorkshopsType = async () => {
+    // Early return if no authenticated user
+    if (!auth.currentUser) {
+      toast.warn("Please login to view workshops");
+      return null;
+    }
+
     try {
-      if (!auth.currentUser) {
-        return null;
-      }
+      // Set up query for upcoming workshops
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const q = query(
-        collection(db, "workshops"),
-        where("dateFrom", ">=", Timestamp.fromDate(today)), // Compare with today's date
-        orderBy("dateFrom", "asc") // Order by date (earliest first)
-      );
-      // Execute the query with error handling
-      const querySnapshot = await getDocs(q).catch((error) => {
-        console.error("Firestore query error:", error);
-        throw error; // Re-throw to be caught by the outer try-catch
-      });
+      today.setHours(0, 0, 0, 0); // Normalize to start of day
 
-      // Check if the result is empty
+      const workshopsQuery = query(
+        collection(db, "workshops"),
+        where("dateFrom", ">=", Timestamp.fromDate(today)), // Only future workshops
+        orderBy("dateFrom", "asc") // Earliest first
+      );
+
+      // Execute query with error handling
+      const querySnapshot = await getDocs(workshopsQuery);
+
+      // Handle empty result set
       if (querySnapshot.empty) {
-        toast.info("No workshops available yet");
-        return []; // Return empty array instead of null for easier consumption
+        toast.info("No upcoming workshops available");
+        return []; // Return empty array for easier consumption
       }
 
-      const workshops: WorkShop[] = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as WorkShop[];
+      // Transform Firestore documents to Workshop objects
+      return querySnapshot.docs.map((doc) => {
+        const workshopData = doc.data();
 
-      return workshops;
+         // Check if current user is registered
+         const isRegistered =
+         workshopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid)
+
+        return {
+          id: doc.id,
+          currUserRegistered: isRegistered,
+          ...workshopData,
+        } as WorkShop;
+      });
     } catch (error) {
-      console.error("Error fetching workshops:", error);
-      toast.error("Error fetching  workshop data");
+      // 6. Error Handling
+      console.error(`Failed to fetch workshops:`, error);
+      toast.error("Error loading workshop details");
       return null;
     }
   };
@@ -238,9 +255,16 @@ const useWorkShop = () => {
       }
 
       const filteredWorkShops = querySnapshot.docs.map((doc) => {
+        const workShopData = doc.data();
+
+        // Check if current user is registered
+        const isRegistered =
+        workShopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid);
+
         return {
           id: doc.id,
-          ...doc.data(),
+          currUserRegistered: isRegistered,
+          ...workShopData,
         } as WorkShop;
       });
 
@@ -276,6 +300,25 @@ const useWorkShop = () => {
 
       const userData = userDocSnap.data();
 
+      // Check for existing registration
+      const workshopDocRef = doc(db, "workshops", workshopId);
+      const workshopSnap = await getDoc(workshopDocRef);
+
+      if (!workshopSnap.exists()) {
+        toast.error("Workshop not found");
+        return;
+      }
+
+      const existingRegistrations = workshopSnap.data().registrations || [];
+      if (
+        existingRegistrations.some((reg: Registration) => reg.id === user.uid)
+      ) {
+        toast.warn("Already registered");
+        return;
+      }
+
+      // 3. Prepare batch
+      const batch = writeBatch(db);
       // Prepare registration data
       const registrationData = {
         id: user.uid,
@@ -284,23 +327,20 @@ const useWorkShop = () => {
         role: userData.role,
       };
 
-      // Get workshop document reference
-      const workshopDocRef = doc(db, "workshops", workshopId);
+      // 4. Add operations to batch
+      batch.update(workshopDocRef, {
+        registrations: arrayUnion(registrationData),
+        updatedAt: new Date(),
+      });
 
-      // Execute both updates in parallel for better performance
-      await Promise.all([
-        // Add user to workshop registrations
-        updateDoc(workshopDocRef, {
-          registrations: arrayUnion(registrationData),
-        }),
+      batch.update(userDocRef, {
+        registrations: arrayUnion(workshopId),
+        updatedAt: new Date(),
+      });
 
-        // Add workshop to user's registrations
-        updateDoc(userDocRef, {
-          registrations: arrayUnion(workshopId),
-        }),
-      ]);
-
-      toast.success("Successfully registered for the workshop!");
+      // 5. Commit batch
+      await batch.commit();
+      toast.success("Registration successful!");
     } catch (error) {
       console.error("Workshop registration failed:", error);
       toast.error("Failed to register for workshop");
@@ -328,12 +368,12 @@ const useWorkShop = () => {
           return;
         }
 
-          // Verify user is the workshop owner
-          if (user.uid !== workshopDoc.data().ownerId) {
-            toast.warn("Only the workshop owner can view registration details");
-            navigate("/workshops");
-            return;
-          }
+        // Verify user is the workshop owner
+        if (user.uid !== workshopDoc.data().owner) {
+          toast.warn("Only the workshop owner can view registration details");
+          navigate("/workshops");
+          return;
+        }
 
         // Type-safe extraction of workshop data
         const workshopData = {

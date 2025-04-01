@@ -7,6 +7,10 @@ import {
   Clock,
   Hourglass,
   Loader2,
+  CheckCircle,
+  PenSquare,
+  Users,
+  Eye,
 } from "lucide-react";
 import {
   Card,
@@ -23,6 +27,7 @@ import { Timestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
+import { auth } from "@/firebase";
 
 // Workshop Card Component
 const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
@@ -31,6 +36,9 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
   const navigate = useNavigate();
 
   const [registerLoading, setRegisterLoading] = useState<boolean>(false);
+  const [registered, setRegistered] = useState<boolean>(
+    workshop.currUserRegistered
+  );
 
   // Format dates
   const formattedStartDate = format(
@@ -69,7 +77,10 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
 
   const register = async () => {
     setRegisterLoading(true);
-    await registerWorkShop(workshop.id, userType);
+    if (!workshop.currUserRegistered) {
+      await registerWorkShop(workshop.id, userType);
+    }
+    setRegistered(true);
     setRegisterLoading(false);
   };
 
@@ -156,7 +167,9 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
           </div>
         )}
         <div className="max-h-[120px] mt-4 overflow-y-auto">
-          <p className="text-sm text-gray-600">{workshop.description}</p>
+          <p className="text-sm text-gray-600 whitespace-pre-wrap">
+            {workshop.description.replace(/\\n/g, "\n")}
+          </p>
         </div>
 
         {/* Location or Link */}
@@ -177,18 +190,54 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex flex-wrap justify-end gap-2 mt-4">
+        {/* View Details Button (only on workshops list page) */}
         {window.location.pathname.endsWith("/workshops") && (
           <Button
-            className="cursor-pointer"
+            variant="outline"
+            className="min-w-[100px] hover:bg-primary hover:text-primary-foreground transition-colors"
             onClick={() => navigate(`/workshops/${workshop.id}`)}
           >
-            View
+            <Eye className="w-4 h-4 mr-2" />
+            View Details
           </Button>
         )}
-        <Button className="cursor-pointer" onClick={() => register()}>
-          {registerLoading ? <Loader2 className="animate-spin" /> : "Register"}
+
+        {/* Registration Button */}
+        <Button
+          className="min-w-[120px] transition-colors"
+          disabled={workshop.currUserRegistered || registerLoading}
+          onClick={() => register()}
+        >
+          {registerLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Processing...
+            </>
+          ) : registered ? (
+            <>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Registered
+            </>
+          ) : (
+            <>
+              <PenSquare className="w-4 h-4 mr-2" />
+              Register Now
+            </>
+          )}
         </Button>
+
+        {/* View Registrations Button (only for owner) */}
+        {workshop.owner === auth?.currentUser?.uid && (
+          <Button
+            variant="outline"
+            className="min-w-[150px] border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            onClick={() => navigate(`/workshops/${workshop.id}/registration`)}
+          >
+            <Users className="w-4 h-4 mr-2" />
+            View Registrants
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

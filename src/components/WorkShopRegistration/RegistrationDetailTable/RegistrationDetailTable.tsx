@@ -28,9 +28,9 @@ const RegistrationDetailTable: FC<RegistrationDetailTableProps> = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {registrationsData.map((participant) => (
+        {registrationsData.map((participant, index) => (
           <TableRow key={participant.id}>
-            <TableCell className="font-medium">{participant.id}</TableCell>
+            <TableCell className="font-medium">{index + 1}</TableCell>
             <TableCell>{participant.name}</TableCell>
             <TableCell>{participant.contactNo}</TableCell>
             <TableCell>
