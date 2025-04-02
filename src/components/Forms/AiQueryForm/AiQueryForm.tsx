@@ -22,10 +22,10 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<{ url: string; file: File }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [savedQuery, setSavedQuery] = useState<{
-    query: string;
-    images: { url: string; file: File }[];
-  }>({ query: "", images: [] });
+  // const [savedQuery, setSavedQuery] = useState<{
+  //   query: string;
+  //   images: { url: string; file: File }[];
+  // }>({ query: "", images: [] });  //future implementation
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -113,7 +113,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
       images.map((image) => convertToBase64(image.file))
     );
 
-    setSavedQuery({ query, images });
+    // setSavedQuery({ query, images }); //future implementation
 
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const posts: Post[] = postsSnapshot.docs.map(

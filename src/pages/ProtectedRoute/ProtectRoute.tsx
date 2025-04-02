@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
-  const { currentUser, loading, setUserType, setUsername, userType, setNav } =
+  const { currentUser, loading, setUserType, setUsername, setNav } =
     useAuthContext();
   const [isRoleChecked, setIsRoleChecked] = useState(false);
 

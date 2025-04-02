@@ -10,7 +10,6 @@ import {
 import { uploadImageToCloudinary } from "./useWorkShopUtility";
 import { auth, db } from "@/firebase";
 import {
-  addDoc,
   arrayUnion,
   collection,
   doc,
@@ -19,7 +18,6 @@ import {
   orderBy,
   query,
   Timestamp,
-  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
