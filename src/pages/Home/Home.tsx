@@ -18,20 +18,47 @@ import breeds from "@/constants/breeds";
 import BreedCard from "@/components/BreedCard/BreedCard";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import getUserInfo from "@/utils/getUserInfo";
+import PageLoader from "@/components/PageLoader/loader";
 
 function Home() {
   const navigate = useNavigate();
-  const {setNav}=useAuthContext();
 
-  useEffect(()=>{
-    setNav(true);
-  },[])
+  const { currentUser, setUserType, setUsername, setNav } = useAuthContext();
+  const [isRoleChecked, setIsRoleChecked] = useState(false);
+
+  useEffect(() => {
+    async function checkUserRole() {
+      if (currentUser) {
+        let userInfo = await getUserInfo(currentUser.uid, "farmers");
+        if (userInfo) {
+          setUserType(userInfo.role === "farmer" ? "farmers" : "experts");
+          setUsername(userInfo.name);
+        } else {
+          userInfo = await getUserInfo(currentUser.uid, "experts");
+          if (userInfo) {
+            setUserType(userInfo?.role === "farmer" ? "farmers" : "experts");
+            setUsername(userInfo?.name);
+          } else {
+            setUserType(null);
+            setUsername(null);
+          }
+        }
+      }
+
+      setIsRoleChecked(true);
+      setNav(true);
+    }
+    checkUserRole();
+  }, [currentUser]);
+
+  if (!isRoleChecked) {
+    return <PageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
-     
-
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1598715559054-0dd66c7e811c?auto=format&fit=crop&q=80')] bg-cover bg-center">
         <div className="absolute inset-0 bg-black/50" />
@@ -43,18 +70,6 @@ function Home() {
             Join us in our mission to protect and revive indigenous cow breeds
             through sustainable practices and modern technology
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 cursor-pointer">
-              <Users className="mr-2 h-5 w-5" /> Connect with Experts
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="bg-white/10 backdrop-blur-sm cursor-pointer"
-            >
-              <Heart className="mr-2 h-5 w-5" /> Adopt a Cow
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -116,11 +131,13 @@ function Home() {
           </div>
         </div>
       </section>
-      
+
       {/* Main Future Features */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Future Services</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Our Future Services
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <FeatureCard
               icon={CalendarCheck}
@@ -170,7 +187,7 @@ function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {breeds.map((breed, index) => (
-              <BreedCard key={index} {...breed}  />
+              <BreedCard key={index} {...breed} />
             ))}
           </div>
         </div>

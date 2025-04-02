@@ -9,7 +9,6 @@ import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleto
 import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
 import { auth } from "@/firebase";
-import filters from "@/constants/filters";
 import WorkShop from "@/types/workShop.types";
 import { useAuthContext } from "@/context/AuthContext";
 import { AlertCircle, Plus } from "lucide-react";
@@ -17,10 +16,11 @@ import { motion } from "framer-motion";
 import { Fab } from "@mui/material";
 import CreatePostDialog from "@/components/CreatePostDialog/CreatePostDialog";
 import AlertDialogBox from "@/components/AlertDialogBox/AlertDialogBox";
+import yourContentFilters from "@/constants/yourContentFilters";
 
-export function PostsPage() {
+const YourPostPage = () => {
   const { userType } = useAuthContext();
-  const { getAllPosts } = usePost();
+  const { getYourPosts } = usePost();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -40,7 +40,7 @@ export function PostsPage() {
       if (!userType) {
         return;
       }
-      const postData = await getAllPosts();
+      const postData = await getYourPosts();
       setPosts(postData);
       let userInfo;
       if (auth.currentUser) {
@@ -68,85 +68,11 @@ export function PostsPage() {
     setSelectedPost(null);
   };
 
-  
-
-  // const handleComment = (postId: string, comment: string) => {
-  //   // In a real app, this would call an API
-  //   console.log(`Commented on post ${postId}: ${comment}`);
-
-  //   // For demo purposes, we'll update the local state
-  //   const updatedPosts = posts.map((post) => {
-  //     if (post.id === postId) {
-  //       return {
-  //         ...post,
-  //         comments: [
-  //           // ...post,
-  //           {
-  //             id: `comment-${Date.now()}`,
-  //             authorId: "volunteer-123", // Assuming the current user is a volunteer
-  //             authorName: "Amit Patel",
-  //             authorProfilePhoto:
-  //               "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80",
-  //             content: comment,
-  //             createdAt: new Date().toISOString(),
-  //           },
-  //         ],
-  //       };
-  //     }
-  //     return post;
-  //   });
-
-  //   setPosts(updatedPosts);
-  // };
-
-  // const handleShare = (postId: string) => {
-  //   // In a real app, this would open a share dialog
-  //   console.log(`Shared post ${postId}`);
-  //   alert("Share functionality would be implemented here!");
-  // };
-
-  // const handleMediaClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  //   if (post.mediaUrl) {
-  //     onPostClick(post);
-  //   }
-  // };
-
-  // const handleShare = (e: React.MouseEvent) => {
-  //   e.stopPropagation(); // Prevent event bubbling
-  //   onShare(post.id);
-  // };
-
-  // const handleSave = (e: React.MouseEvent) => {
-  //   e.stopPropagation(); // Prevent event bubbling
-  //   setIsSaved(!isSaved);
-  // };
-
   return (
     <>
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-        {/* Filter Component for better UI/UX */}
-        <div className="mb-4">
-          <Filter
-            setLoading={setLoading}
-            setData={setPosts as unknown as (data: Post[] | WorkShop[]) => void}
-            filters={filters}
-            isPost={true}
-          />
-        </div>
 
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
-
-          <Card className="mb-8 overflow-hidden">
-            {/* <CardTitle>Create Post</CardTitle> */}
-            <CreatePostForm
-              firebaseDocuemntType={userType as "farmers" | "experts"}
-              post={null}
-              editForm={false}
-            />
-          </Card>
-
           {/* Posts Feed */}
           <div>
             {loading ? (
@@ -186,10 +112,6 @@ export function PostsPage() {
                   setEditPostDialogOpen={setOpen}
                   setEditForm={setEditForm}
                   setEditPost={setEditPostInfo}
-                  // onComment={handleComment}
-                  // onLike={handleLike}
-                  // onShare={handleShare}
-                  // onPostClick={handlePostClick}
                 />
               ))
             )}
@@ -200,9 +122,6 @@ export function PostsPage() {
             post={selectedPost}
             isOpen={isModalOpen}
             onClose={handleCloseModal}
-            // onLike={handleLike}
-            // onComment={handleComment}
-            // onShare={handleShare}
           />
         </div>
 
@@ -242,4 +161,6 @@ export function PostsPage() {
       </div>
     </>
   );
-}
+};
+
+export default YourPostPage;

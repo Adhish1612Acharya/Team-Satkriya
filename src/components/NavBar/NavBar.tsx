@@ -12,6 +12,8 @@ import {
   Home,
   LogIn,
   HomeIcon,
+  CalendarCheck,
+  Bookmark,
 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import Profile from "./Profile";
@@ -47,6 +49,24 @@ const NavBar = () => {
             href: "/workshops",
             icon: <Calendar className="h-4 w-4" />,
             color: "text-amber-500",
+          },
+          {
+            title: "Your Posts",
+            href: "/user/posts",
+            icon: <FileText className="w-5 h-5 text-blue-600" />,
+            className: "hover:bg-blue-50", // Optional hover effect
+          },
+          {
+            title: "Your Registrations",
+            href: "/user/registrations",
+            icon: <CalendarCheck className="w-5 h-5 text-green-600" />,
+            className: "hover:bg-green-50",
+          },
+          {
+            title: "Your Bookmarks",
+            href: "/user/bookmarks",
+            icon: <Bookmark className="w-5 h-5 text-purple-600" />,
+            className: "hover:bg-purple-50",
           },
         ]
       : []),
