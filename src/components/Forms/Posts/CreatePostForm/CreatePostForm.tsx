@@ -17,7 +17,6 @@ import { PostArgu } from "@/hooks/usePost/usePost.types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, VideoIcon, X, FileText, Loader2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
 import { toast } from "react-toastify";

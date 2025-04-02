@@ -63,7 +63,7 @@ const PostCard: FC<PostCardProps> = ({
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, _setIsSaved] = useState(false);
 
   const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState<boolean>(false);

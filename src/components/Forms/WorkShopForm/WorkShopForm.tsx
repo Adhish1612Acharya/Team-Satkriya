@@ -16,15 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { z } from "zod";
 import { toast } from "react-toastify";
-import { CalendarIcon, Loader2 } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import {  Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -39,6 +31,10 @@ import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import { validateAndFilterWebinar } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
 import webinarFilters from "@/constants/webinarFilters";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
+import { format } from "date-fns";
 
 // Generate time options in 12-hour format
 const generateTimeOptions = () => {
@@ -63,6 +59,9 @@ const WorkshopForm = () => {
   const navigate = useNavigate();
   const { createWorkshop } = useWorkShop();
 
+  // Inside your component
+  const [dateFrom, setDateFrom] = useState<Dayjs | null>(dayjs());
+  const [dateTo, setDateTo] = useState<Dayjs | null>(dayjs());
 
   // Initialize form
   const form = useForm<z.infer<typeof workshopSchema>>({
@@ -82,8 +81,8 @@ const WorkshopForm = () => {
   });
 
   const mode = form.watch("mode");
-  const dateFrom = form.watch("dateFrom");
-  const dateTo = form.watch("dateTo");
+  // const dateFrom = form.watch("dateFrom");
+  // const dateTo = form.watch("dateTo");
   const timeFrom = form.watch("timeFrom");
 
   const formatTime12Hour = (time24: string) => {
@@ -140,6 +139,7 @@ const WorkshopForm = () => {
     }
   };
 
+
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-lg">
       <CardContent className="p-6">
@@ -191,7 +191,7 @@ const WorkshopForm = () => {
               )}
             />
 
-            {/* Date Range */}
+            {/* Date Range
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -291,6 +291,52 @@ const WorkshopForm = () => {
                   </FormItem>
                 )}
               />
+            </div> */}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Start Date */}
+              <DemoContainer components={["DatePicker"]}>
+                <DatePicker
+                  label="Start Date"
+                  value={dateFrom}
+                  onChange={(newValue: Dayjs | null) => {
+                    setDateFrom(newValue);
+                    if (newValue && dateTo && newValue.isAfter(dateTo)) {
+                      setDateTo(newValue);
+                      form.setValue("dateTo", newValue?.toDate() || new Date());
+                    }
+                    form.setValue("dateFrom", newValue?.toDate() || new Date());
+                  }}
+                  minDate={dayjs()}
+                  format="MMM DD, YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      variant: "outlined",
+                    },
+                  }}
+                />
+              </DemoContainer>
+
+              {/* End Date */}
+              <DemoContainer components={["DatePicker"]}>
+                <DatePicker
+                  label="End Date"
+                  value={dateTo}
+                  onChange={(newValue: Dayjs | null) => {
+                    setDateTo(newValue);
+                    form.setValue("dateTo", newValue?.toDate() || new Date());
+                  }}
+                  minDate={dateFrom || dayjs()}
+                  format="MMM DD, YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      variant: "outlined",
+                    },
+                  }}
+                />
+              </DemoContainer>
             </div>
 
             {/* Time Range */}
