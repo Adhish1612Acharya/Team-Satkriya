@@ -50,6 +50,8 @@ export default function WorkshopRegistrationPage() {
 
   if (!loading && workShop && workShop.registrations.length === 0) {
     return (
+      <div className="container mx-auto py-6 space-y-8">
+      <WorkShopSummaryCard workshopData={workShop} />
       <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg border border-dashed">
         <Users className="h-12 w-12 text-gray-400 mb-4" />
         <h3 className="text-lg font-medium text-gray-500 mb-2">
@@ -59,6 +61,7 @@ export default function WorkshopRegistrationPage() {
           Be the first to register for this workshop! Share it with others to
           increase participation.
         </p> */}
+      </div>
       </div>
     );
   }

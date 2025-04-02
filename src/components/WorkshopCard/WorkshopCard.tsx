@@ -154,7 +154,7 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
       <CardContent>
         {/* Filters Section - Add this */}
         {workshop.filters && workshop.filters.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="max-h-[100px] overflow-y-auto mt-4 flex flex-wrap gap-2">
             {workshop.filters.map((filter, index) => (
               <Badge
                 key={index}
@@ -183,7 +183,14 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
             <>
               <Globe className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-500" />
               <span className="break-all text-blue-600 hover:underline">
-                {workshop.link}
+                <a
+                  href={workshop.link || ""}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-blue-600 hover:underline"
+                >
+                  {workshop.link}
+                </a>
               </span>
             </>
           )}
@@ -204,28 +211,32 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
         )}
 
         {/* Registration Button */}
-        <Button
-          className="min-w-[120px] transition-colors"
-          disabled={workshop.currUserRegistered || registerLoading}
-          onClick={() => register()}
-        >
-          {registerLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : registered ? (
-            <>
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Registered
-            </>
-          ) : (
-            <>
-              <PenSquare className="w-4 h-4 mr-2" />
-              Register Now
-            </>
-          )}
-        </Button>
+        {workshop.owner !== auth.currentUser?.uid && (
+          <Button
+            className="min-w-[120px] transition-colors"
+            disabled={
+              workshop.currUserRegistered || registerLoading || registered
+            }
+            onClick={() => register()}
+          >
+            {registerLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : registered ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Registered
+              </>
+            ) : (
+              <>
+                <PenSquare className="w-4 h-4 mr-2" />
+                Register Now
+              </>
+            )}
+          </Button>
+        )}
 
         {/* View Registrations Button (only for owner) */}
         {workshop.owner === auth?.currentUser?.uid && (

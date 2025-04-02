@@ -1,22 +1,17 @@
 import { useEffect, useState } from "react";
 import PostCard from "@/components/Post/PostCard/PostCard";
 import { PostModal } from "@/components/Post/PostModal";
-import { Card, CardTitle } from "@/components/ui/card";
 import Post from "@/types/posts.types";
-import CreatePostForm from "@/components/Forms/Posts/CreatePostForm/CreatePostForm";
 import usePost from "@/hooks/usePost/usePost";
 import PostCardSkeleton from "@/components/Post/PostCardSkeleton/PostCardSkeleton";
-import Filter from "@/components/Filter/Filter/Filter";
 import getUserInfo from "@/utils/getUserInfo";
 import { auth } from "@/firebase";
-import WorkShop from "@/types/workShop.types";
 import { useAuthContext } from "@/context/AuthContext";
 import { AlertCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Fab } from "@mui/material";
 import CreatePostDialog from "@/components/CreatePostDialog/CreatePostDialog";
 import AlertDialogBox from "@/components/AlertDialogBox/AlertDialogBox";
-import yourContentFilters from "@/constants/yourContentFilters";
 
 const YourPostPage = () => {
   const { userType } = useAuthContext();
