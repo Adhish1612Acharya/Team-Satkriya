@@ -89,7 +89,10 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
     ${
       ((userRole === "doctor" || userRole === "researchInstitution") &&
         verified) ||
-        (userRole === "farmer" || userRole === "volunteer"  || userRole === "ngo") && verifiedProfiles?.length > 0
+      ((userRole === "farmer" ||
+        userRole === "volunteer" ||
+        userRole === "ngo") &&
+        verifiedProfiles?.length > 0)
         ? "bg-green-500 hover:bg-green-600 text-white"
         : "bg-red-500 hover:bg-red-600 text-white"
     }
@@ -117,7 +120,18 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               {/* For verifiers */}
               {(userRole === "doctor" ||
                 userRole === "researchInstitution") && (
-                <div>{verified ? "Verified By You" : "Not Verified By you"}</div>
+                <div>
+                  {verified ? (
+                    "Verified By You"
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <div>Not Verified</div>
+                      <span className="text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 px-2 py-0.5 rounded-full mt-1 transition-all shadow-sm">
+                        Click to verify
+                      </span>
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}

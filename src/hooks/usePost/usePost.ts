@@ -720,7 +720,10 @@ const usePost = () => {
     }
   };
 
-  const handleBookMarkPost = async (postId: string) => {
+  const handleBookMarkPost = async (
+    postId: string,
+    userType: "farmers" | "experts"
+  ) => {
     const user = auth.currentUser;
 
     // Edge Case 1: User not authenticated
@@ -740,7 +743,7 @@ const usePost = () => {
         return;
       }
 
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, userType, user.uid);
       const userSnap = await getDoc(userRef);
 
       // Edge Case 3: User document doesn't exist
@@ -776,6 +779,30 @@ const usePost = () => {
     }
   };
 
+  const fetchBookmarkedPosts = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      toast.warning("Please login to view bookmarks");
+      return [];
+    }
+
+    try {
+      // 1. Get user's bookmark IDs
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const bookmarkIds = userDoc.data()?.bookmarks || [];
+
+      // 2. Reuse fetchPostById for each bookmark
+      const postPromises = bookmarkIds.map((id: string) => fetchPostById(id));
+      const posts = (await Promise.all(postPromises)).filter(Boolean);
+
+      return posts as Post[];
+    } catch (error) {
+      console.error("Bookmarks error:", error);
+      toast.error("Failed to load bookmarks");
+      return [];
+    }
+  };
+
   return {
     createPost,
     getAllPosts,
@@ -790,6 +817,7 @@ const usePost = () => {
     deletePost,
     likePost,
     handleBookMarkPost,
+    fetchBookmarkedPosts,
   };
 };
 

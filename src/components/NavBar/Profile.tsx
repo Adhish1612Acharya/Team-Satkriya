@@ -1,4 +1,10 @@
-import { LogOut } from "lucide-react";
+import {
+  Bookmark,
+  CalendarCheck,
+  CheckCircle,
+  FileText,
+  LogOut,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -12,11 +18,47 @@ import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "react-toastify";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
+import { useLocation, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const Profile = () => {
-  const { currentUser, setCurrentUser, setUserType, username } =
+  const { currentUser, setCurrentUser, setUserType, username, userType } =
     useAuthContext();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  const profileItem = [
+    ...(currentUser
+      ? [
+          {
+            title: "Your Posts",
+            href: "/user/posts",
+            icon: <FileText className="w-5 h-5 text-blue-600" />,
+          },
+          {
+            title: "Your Registrations",
+            href: "/user/registrations",
+            icon: <CalendarCheck className="w-5 h-5 text-green-600" />,
+          },
+          {
+            title: "Your Bookmarks",
+            href: "/user/bookmarks",
+            icon: <Bookmark className="w-5 h-5 text-purple-600" />,
+          },
+        ]
+      : []),
+
+    ...(currentUser && userType === "experts"
+      ? [
+          {
+            title: "Your workshops",
+            href: "/user/workshops",
+            icon: <CheckCircle />,
+            color: "text-green-500",
+          },
+        ]
+      : []),
+  ];
   const logOut = async () => {
     try {
       await signOut(auth);
@@ -32,24 +74,24 @@ const Profile = () => {
   return (
     <DropdownMenu>
       <div onClick={() => console.log("Clicked")}>
-      <DropdownMenuTrigger >
-        <Button
-          variant="ghost"
-          size="icon"
-   className="relative z-50 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
-          onClick={() => console.log("Clicked")}
-        >
-          <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
-            <AvatarImage
-              src={currentUser?.photoURL || "/placeholder.svg"}
-              alt="User"
-            />
-            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-              {username?.charAt(0) || "U"}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
+        <DropdownMenuTrigger>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative z-50 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
+            onClick={() => console.log("Clicked")}
+          >
+            <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
+              <AvatarImage
+                src={currentUser?.photoURL || "/placeholder.svg"}
+                alt="User"
+              />
+              <AvatarFallback className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+                {username?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
       </div>
 
       <DropdownMenuContent
@@ -75,15 +117,22 @@ const Profile = () => {
           </div>
         </div>
         <DropdownMenuSeparator />
-        {/* <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-        <span>Profile</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-        <span>Settings</span>
-      </DropdownMenuItem>
-      <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-        <span>My Publications</span>
-      </DropdownMenuItem> */}
+        {profileItem.map((eachItem) => {
+          return (
+            <DropdownMenuItem
+              onClick={() => navigate(eachItem.href)}
+              className={cn(
+                "cursor-pointer flex items-center gap-2",
+                location.pathname === eachItem.href
+                ? "text-primary font-medium bg-primary/10 dark:bg-primary/20 border-l-2 border-primary shadow-sm"
+                : "text-muted-foreground hover:bg-accent/50 dark:hover:bg-accent/10 hover:text-primary transition-colors"
+              )}
+            >
+              {eachItem.icon}
+              <span>{eachItem.title}</span>
+            </DropdownMenuItem>
+          );
+        })}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={logOut}

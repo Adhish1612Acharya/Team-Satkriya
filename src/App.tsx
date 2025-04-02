@@ -24,6 +24,7 @@ import PostDetailPage from "./pages/Posts/PostDetailPage/PostDetailPage";
 import WorkshopRegistration from "./pages/Expert/WorkShopRegistration/WorkShopRegistration";
 import YourPostPage from "./pages/YourPostsPage/YourPostPage";
 import YourRegistrationsPage from "./pages/YourRegistrationsPage/YourRegistrationsPage";
+import YourWorkShopsPage from "./pages/Expert/YourWorkShopsPage/YourWorkShopsPage";
 
 const App = () => {
   const { nav } = useAuthContext();
@@ -75,6 +76,7 @@ const App = () => {
               path="/workshops/:id/registration"
               element={<WorkshopRegistration />}
             />
+            <Route path="/user/workshops" element={<YourWorkShopsPage />} />
             {/* <Route path="/profile/farmer" element={<FarmerProfile />} />
             <Route path="/profile/doctor" element={<DoctorProfile />} />
             <Route path="/profile/ngo" element={<NGOProfile />} />

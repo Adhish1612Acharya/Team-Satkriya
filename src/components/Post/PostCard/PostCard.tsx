@@ -10,10 +10,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Bookmark,
-
   Loader2,
   MessageCircle,
-
   Pencil,
   Share,
   Smile,
@@ -26,7 +24,7 @@ import PostCardProps from "./PostCard.types";
 import Comment from "@/types/comment.types";
 import usePost from "@/hooks/usePost/usePost";
 import { Skeleton } from "@mui/material";
-import {Timestamp } from "@firebase/firestore";
+import { Timestamp } from "@firebase/firestore";
 import {
   Select,
   SelectContent,
@@ -36,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import VerifyPostButton from "@/components/VerifyPostButton/VerifyPostButton";
 import { useAuthContext } from "@/context/AuthContext";
-import { auth} from "@/firebase";
+import { auth } from "@/firebase";
 import { toast } from "react-toastify";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -56,8 +54,14 @@ const PostCard: FC<PostCardProps> = ({
   // onPostClick,
 }) => {
   const { userType } = useAuthContext();
-  const { getPostComments, addCommentPost, getFilteredComments, likePost } =
-    usePost();
+  const {
+    getPostComments,
+    addCommentPost,
+    getFilteredComments,
+    likePost,
+    fetchBookmarkedPosts,
+    handleBookMarkPost,
+  } = usePost();
 
   const [isLiked, setIsLiked] = useState(post.currUserLiked);
   const [likesCount, setLikesCount] = useState(post.likesCount);
@@ -74,6 +78,7 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
+
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
@@ -85,6 +90,40 @@ const PostCard: FC<PostCardProps> = ({
 
   const handleLike = async () => {
     await likePost(post.id, likeTimeoutRef, setIsLiked, setLikesCount);
+  };
+
+  const handleShare = async (): Promise<void> => {
+    const url = `${window.location.origin}/posts/${post.id}`;
+    const text = `${post.content.substring(
+      0,
+      100
+    )}...\n\n🔗 Read full post: ${url}\n\n*Shared via Gopushti* 🐄`;
+
+    try {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+
+      // If using react-hot-toast
+      toast.success("Opened WhatsApp to share!", {
+        position: "bottom-center",
+      });
+    } catch (error) {
+      toast.error("Couldn't open WhatsApp");
+
+      // Fallback with separate button
+      const shouldCopy = confirm("Want to copy the link instead?");
+      if (shouldCopy) {
+        try {
+          await navigator.clipboard.writeText(text);
+          toast.success("Copied to clipboard!", {
+            position: "bottom-center",
+          });
+        } catch (copyError) {
+          toast.error("Failed to copy", {
+            position: "bottom-center",
+          });
+        }
+      }
+    }
   };
 
   const addCommentsFunc = async () => {
@@ -100,6 +139,10 @@ const PostCard: FC<PostCardProps> = ({
       console.log(err);
       toast.error("Add comment error");
     }
+  };
+
+  const handleBookMark = async () => {
+    await handleBookMarkPost(post.id, userType as "farmers" | "experts");
   };
 
   return (
@@ -306,9 +349,9 @@ const PostCard: FC<PostCardProps> = ({
             variant="ghost"
             size="sm"
             className="flex items-center space-x-1 flex-1 justify-center"
-            // onClick={handleShare}
+            onClick={handleShare}
           >
-            <Share size={18} />
+            <MessageCircle size={18} className="h-4 w-4 mr-2" />
             <span>Share</span>
           </Button>
           <Button

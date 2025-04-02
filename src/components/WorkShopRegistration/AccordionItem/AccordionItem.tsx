@@ -1,14 +1,11 @@
 import { ChevronDown, ChevronUp, Phone} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FC, useState } from "react";
 import AccordionItemProps from "./AccordionItem.types";
-import { useNavigate } from "react-router-dom";
 
 // Accordion Item Component
 const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail,index }) => {
-  const navigate = useNavigate();
 
   const [openItem, setOpenItem] = useState<string>("");
 
@@ -61,15 +58,6 @@ const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail,index }) => {
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span>{registrantDetail?.contactNo}</span>
             </div>
-
-            <Button
-              onClick={() => {
-                navigate(`/profile/${registrantDetail?.id}`);
-              }}
-              className="w-full"
-            >
-              View Full Profile
-            </Button>
           </div>
         </div>
       </div>

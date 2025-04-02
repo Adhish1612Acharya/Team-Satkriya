@@ -9,13 +9,10 @@ import {
 import { FC } from "react";
 import RegistrationDetailTableProps from "./RegistrationDetailTable.types";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const RegistrationDetailTable: FC<RegistrationDetailTableProps> = ({
   registrationsData,
 }) => {
-  const navigate = useNavigate();
   return (
     <Table>
       <TableHeader>
@@ -24,7 +21,6 @@ const RegistrationDetailTable: FC<RegistrationDetailTableProps> = ({
           <TableHead>Name</TableHead>
           <TableHead>Contact No.</TableHead>
           <TableHead>Role</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -35,17 +31,6 @@ const RegistrationDetailTable: FC<RegistrationDetailTableProps> = ({
             <TableCell>{participant.contactNo}</TableCell>
             <TableCell>
               <Badge variant="outline">{participant.role}</Badge>
-            </TableCell>
-            <TableCell className="text-right">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigate(`/profile/${participant.id}`);
-                }}
-              >
-                View Profile
-              </Button>
             </TableCell>
           </TableRow>
         ))}

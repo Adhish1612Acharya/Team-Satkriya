@@ -6,7 +6,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FC } from "react";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Globe,
+  MapPin,
+  User,
+} from "lucide-react";
 import WorkShopSummaryCardProps from "./WorkShopSummaryCard.types";
 import { format } from "date-fns";
 import { Timestamp } from "firebase/firestore";
@@ -36,6 +42,7 @@ const WorkShopSummaryCard: FC<WorkShopSummaryCardProps> = ({
             <CardTitle className="text-2xl md:text-3xl">
               {workshopData?.title}
             </CardTitle>
+
             <CardDescription className="mt-2">
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
                 <div className="flex items-center gap-1">
@@ -54,8 +61,29 @@ const WorkShopSummaryCard: FC<WorkShopSummaryCardProps> = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{workshopData?.location}</span>
+                  {workshopData?.mode === "online" ? (
+                    <>
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <a
+                        href={workshopData.link || ""}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline break-all mr-2"
+                      >
+                        Online Workshop Link
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>{workshopData?.location}</span>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">Hosted by: </span>
+                  <span>You</span>
                 </div>
               </div>
             </CardDescription>
