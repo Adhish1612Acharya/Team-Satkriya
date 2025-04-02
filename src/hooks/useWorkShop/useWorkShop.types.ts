@@ -37,3 +37,5 @@ export type RegisterWorkshopType = (
 export type GetWorkshopRegistrationDetailsType = (
   workshopId: string,
 ) => Promise<WorkShop | void>;
+
+export type GetUserRegistrationsDetailsType=(userType:"farmers" | "experts")=> Promise<WorkShop[] | void>

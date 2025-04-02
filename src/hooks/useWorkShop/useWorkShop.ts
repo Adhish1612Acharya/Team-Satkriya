@@ -4,6 +4,7 @@ import {
   fetchAllWorkshopsType,
   fetchWorkshopByIdType,
   GetFilteredWorkshopType,
+  GetUserRegistrationsDetailsType,
   GetWorkshopRegistrationDetailsType,
   RegisterWorkshopType,
 } from "./useWorkShop.types";
@@ -388,6 +389,63 @@ const useWorkShop = () => {
       }
     };
 
+
+    const getUserRegistrations:GetUserRegistrationsDetailsType = async (userType) => {
+      try {
+        // Validate current user
+        const user = auth.currentUser;
+        if (!user) {
+          toast.error("Please login to view your registrations");
+          navigate("/auth");
+          return;
+        }
+    
+        // 1. Get user document
+        const userDocRef = doc(db, userType, user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+    
+        if (!userDocSnap.exists()) {
+          toast.error("User profile not found");
+          navigate("/workshops");
+          return;
+        }
+    
+        // 2. Get registered workshop IDs (with fallback for empty array)
+        const workshopIds = userDocSnap.data()?.registrations || [];
+        if (!workshopIds.length) {
+          return []; // Return empty array if no registrations
+        }
+    
+        // 3. Fetch all workshops in parallel for better performance
+        const workshopPromises = workshopIds.map(async (workshopId: string) => {
+          const workshopDocRef = doc(db, "workshops", workshopId);
+          const workshopSnap = await getDoc(workshopDocRef);
+    
+          if (!workshopSnap.exists()) {
+            console.warn(`Missing workshop: ${workshopId}`);
+            return // Skip deleted workshops
+          }
+    
+          return {
+            id: workshopSnap.id,
+            currUserRegistered: true, // Flag indicating user registration
+            ...workshopSnap.data()
+          } as WorkShop;
+        });
+    
+        // 4. Wait for all promises and filter out nulls
+        const workshops = (await Promise.all(workshopPromises)).filter(Boolean) as WorkShop[];
+        
+        return workshops;
+    
+      } catch (error) {
+        console.error("Failed to fetch registrations:", error);
+        toast.error("Failed to load your registrations");
+        return;
+      }
+    };
+
+
   return {
     createWorkshop,
     fetchWorkshopById,
@@ -396,6 +454,7 @@ const useWorkShop = () => {
     registerWorkShop,
     getWorkshopRegistrationDetails,
     getAllYourWorkshops,
+    getUserRegistrations
   };
 };
 

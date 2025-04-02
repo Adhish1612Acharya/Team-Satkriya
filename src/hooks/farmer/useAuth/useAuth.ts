@@ -81,6 +81,7 @@ const useAuth = () => {
             experience: data.experience,
           },
           registrations: [],
+          bookmarks: [],
           createdAt: new Date(),
           updatedAt: new Date(),
         });

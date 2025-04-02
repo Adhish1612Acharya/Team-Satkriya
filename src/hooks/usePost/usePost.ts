@@ -720,6 +720,62 @@ const usePost = () => {
     }
   };
 
+  const handleBookMarkPost = async (postId: string) => {
+    const user = auth.currentUser;
+
+    // Edge Case 1: User not authenticated
+    if (!user) {
+      toast.warning("Please login to bookmark posts");
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      // Edge Case 2: Verify post exists
+      const postRef = doc(db, "posts", postId);
+      const postSnap = await getDoc(postRef);
+
+      if (!postSnap.exists()) {
+        toast.error("The post no longer exists");
+        return;
+      }
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      // Edge Case 3: User document doesn't exist
+      if (!userSnap.exists()) {
+        toast.error("User profile not found");
+        return;
+      }
+
+      const currentBookmarks = userSnap.data()?.bookmarks || [];
+      const isBookmarked = currentBookmarks.includes(postId);
+
+      // Transaction-like pattern for atomic updates
+      if (isBookmarked) {
+        await updateDoc(userRef, {
+          bookmarks: arrayRemove(postId),
+          updatedAt: new Date().toISOString(),
+        });
+        toast.success("Removed from bookmarks");
+        return;
+      } else {
+        // Edge Case 4: Prevent duplicate bookmarks
+        await updateDoc(userRef, {
+          bookmarks: arrayUnion(postId),
+          updatedAt: new Date().toISOString(),
+        });
+        toast.success("Added to bookmarks");
+        return;
+      }
+    } catch (error) {
+      console.error("Failed to bookmark posts", error);
+      toast.error("Failed to bookmark posts");
+      return;
+    }
+  };
+
   return {
     createPost,
     getAllPosts,
@@ -733,6 +789,7 @@ const usePost = () => {
     editPost,
     deletePost,
     likePost,
+    handleBookMarkPost,
   };
 };
 

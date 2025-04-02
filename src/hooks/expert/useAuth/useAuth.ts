@@ -71,6 +71,7 @@ const useAuth = () => {
             posts: [],
             workshops: [],
             registrations: [],
+            bookmarks:[],
             createdAt: new Date(),
             updatedAt: new Date(),
           });
@@ -120,6 +121,7 @@ const useAuth = () => {
           posts: [],
           workshops: [],
           registrations: [],
+          bookmarks:[],
           role: data.role,
           profileData: data.profileData,
           createdAt: new Date(),

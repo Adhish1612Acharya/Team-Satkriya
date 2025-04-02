@@ -22,6 +22,8 @@ import WorkShopDetail from "./pages/WorkShopDetails/WorkShopDetail";
 import { useAuthContext } from "./context/AuthContext";
 import PostDetailPage from "./pages/Posts/PostDetailPage/PostDetailPage";
 import WorkshopRegistration from "./pages/Expert/WorkShopRegistration/WorkShopRegistration";
+import YourPostPage from "./pages/YourPostsPage/YourPostPage";
+import YourRegistrationsPage from "./pages/YourRegistrationsPage/YourRegistrationsPage";
 
 const App = () => {
   const { nav } = useAuthContext();
@@ -57,6 +59,11 @@ const App = () => {
             <Route path="/posts/:id" element={<PostDetailPage />} />
             <Route path="/workshops" element={<WorkshopsPage />} />
             <Route path="/workshops/:id" element={<WorkShopDetail />} />
+            <Route path="/user/posts" element={<YourPostPage />} />
+            <Route
+              path="/user/registrations"
+              element={<YourRegistrationsPage />}
+            />
           </Route>
           <Route element={<FarmerProtectRoute />}>
             <Route path="/solve-query" element={<AiSolveQuery />} />
@@ -64,7 +71,10 @@ const App = () => {
 
           <Route element={<ExpertProtectRoute />}>
             <Route path="/workshops/create" element={<CreateWorkShop />} />
-            <Route path="/workshops/:id/registration" element={<WorkshopRegistration/>}/>
+            <Route
+              path="/workshops/:id/registration"
+              element={<WorkshopRegistration />}
+            />
             {/* <Route path="/profile/farmer" element={<FarmerProfile />} />
             <Route path="/profile/doctor" element={<DoctorProfile />} />
             <Route path="/profile/ngo" element={<NGOProfile />} />
