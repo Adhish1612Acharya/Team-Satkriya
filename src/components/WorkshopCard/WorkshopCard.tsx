@@ -11,6 +11,7 @@ import {
   PenSquare,
   Users,
   Eye,
+  PawPrint,
 } from "lucide-react";
 import {
   Card,
@@ -28,6 +29,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import { auth } from "@/firebase";
+import { Handshake, Heart, Building, Leaf } from "lucide-react";
 
 // Workshop Card Component
 const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
@@ -123,9 +125,41 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
           </Avatar>
           <div>
             <div className="text-sm font-medium">
+              {workshop.role === "doctor" && "Dr. "}
               {workshop.profileData.name}
             </div>
-            <div className="text-xs text-muted-foreground">{workshop.role}</div>
+            <div className="text-xs flex text-muted-foreground">
+              {workshop.role === "doctor" && (
+                <>
+                  <PawPrint size={14} className="text-teal-500 mr-1" />
+                  Veterinary Doctor
+                </>
+              )}
+              {workshop.role === "ngo" && (
+                <>
+                  <Handshake size={14} className="text-purple-500 mr-1" />
+                  NGO
+                </>
+              )}
+              {workshop.role === "volunteer" && (
+                <>
+                  <Heart size={14} className="text-red-500 mr-1" />
+                  Volunteer
+                </>
+              )}
+              {workshop.role === "researchInstitution" && (
+                <>
+                  <Building size={14} className="text-green-500 mr-1" />
+                  Research Institution
+                </>
+              )}
+              {workshop.role === "farmer" && (
+                <>
+                  <Leaf size={14} className="text-brown-500 mr-1" />
+                  Farmer
+                </>
+              )}
+            </div>
           </div>
         </div>
         <CardTitle className="line-clamp-2 text-xl">{workshop.title}</CardTitle>

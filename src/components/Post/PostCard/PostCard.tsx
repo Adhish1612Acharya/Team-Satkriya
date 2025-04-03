@@ -9,11 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Bookmark,
   Loader2,
   MessageCircle,
+  PawPrint,
   Pencil,
-  Share,
   Smile,
   ThumbsUp,
   Trash,
@@ -38,6 +37,7 @@ import { auth } from "@/firebase";
 import { toast } from "react-toastify";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Handshake, Heart, Building, Leaf } from "lucide-react";
 
 const PostCard: FC<PostCardProps> = ({
   post,
@@ -48,26 +48,14 @@ const PostCard: FC<PostCardProps> = ({
   setEditPostDialogOpen,
   setEditForm,
   setEditPost,
-  // onLike,
-  // onComment,
-  // onShare,
-  // onPostClick,
 }) => {
   const { userType } = useAuthContext();
-  const {
-    getPostComments,
-    addCommentPost,
-    getFilteredComments,
-    likePost,
-    fetchBookmarkedPosts,
-    handleBookMarkPost,
-  } = usePost();
+  const { getPostComments, addCommentPost, getFilteredComments, likePost } =
+    usePost();
 
   const [isLiked, setIsLiked] = useState(post.currUserLiked);
   const [likesCount, setLikesCount] = useState(post.likesCount);
   const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const [isSaved, _setIsSaved] = useState(false);
 
   const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState<boolean>(false);
@@ -96,7 +84,7 @@ const PostCard: FC<PostCardProps> = ({
     const text = `${post.content.substring(
       0,
       100
-    )}...\n\n🔗 Read full post: ${url}\n\n*Shared via Gopushti* 🐄`;
+    )}...\n\n Read full post: ${url}\n\n*Shared via Gopushti* `;
 
     try {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
@@ -141,7 +129,7 @@ const PostCard: FC<PostCardProps> = ({
   };
 
   return (
-    <Card className="mb-6 overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="mb-6   overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -155,10 +143,44 @@ const PostCard: FC<PostCardProps> = ({
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">{post.profileData.name}</p>
+              <p className="font-medium">
+                {post.role === "doctor" && "Dr. "}
+                {post.profileData.name}
+              </p>
               {/* Header: Role and Time */}
               <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 flex-wrap">
-                <span>{post.role}</span>
+                <span className="flex items-center gap-1 text-gray-500 text-sm">
+                  {post.role === "doctor" && (
+                    <>
+                      <PawPrint size={14} className="text-teal-500" />
+                      Veterinary Doctor
+                    </>
+                  )}
+                  {post.role === "ngo" && (
+                    <>
+                      <Handshake size={14} className="text-purple-500" />
+                      NGO
+                    </>
+                  )}
+                  {post.role === "volunteer" && (
+                    <>
+                      <Heart size={14} className="text-red-500" />
+                      Volunteer
+                    </>
+                  )}
+                  {post.role === "researchInstitution" && (
+                    <>
+                      <Building size={14} className="text-green-500" />
+                      Research Institution
+                    </>
+                  )}
+                  {post.role === "farmer" && (
+                    <>
+                      <Leaf size={14} className="text-brown-500" />
+                      Farmer
+                    </>
+                  )}
+                </span>
                 <span className="mx-1">•</span>
                 <span className="whitespace-nowrap">
                   {formatDistanceToNow(
@@ -172,48 +194,48 @@ const PostCard: FC<PostCardProps> = ({
             </div>
           </div>
           <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-2">
-  {post.verified !== null &&
-    post.role !== "doctor" &&
-    post.role !== "researchInstitution" && (
-      <div className="w-full sm:w-auto flex justify-center sm:justify-end">
-        <VerifyPostButton
-          userRole={userRole}
-          verifiedProfiles={post.verified}
-          postId={post.id}
-        />
-      </div>
-    )}
-  {post.ownerId === auth?.currentUser?.uid &&
-    !window.location.pathname.startsWith("/posts/") && (
-      <div className="flex justify-center gap-2 w-full sm:w-auto">
-        <Button
-          className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setEditPost?.(post);
-            setEditForm?.(true);
-            setEditPostDialogOpen?.(true);
-          }}
-        >
-          <Pencil className="w-4 h-4 sm:mr-1" />
-          <span className="sr-only sm:not-sr-only">Edit</span>
-        </Button>
-        <Button
-          className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setDeletePostId?.(post.id);
-            setAlertDialog?.(true);
-          }}
-        >
-          <Trash className="w-4 h-4 sm:mr-1" />
-          <span className="sr-only sm:not-sr-only">Delete</span>
-        </Button>
-      </div>
-    )}
-</div>
+            {post.verified !== null &&
+              post.role !== "doctor" &&
+              post.role !== "researchInstitution" && (
+                <div className="w-full sm:w-auto flex justify-center sm:justify-end">
+                  <VerifyPostButton
+                    userRole={userRole}
+                    verifiedProfiles={post.verified}
+                    postId={post.id}
+                  />
+                </div>
+              )}
+            {post.ownerId === auth?.currentUser?.uid &&
+              !window.location.pathname.startsWith("/posts/") && (
+                <div className="flex justify-center gap-2 w-full sm:w-auto">
+                  <Button
+                    className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditPost?.(post);
+                      setEditForm?.(true);
+                      setEditPostDialogOpen?.(true);
+                    }}
+                  >
+                    <Pencil className="w-4 h-4 sm:mr-1" />
+                    <span className="sr-only sm:not-sr-only">Edit</span>
+                  </Button>
+                  <Button
+                    className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setDeletePostId?.(post.id);
+                      setAlertDialog?.(true);
+                    }}
+                  >
+                    <Trash className="w-4 h-4 sm:mr-1" />
+                    <span className="sr-only sm:not-sr-only">Delete</span>
+                  </Button>
+                </div>
+              )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
@@ -352,18 +374,6 @@ const PostCard: FC<PostCardProps> = ({
           >
             <MessageCircle size={18} className="h-4 w-4 mr-2" />
             <span>Share</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "flex items-center space-x-1 flex-1 justify-center",
-              isSaved && "text-blue-500"
-            )}
-            // onClick={handleSave}
-          >
-            <Bookmark size={18} className={isSaved ? "fill-blue-500" : ""} />
-            <span>Save</span>
           </Button>
         </div>
 
