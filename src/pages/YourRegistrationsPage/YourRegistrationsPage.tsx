@@ -1,4 +1,3 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import WorkShopPreview from "@/components/WorkShopPreview/WorkShopPreview";
@@ -6,7 +5,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import WorkShop from "@/types/workShop.types";
 
-import { CalendarCheck, CalendarX, Info, Plus } from "lucide-react";
+import { CalendarCheck, CalendarX, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -72,7 +71,6 @@ const YourRegistrationsPage = () => {
       </div>
     );
   }
-
 
   return (
     <div className="space-y-6">

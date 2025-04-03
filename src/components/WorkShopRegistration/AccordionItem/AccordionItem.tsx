@@ -1,12 +1,12 @@
-import { ChevronDown, ChevronUp, Phone} from "lucide-react";
+import { ChevronDown, ChevronUp, PawPrint, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { FC, useState } from "react";
 import AccordionItemProps from "./AccordionItem.types";
+import { Handshake, Heart, Building, Leaf } from "lucide-react";
 
 // Accordion Item Component
-const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail,index }) => {
-
+const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail, index }) => {
   const [openItem, setOpenItem] = useState<string>("");
 
   const handleToggle = (id: string) => {
@@ -26,9 +26,43 @@ const AccordionItem: FC<AccordionItemProps> = ({ registrantDetail,index }) => {
             {index + 1}
           </div>
           <div>
-            <h3 className="font-medium">{registrantDetail?.name}</h3>
+            <h3 className="font-medium">
+              {" "}
+              {registrantDetail?.role === "doctor" && "Dr. "}
+              {registrantDetail?.name}
+            </h3>
             <Badge variant="outline" className="mt-1">
-              {registrantDetail?.role}
+              {" "}
+              {registrantDetail?.role === "doctor" && (
+                <>
+                  <PawPrint size={14} className="text-teal-500" />
+                  Veterinary Doctor
+                </>
+              )}
+              {registrantDetail?.role === "ngo" && (
+                <>
+                  <Handshake size={14} className="text-purple-500" />
+                  NGO
+                </>
+              )}
+              {registrantDetail?.role === "volunteer" && (
+                <>
+                  <Heart size={14} className="text-red-500" />
+                  Volunteer
+                </>
+              )}
+              {registrantDetail?.role === "researchInstitution" && (
+                <>
+                  <Building size={14} className="text-green-500" />
+                  Research Institution
+                </>
+              )}
+              {registrantDetail?.role === "farmer" && (
+                <>
+                  <Leaf size={14} className="text-brown-500" />
+                  Farmer
+                </>
+              )}
             </Badge>
           </div>
         </div>

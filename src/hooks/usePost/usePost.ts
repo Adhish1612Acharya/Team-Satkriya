@@ -696,12 +696,16 @@ const usePost = () => {
 
       const postRef = doc(db, "posts", postId);
 
-      if (userInfo) {
+      if (
+        userInfo &&
+        (userInfo.role === "doctor" || userInfo.role === "researchInstitution")
+      ) {
         await updateDoc(postRef, {
           verified: arrayUnion({
             id: user.uid,
             name: userInfo.name,
             profilePic: userInfo.profilePic || "",
+            role: userInfo.role,
           }),
         });
 
@@ -709,6 +713,7 @@ const usePost = () => {
           id: user.uid,
           name: userInfo.name,
           profilePic: userInfo.profilePic || "",
+          role: userInfo.role,
         };
       } else {
         return false;

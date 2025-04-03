@@ -1,4 +1,4 @@
-import { ArrowRight, Calendar, CheckCircle, Clock, Hourglass, MapPin } from "lucide-react";
+import { ArrowRight, Calendar, CheckCircle, Clock, Hourglass}  from "lucide-react";
 import {
   Card,
   CardContent,

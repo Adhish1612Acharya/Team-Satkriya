@@ -13,7 +13,6 @@ import { Badge, Calendar, ClipboardList, Users, UserX } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 import { format } from "date-fns";
 
-
 export default function WorkshopRegistrationPage() {
   const { id } = useParams();
   const { getWorkshopRegistrationDetails } = useWorkShop();
@@ -37,19 +36,6 @@ export default function WorkshopRegistrationPage() {
     getRegistrationDetails();
   }, [id]);
 
-  // const formattedStartDate = format(
-  //   workShop?.dateFrom instanceof Timestamp
-  //     ? workShop?.dateFrom.toDate() // Convert Firestore Timestamp to JS Date
-  //     : new Date(workShop?.dateFrom || ""),
-  //   "MMM dd, yyyy"
-  // );
-  // const formattedEndDate = format(
-  //   workShop?.dateTo instanceof Timestamp
-  //     ? workShop?.dateTo.toDate() // Convert Firestore Timestamp to JS Date
-  //     : new Date(workShop?.dateTo || ""),
-  //   "MMM dd, yyyy"
-  // );
-
   if (loading && !workShop) {
     return (
       <div className="container mx-auto py-6 space-y-8">
@@ -63,6 +49,19 @@ export default function WorkshopRegistrationPage() {
       </div>
     );
   }
+
+  const formattedStartDate = format(
+    workShop?.dateFrom instanceof Timestamp
+      ? workShop?.dateFrom.toDate() // Convert Firestore Timestamp to JS Date
+      : new Date(workShop?.dateFrom || ""),
+    "MMM dd, yyyy"
+  );
+  const formattedEndDate = format(
+    workShop?.dateTo instanceof Timestamp
+      ? workShop?.dateTo.toDate() // Convert Firestore Timestamp to JS Date
+      : new Date(workShop?.dateTo || ""),
+    "MMM dd, yyyy"
+  );
 
   if (!loading && workShop && workShop.registrations.length === 0) {
     return (
@@ -114,20 +113,18 @@ export default function WorkshopRegistrationPage() {
               registered
             </p>
           </div>
-          {/* <div className="flex items-center gap-4">
-            <Badge  className="px-3 py-1">
-              <Calendar className="h-4 w-4 mr-2" />
-              {" "}
-                    {formattedStartDate}
-                    {workShop?.dateFrom !== workShop?.dateTo &&
-                      ` - ${formattedEndDate}`}
+          <div className="flex items-center gap-4">
+            <Badge className="px-3 py-1">
+              <Calendar className="h-4 w-4 mr-2" /> {formattedStartDate}
+              {workShop?.dateFrom !== workShop?.dateTo &&
+                ` - ${formattedEndDate}`}
             </Badge>
-          </div> */}
+          </div>
         </div>
 
         {/* Responsive Registrations View */}
         {isMobile ? (
-          <div className="space-y-4">
+          <div className="space-y-4 h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 pr-2">
             {workShop?.registrations.map((participant, index) => (
               <AccordionItem
                 key={participant.id || index}

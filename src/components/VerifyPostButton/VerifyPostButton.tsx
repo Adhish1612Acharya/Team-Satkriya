@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FC } from "react";
-import { X, User, Loader2 } from "lucide-react";
+import { X, User, Loader2, Building, PawPrint } from "lucide-react";
 import styles from "./VerifyPostButton.module.css";
 import VerifyPostButtonProps from "./VerifyPostButton.types";
 import { auth } from "@/firebase";
@@ -14,6 +14,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
   const { verifyPost } = usePost();
 
   const [verified, setVerified] = useState(false);
+
 
   const [showPopup, setShowPopup] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -147,7 +148,8 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
           {/* Popup content - positioned below the button */}
           <div
             ref={popupRef}
-            className={`absolute top-full left-1 transform -translate-x-1/2 mt-2 w-56 bg-white rounded-lg shadow-lg z-50 border border-gray-200 overflow-hidden ${styles.animateFadeIn}`} // Increased z-index to 50
+            className={`absolute top-full transform -translate-x-3/4 mt-2 w-56 
+  bg-white rounded-lg shadow-lg z-[999] border border-gray-200 overflow-hidden ${styles.animateFadeIn}`}
             style={{
               boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
             }}
@@ -160,7 +162,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
                 onClick={() => setShowPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
               >
-                <X size={14} /> {/* Replaced FaTimes with X */}
+                <X size={14} />
               </button>
             </div>
 
@@ -170,7 +172,6 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
                   key={user.id}
                   className="px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors"
                 >
-                  {/* User Logo/Avatar - Made slightly larger and more prominent */}
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 flex-shrink-0 border border-gray-200">
                     {user.profilePic ? (
                       <img
@@ -182,8 +183,28 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
                       <User size={14} />
                     )}
                   </div>
-                  {/* Username - Made more prominent */}
-                  <span className="text-gray-800 font-medium">{user.name}</span>
+                  {/* Name & Role Section */}
+                  <div className="flex flex-col">
+                    {/* Name with Doctor Prefix if applicable */}
+                    <span className="text-gray-800 font-medium text-sm sm:text-base">
+                      {user.role === "doctor" ? `Dr. ${user.name}` : user.name}
+                    </span>
+
+                    {/* Role with Icon */}
+                    <span className="text-gray-500 text-[11px] sm:text-xs flex items-center gap-1">
+                      {user.role === "doctor" && (
+                        <PawPrint size={12} className="text-teal-500" />
+                      )}
+                      {user.role === "researchInstitution" && (
+                        <Building size={12} className="text-green-500" />
+                      )}
+                      {user.role === "doctor"
+                        ? " Veterinary Doctor"
+                        : user.role === "researchInstitution"
+                        ? "Research Institution"
+                        : ""}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>

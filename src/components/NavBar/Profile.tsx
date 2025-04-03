@@ -1,5 +1,4 @@
 import {
-  Bookmark,
   CalendarCheck,
   CheckCircle,
   FileText,
@@ -39,11 +38,6 @@ const Profile = () => {
             title: "Your Registrations",
             href: "/user/registrations",
             icon: <CalendarCheck className="w-5 h-5 text-green-600" />,
-          },
-          {
-            title: "Your Bookmarks",
-            href: "/user/bookmarks",
-            icon: <Bookmark className="w-5 h-5 text-purple-600" />,
           },
         ]
       : []),
@@ -124,8 +118,8 @@ const Profile = () => {
               className={cn(
                 "cursor-pointer flex items-center gap-2",
                 location.pathname === eachItem.href
-                ? "text-primary font-medium bg-primary/10 dark:bg-primary/20 border-l-2 border-primary shadow-sm"
-                : "text-muted-foreground hover:bg-accent/50 dark:hover:bg-accent/10 hover:text-primary transition-colors"
+                  ? "text-primary font-medium bg-primary/10 dark:bg-primary/20 border-l-2 border-primary shadow-sm"
+                  : "text-muted-foreground hover:bg-accent/50 dark:hover:bg-accent/10 hover:text-primary transition-colors"
               )}
             >
               {eachItem.icon}
