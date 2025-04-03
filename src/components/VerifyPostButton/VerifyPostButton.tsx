@@ -82,21 +82,21 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
               ? handleVerifiedClick
               : handleVerify
           }
-          className={` cursor-pointer
-    flex items-center justify-center gap-2 
-    px-4 py-2 rounded-md font-medium
-    transition-all duration-300 ease-in-out
-    ${
-      ((userRole === "doctor" || userRole === "researchInstitution") &&
-        verified) ||
-      ((userRole === "farmer" ||
-        userRole === "volunteer" ||
-        userRole === "ngo") &&
-        verifiedProfiles?.length > 0)
-        ? "bg-green-500 hover:bg-green-600 text-white"
-        : "bg-red-500 hover:bg-red-600 text-white"
-    }
-  `}
+          className={`cursor-pointer
+            flex items-center justify-center gap-1
+            px-3 py-1 rounded-md text-sm
+            transition-all duration-200 ease-in-out
+            ${
+              ((userRole === "doctor" || userRole === "researchInstitution") &&
+                verified) ||
+              ((userRole === "farmer" ||
+                userRole === "volunteer" ||
+                userRole === "ngo") &&
+                verifiedProfiles?.length > 0)
+                ? "bg-green-100 hover:bg-green-200 text-green-800 border border-green-200"
+                : "bg-red-100 hover:bg-red-200 text-red-800 border border-red-200"
+            }
+          `}
           disabled={
             verifyLoad ||
             (userRole !== "doctor" &&
@@ -154,7 +154,7 @@ const VerifyPostButton: FC<VerifyPostButtonProps> = ({
           >
             <div className="flex justify-between items-center p-2 border-b border-gray-100 bg-gray-50">
               <h3 className="font-medium text-sm text-gray-700">
-                Verified Users
+                Verified Experts
               </h3>
               <button
                 onClick={() => setShowPopup(false)}

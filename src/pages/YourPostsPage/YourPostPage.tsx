@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { Fab } from "@mui/material";
 import CreatePostDialog from "@/components/CreatePostDialog/CreatePostDialog";
 import AlertDialogBox from "@/components/AlertDialogBox/AlertDialogBox";
+import { Button } from "@/components/ui/button";
 
 const YourPostPage = () => {
   const { userType } = useAuthContext();
@@ -66,8 +67,23 @@ const YourPostPage = () => {
   return (
     <>
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-
         <div className="max-w-2xl mx-auto">
+          {/* Page Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+              Your Community Posts
+            </h1>
+            {!loading && (
+              <p className="text-gray-600 dark:text-gray-300">
+                {posts.length > 0
+                  ? `You've shared ${posts.length} post${
+                      posts.length !== 1 ? "s" : ""
+                    } with the community`
+                  : "Your shared posts will appear here"}
+              </p>
+            )}
+          </div>
+
           {/* Posts Feed */}
           <div>
             {loading ? (
@@ -76,7 +92,7 @@ const YourPostPage = () => {
                 <PostCardSkeleton />
                 <PostCardSkeleton />
               </>
-            ) : !loading && posts.length === 0 ? (
+            ) : posts.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -88,30 +104,48 @@ const YourPostPage = () => {
                   className="text-gray-500 dark:text-gray-400"
                 />
                 <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                  No Posts Found
+                  No Posts Yet
                 </h2>
                 <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
-                  It looks like there are no posts available at the moment. Be
-                  the first to share something useful!
+                  You haven't shared any posts yet. Click the + button below to
+                  create your first post!
                 </p>
+                <Button
+                  onClick={() => setOpen(true)}
+                  className="mt-4"
+                  variant="outline"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create First Post
+                </Button>
               </motion.div>
             ) : (
-              posts.map((post) => (
-                <PostCard
-                  setAlertDialog={setAlertDialogOpen}
-                  key={post.id}
-                  post={post}
-                  userRole={userRole}
-                  handleMediaClick={handlePostClick}
-                  setDeletePostId={setDeletePostId}
-                  setEditPostDialogOpen={setOpen}
-                  setEditForm={setEditForm}
-                  setEditPost={setEditPostInfo}
-                />
-              ))
+              <>
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Recent Activity
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Your latest contributions to the community
+                  </p>
+                </div>
+
+                {posts.map((post) => (
+                  <PostCard
+                    setAlertDialog={setAlertDialogOpen}
+                    key={post.id}
+                    post={post}
+                    userRole={userRole}
+                    handleMediaClick={handlePostClick}
+                    setDeletePostId={setDeletePostId}
+                    setEditPostDialogOpen={setOpen}
+                    setEditForm={setEditForm}
+                    setEditPost={setEditPostInfo}
+                  />
+                ))}
+              </>
             )}
           </div>
-
           {/* Post Modal */}
           <PostModal
             post={selectedPost}
