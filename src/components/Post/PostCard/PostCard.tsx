@@ -78,7 +78,6 @@ const PostCard: FC<PostCardProps> = ({
     post.commentsCount
   );
 
-
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
@@ -141,10 +140,6 @@ const PostCard: FC<PostCardProps> = ({
     }
   };
 
-  const handleBookMark = async () => {
-    await handleBookMarkPost(post.id, userType as "farmers" | "experts");
-  };
-
   return (
     <Card className="mb-6 overflow-hidden hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
@@ -176,50 +171,54 @@ const PostCard: FC<PostCardProps> = ({
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            {post.verified !== null &&
-              post.role !== "doctor" &&
-              post.role !== "researchInstitution" && (
-                <VerifyPostButton
-                  userRole={userRole}
-                  verifiedProfiles={post.verified}
-                  postId={post.id}
-                />
-              )}
-            {post.ownerId === auth?.currentUser?.uid &&
-              !window.location.pathname.startsWith("/posts/") && (
-                <>
-                  <Button
-                    className="cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditPost?.(post);
-                      setEditForm?.(true);
-                      setEditPostDialogOpen?.(true);
-                    }}
-                  >
-                    <Pencil className="w-4 h-4 mr-1" /> Edit
-                  </Button>
-                  <Button
-                    className="cursor-pointer text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setDeletePostId?.(post.id);
-                      setAlertDialog?.(true);
-                    }}
-                  >
-                    <Trash className="w-4 h-4 mr-1" /> Delete
-                  </Button>
-                </>
-              )}
-          </div>
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-2">
+  {post.verified !== null &&
+    post.role !== "doctor" &&
+    post.role !== "researchInstitution" && (
+      <div className="w-full sm:w-auto flex justify-center sm:justify-end">
+        <VerifyPostButton
+          userRole={userRole}
+          verifiedProfiles={post.verified}
+          postId={post.id}
+        />
+      </div>
+    )}
+  {post.ownerId === auth?.currentUser?.uid &&
+    !window.location.pathname.startsWith("/posts/") && (
+      <div className="flex justify-center gap-2 w-full sm:w-auto">
+        <Button
+          className="text-blue-500 border-blue-500 hover:bg-blue-500 hover:text-white"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setEditPost?.(post);
+            setEditForm?.(true);
+            setEditPostDialogOpen?.(true);
+          }}
+        >
+          <Pencil className="w-4 h-4 sm:mr-1" />
+          <span className="sr-only sm:not-sr-only">Edit</span>
+        </Button>
+        <Button
+          className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setDeletePostId?.(post.id);
+            setAlertDialog?.(true);
+          }}
+        >
+          <Trash className="w-4 h-4 sm:mr-1" />
+          <span className="sr-only sm:not-sr-only">Delete</span>
+        </Button>
+      </div>
+    )}
+</div>
         </div>
       </CardHeader>
       <CardContent className="pb-3">
         {post.filters && post.filters.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 max-h-20 overflow-y-auto">
             {post.filters.map((filter, index) => (
               <span
                 key={index}

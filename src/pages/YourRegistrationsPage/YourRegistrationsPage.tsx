@@ -6,7 +6,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
 import WorkShop from "@/types/workShop.types";
 
-import { CalendarX, Info, Plus } from "lucide-react";
+import { CalendarCheck, CalendarX, Info, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -73,39 +73,33 @@ const YourRegistrationsPage = () => {
     );
   }
 
-  if (registeredWorkshops.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Alert className="max-w-md">
-          <Info className="h-4 w-4" />
-          <AlertTitle>No registrations found</AlertTitle>
-          <AlertDescription>
-            You haven't registered for any workshops yet. Explore available
-            workshops to get started.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-8">
-      {/* Enhanced Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center mt-4 ml-4 sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
-            Your Workshop Registrations
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <CalendarCheck className="text-primary h-6 w-6" />
+            Your Registered Workshops
           </h1>
-          <p className="text-muted-foreground mt-2">
-            {registeredWorkshops.length} workshop
-            {registeredWorkshops.length !== 1 ? "s" : ""} Registered
+          <p className="text-muted-foreground mt-1">
+            {registeredWorkshops.length > 0
+              ? `Showing ${registeredWorkshops.length} workshop${
+                  registeredWorkshops.length !== 1 ? "s" : ""
+                } you've registered for`
+              : "Your workshop registrations will appear here"}
           </p>
         </div>
+        <Button onClick={() => navigate("/workshops")} className="gap-2 mr-4">
+          <Plus className="h-4 w-4" />
+          Explore Workshops
+        </Button>
       </div>
 
-      {/* Enhanced Grid Layout */}
+      {/* Content Area */}
       {registeredWorkshops.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 mb-6 ml-4 lg:grid-cols-3 gap-6">
           {registeredWorkshops.map((workshop) => (
             <WorkShopPreview key={workshop.id} workshop={workshop} />
           ))}
@@ -113,13 +107,15 @@ const YourRegistrationsPage = () => {
       ) : (
         <div className="flex flex-col items-center justify-center py-12 rounded-lg border border-dashed bg-muted/50">
           <CalendarX className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No upcoming workshops</h3>
+          <h3 className="text-xl font-semibold mb-2">
+            No Workshop Registrations
+          </h3>
           <p className="text-muted-foreground text-center max-w-md mb-4">
-            You haven't registered for any workshops yet. Explore available
-            workshops to get started.
+            You haven't registered for any workshops yet. Discover upcoming
+            sessions to enhance your farming knowledge.
           </p>
-          <Button onClick={() => navigate("/workshops")}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={() => navigate("/workshops")} className="gap-2">
+            <Plus className="h-4 w-4" />
             Browse Workshops
           </Button>
         </div>
