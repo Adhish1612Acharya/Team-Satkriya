@@ -31,14 +31,29 @@ export const classifyContent: ClassifyContentCalls = async (
   existingFilters
 ) => {
   try {
+    // Flatten all valid subfilters for reference
+    const validSubfilters = Object.values(existingFilters).flatMap(
+      (category: any) => category.subFilters
+    );
+
     const prompt = `
     You are an AI assistant specializing in content classification.  
     Your task is to categorize a given post into one or more **predefined filters**.
+
+      STRICT RULES FOR RESPONSE:
+    1. Respond ONLY with valid JSON in this exact format:
+    {
+      "valid": boolean,
+      "filters": string[] (ONLY from allowed list),
+      "error"?: string (if invalid)
+    }
+    2. filters MUST ONLY contain values from this exact list:
+    ${JSON.stringify(validSubfilters)}
     
     ### **Input Data**
     - Post Description: "${content}"
     - Media (image, document, or video): "${media}" 
-    - Available Filters: ${JSON.stringify(existingFilters)}
+    - Available Filters: ${JSON.stringify(validSubfilters)}
     
     ### **Task Requirements**
     1. **Select Only from Existing Filters**:  
@@ -54,6 +69,11 @@ export const classifyContent: ClassifyContentCalls = async (
     {
       "filters": ["At least one relevant existing sub-filter"]
     }
+
+     FILTER MATCHING RULES:
+    1. Select ALL matching subfilters from the allowed list
+    2. Must be EXACT matches (no variations)
+    4. NEVER invent new filters
     
     - The **"filters" array must never be empty**.
     - **Only return predefined sub-filters**—do not generate new ones.
@@ -165,15 +185,29 @@ export const validateAndFilterWebinar = async (
   webinarFilters: any
 ): Promise<string | null> => {
   try {
+    // Flatten all valid subfilters for reference
+    const validSubfilters = Object.values(webinarFilters).flatMap(
+      (category: any) => category.subFilters
+    );
     const prompt = `
     You are an AI assistant specializing in indigenous cow dairy farming. Your task is to:
     1. Validate if a webinar is relevant to indigenous cow dairy farming
     2. If relevant, apply predefined filters to categorize the webinar
 
+     STRICT RULES FOR RESPONSE:
+    1. Respond ONLY with valid JSON in this exact format:
+    {
+      "valid": boolean,
+      "filters": string[] (ONLY from allowed list),
+      "error"?: string (if invalid)
+    }
+    2. filters MUST ONLY contain values from this exact list:
+    ${JSON.stringify(validSubfilters)}
+
     ### Input Data
     - Webinar Details: ${JSON.stringify(webinarDetails)}
     - Thumbnail (Base64): ${thumbnailBase64}
-    - Predefined Filters: ${JSON.stringify(webinarFilters)}
+    - Predefined Filters: ${JSON.stringify(validSubfilters)}
 
     ### Task Instructions
     1. **Relevance Validation**:
