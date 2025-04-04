@@ -46,7 +46,7 @@ const YourRegistrationsPage = () => {
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="h-full flex flex-col overflow-hidden border rounded-lg"
+            className="h-full flex flex-col overflow-hidden border rounded-lg mt-4"
           >
             <div className="p-6 pb-3">
               <Skeleton className="h-6 w-3/4 mb-2" />

@@ -123,7 +123,7 @@ const Profile = () => {
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        {currentUser?.email?.split("@")[0]}
+        {currentUser?.email}
       </p>
     </div>
         </div>

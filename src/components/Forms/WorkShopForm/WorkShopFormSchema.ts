@@ -1,13 +1,12 @@
 import { z } from "zod";
-
 const workshopSchema = z
   .object({
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Description is required"),
-     dateFrom: z.date(),
-     dateTo: z.date(),
-    timeFrom:z.string().min(1),
-    timeTo:z.string().min(1),
+    dateFrom: z.date(),
+    dateTo: z.date(),
+    timeFrom: z.string().min(1),
+    timeTo: z.string().min(1),
     mode: z.enum(["online", "offline"], {
       required_error: "Mode is required",
     }),
@@ -34,7 +33,7 @@ const workshopSchema = z
       });
     }
 
-    if(data.dateTo< data.dateFrom){
+    if (data.dateTo < data.dateFrom) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Enter a valid date greater than from date",

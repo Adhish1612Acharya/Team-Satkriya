@@ -82,14 +82,14 @@ export default function WorkshopRegistrationPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="container px-4 mx-auto py-6 space-y-8">
       {/* Workshop Summary Section */}
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
-          <Users className="text-primary h-6 w-6" />
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center gap-2 sm:gap-3">
+          <Users className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
           <span>Workshop Participants</span>
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Viewing registrations for:{" "}
           <span className="font-medium">{workShop?.title}</span>
         </p>
@@ -98,24 +98,23 @@ export default function WorkshopRegistrationPage() {
       <WorkShopSummaryCard workshopData={workShop} />
 
       {/* Registrations Section */}
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-2 bg-muted/50 rounded-lg">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-muted/50 rounded-lg">
           <div>
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-primary" />
-              Participant Registrations
+            <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+              <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span>Participant Registrations</span>
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {workShop?.registrations.length}{" "}
-              {workShop?.registrations.length === 1
-                ? "person has"
-                : "people have"}{" "}
+              {workShop?.registrations.length === 1 ? "person" : "people"}{" "}
               registered
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <Badge className="px-3 py-1">
-              <Calendar className="h-4 w-4 mr-2" /> {formattedStartDate}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Badge className="px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              {formattedStartDate}
               {workShop?.dateFrom !== workShop?.dateTo &&
                 ` - ${formattedEndDate}`}
             </Badge>
@@ -124,7 +123,7 @@ export default function WorkshopRegistrationPage() {
 
         {/* Responsive Registrations View */}
         {isMobile ? (
-          <div className="space-y-4 h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 pr-2">
+          <div className="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 pr-1">
             {workShop?.registrations.map((participant, index) => (
               <AccordionItem
                 key={participant.id || index}
@@ -134,19 +133,19 @@ export default function WorkshopRegistrationPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-lg border overflow-hidden shadow-sm">
-            <RegistrationDetailTable
-              registrationsData={workShop?.registrations || []}
-            />
-          </div>
+          <RegistrationDetailTable
+            registrationsData={workShop?.registrations || []}
+          />
         )}
 
-        {/* Empty State */}
+        {/* Empty State - Just in case */}
         {workShop?.registrations.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 rounded-lg border border-dashed">
-            <UserX className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Registrations Yet</h3>
-            <p className="text-muted-foreground text-center max-w-md mb-4">
+            <UserX className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">
+              No Registrations Yet
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground text-center max-w-md px-4">
               Participants will appear here once they register for your
               workshop.
             </p>
