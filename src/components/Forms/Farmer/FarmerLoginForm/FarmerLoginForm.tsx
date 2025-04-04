@@ -45,7 +45,7 @@ const FarmerLoginForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="123-456-7890" {...field} />
+                <Input placeholder="9987968756" type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -75,7 +75,11 @@ const FarmerLoginForm = () => {
             className="bg-green-600 hover:bg-green-700"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ?<Loader2/>:"Sign in"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Sign in"
+            )}
           </Button>
         </div>
       </form>

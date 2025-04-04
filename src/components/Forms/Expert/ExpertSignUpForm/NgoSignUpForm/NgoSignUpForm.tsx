@@ -88,7 +88,7 @@ const NgoSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="tel" {...field} />
+                <Input type="number" placeholder="9987868576" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,7 +164,7 @@ const NgoSignUpForm = () => {
         />
         <div className="space-y-4">
         <Button variant="outline" className="cursor-pointer" icon={Lock} disabled={form.formState.isSubmitting} type="submit" fullWidth>
-          {form.formState.isSubmitting ? <Loader2/> : "Create Account"}
+          {form.formState.isSubmitting ? <Loader2 className="animate-spin"/> : "Create Account"}
           </Button>
           <Button
             variant="outline"

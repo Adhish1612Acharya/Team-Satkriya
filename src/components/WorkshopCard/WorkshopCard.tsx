@@ -176,12 +176,20 @@ const WorkshopCard: FC<WorkShopCardProps> = ({ workshop, userType }) => {
             </span>
           )}
         </CardDescription>
-        {/* Time Range */}
-        <CardDescription className="flex items-center text-sm mt-1">
-          <Clock className="mr-1 h-4 w-4" />
-          <span>
-            {workshop.timeFrom} to {workshop.timeTo}
-          </span>
+        <CardDescription className="text-sm mt-1">
+          {/* Time Range - First Line */}
+          <div className="flex items-center">
+            <Clock className="mr-1 h-4 w-4" />
+            <span>
+              {workshop.timeFrom} to {workshop.timeTo}
+            </span>
+          </div>
+
+          {/* Registrations - Second Line */}
+          <div className="flex items-center mt-1">
+            <Users className="mr-1 h-4 w-4" />
+            <span>{workshop.registrations?.length || 0} registered</span>
+          </div>
         </CardDescription>
       </CardHeader>
 

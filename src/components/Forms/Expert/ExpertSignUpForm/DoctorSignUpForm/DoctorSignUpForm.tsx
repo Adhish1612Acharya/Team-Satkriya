@@ -97,7 +97,7 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="tel" {...field} />
+                <Input type="number" placeholder="9989786754" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -150,7 +150,7 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Years of Practice</FormLabel>
               <FormControl>
-                <Input type="number" {...field} />
+                <Input type="number" placeholder="5" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -203,7 +203,7 @@ const DoctorSignUpForm = () => {
         {/* Buttons */}
         <div className="space-y-4">
           <Button variant="outline" className="cursor-pointer" icon={Lock} disabled={form.formState.isSubmitting} type="submit" fullWidth>
-          {form.formState.isSubmitting ? <Loader2/> : "Create Account"}
+          {form.formState.isSubmitting ? <Loader2 className="animate-spin"/> : "Create Account"}
           </Button>
           <Button
             variant="outline"

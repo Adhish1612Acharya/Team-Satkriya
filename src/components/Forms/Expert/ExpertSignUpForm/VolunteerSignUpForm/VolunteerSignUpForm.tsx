@@ -87,7 +87,7 @@ const VolunteerSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="tel" {...field} />
+                <Input type="number" placeholder="9987868576" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -169,7 +169,7 @@ const VolunteerSignUpForm = () => {
             type="submit"
             fullWidth
           >
-            {form.formState.isSubmitting ? <Loader2 /> : "Create Account"}
+            {form.formState.isSubmitting ? <Loader2  className="animate-spin"/> : "Create Account"}
           </Button>
           <Button
             variant="outline"

@@ -64,8 +64,19 @@ const ExpertLoginForm: FC = () => {
         />
 
         <div className="space-y-4">
-          <Button type="submit" className="cursor-pointer" variant="outline" disabled={form.formState.isSubmitting} fullWidth icon={LogIn}>
-            {form.formState.isSubmitting ? <Loader2/> : "Sign in"}
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            variant="outline"
+            disabled={form.formState.isSubmitting}
+            fullWidth
+            icon={LogIn}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Sign in"
+            )}
           </Button>
 
           <Button
@@ -76,7 +87,7 @@ const ExpertLoginForm: FC = () => {
             fullWidth
             icon={GoogleIcon}
           >
-          Sign In with Google
+            Sign In with Google
           </Button>
         </div>
 
