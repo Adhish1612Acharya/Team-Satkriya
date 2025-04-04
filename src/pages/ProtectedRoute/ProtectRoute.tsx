@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ProtectedRoute = () => {
-  const { currentUser, loading, setUserType, setUsername, setNav } =
+  const { currentUser, loading, setUserType, setUsername, setNav, setRole } =
     useAuthContext();
   const [isRoleChecked, setIsRoleChecked] = useState(false);
 
@@ -14,11 +14,13 @@ const ProtectedRoute = () => {
       if (currentUser) {
         let userInfo = await getUserInfo(currentUser.uid, "farmers");
         if (userInfo) {
+          setRole(userInfo.role);
           setUserType(userInfo.role === "farmer" ? "farmers" : "experts");
           setUsername(userInfo.name);
         } else {
           userInfo = await getUserInfo(currentUser.uid, "experts");
           if (userInfo) {
+            setRole(userInfo.role);
             setUserType(userInfo?.role === "farmer" ? "farmers" : "experts");
             setUsername(userInfo?.name);
           } else {

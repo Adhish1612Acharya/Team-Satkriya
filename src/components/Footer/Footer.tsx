@@ -1,10 +1,9 @@
-import { GitHubLogoIcon,LinkedInLogoIcon, TwitterLogoIcon } from "@radix-ui/react-icons";
 import {
-  Heart,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
+  GitHubLogoIcon,
+  LinkedInLogoIcon,
+  TwitterLogoIcon,
+} from "@radix-ui/react-icons";
+import { Heart, Mail, Phone, MapPin } from "lucide-react";
 import { FC } from "react";
 
 const Footer: FC = () => {
@@ -37,15 +36,15 @@ const Footer: FC = () => {
                 className="flex items-center space-x-2 hover:text-indigo-400"
               >
                 <Mail className="w-5 h-5" />
-                <span>adhish@example.com</span>
+                <span>teamsatkriya@gmail.com</span>
               </a>
               <div className="flex items-center space-x-2">
                 <Phone className="w-5 h-5" />
-                <span>+91 8904156469</span>
+                <span>+91 8904353637</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5" />
-                <span>Kankanadi Hospital Mangalore</span>
+                <span>Mangalore , Karnataka , India</span>
               </div>
             </div>
           </div>
@@ -82,17 +81,13 @@ const Footer: FC = () => {
             <h3 className="text-lg font-semibold text-white">Follow Us</h3>
             <div className="flex space-x-4">
               <a href="#">
-                <GitHubLogoIcon
-                fontSize="medium" className="!w-6 !h-6"
-                />
+                <GitHubLogoIcon fontSize="medium" className="!w-6 !h-6" />
               </a>
               <a href="#">
-                <TwitterLogoIcon
-                fontSize="medium" className="!w-6 !h-6"
-                />
+                <TwitterLogoIcon fontSize="medium" className="!w-6 !h-6" />
               </a>
               <a href="#">
-              <LinkedInLogoIcon fontSize="medium" className="!w-6 !h-6" />
+                <LinkedInLogoIcon fontSize="medium" className="!w-6 !h-6" />
               </a>
             </div>
             <p className="text-sm">

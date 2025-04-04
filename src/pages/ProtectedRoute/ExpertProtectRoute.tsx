@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const ExpertProtectRoute = () => {
-  const { currentUser, loading, userType, setUserType, setUsername, setNav } =
+  const { currentUser, loading, userType, setUserType, setUsername, setNav,setRole } =
     useAuthContext();
   const [checkRole, setCheckRole] = useState<boolean>(true);
 
@@ -15,6 +15,7 @@ const ExpertProtectRoute = () => {
       if (currentUser) {
         const userInfo = await getUserInfo(currentUser.uid, "experts");
         if (userInfo !== null) {
+          setRole(userInfo.role);
           setUserType("experts");
           setUsername(userInfo.name);
         } else {

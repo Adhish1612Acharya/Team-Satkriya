@@ -5,15 +5,23 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
 const FarmerProtectRoute = () => {
-  const { currentUser, userType,loading, setUserType, setUsername,setNav } =
-    useAuthContext();
-    const [checkRole,setCheckRole]=useState<boolean>(true);
+  const {
+    currentUser,
+    userType,
+    loading,
+    setUserType,
+    setUsername,
+    setNav,
+    setRole,
+  } = useAuthContext();
+  const [checkRole, setCheckRole] = useState<boolean>(true);
 
   useEffect(() => {
     async function checkUserRole() {
       if (currentUser) {
         const userInfo = await getUserInfo(currentUser.uid, "farmers");
         if (userInfo !== null) {
+          setRole(userInfo.role);
           setUserType("farmers");
           setUsername(userInfo.name);
         } else {
@@ -26,9 +34,9 @@ const FarmerProtectRoute = () => {
     }
 
     checkUserRole();
-  }, [currentUser, setUserType]); 
+  }, [currentUser, setUserType]);
 
-  if (checkRole || loading) return <PageLoader />
+  if (checkRole || loading) return <PageLoader />;
 
   if (!currentUser) {
     return <Navigate to="/auth" replace />; // Redirect to auth if no user is logged in

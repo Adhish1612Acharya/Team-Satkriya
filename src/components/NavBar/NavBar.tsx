@@ -96,7 +96,7 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800">
+    <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-50/10 via-indigo-50/5 to-purple-50/10 dark:from-blue-900/10 dark:via-indigo-900/5 dark:to-purple-900/10"></div>
       <div className="container flex h-16 items-center justify-between px-6 lg:px-8 relative z-10">
         {/* <motion.div
