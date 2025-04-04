@@ -187,6 +187,7 @@ const WorkshopForm = () => {
 
       const filters = jsonData.filters;
 
+
       const createdWorkshopId = await createWorkshop(data, filters);
       if (!createdWorkshopId) {
         return;
