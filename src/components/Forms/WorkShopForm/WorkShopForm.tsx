@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { z } from "zod";
 import { toast } from "react-toastify";
-import {  Loader2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -24,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
 import { useState } from "react";
 import workshopSchema from "./WorkShopFormSchema";
 import useWorkShop from "@/hooks/useWorkShop/useWorkShop";
@@ -35,6 +33,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { format } from "date-fns";
+import { Step, StepLabel, Stepper } from "@mui/material";
 
 // Generate time options in 12-hour format
 const generateTimeOptions = () => {
@@ -62,6 +61,14 @@ const WorkshopForm = () => {
   // Inside your component
   const [dateFrom, setDateFrom] = useState<Dayjs | null>(dayjs());
   const [dateTo, setDateTo] = useState<Dayjs | null>(dayjs());
+  const [activeStep, setActiveStep] = useState(0);
+
+  // Use local state to prevent focus loss
+  const [locationValue, setLocationValue] = useState("");
+
+  const [linkValue, setLinkValue] = useState("");
+
+  const [preview, setPreview] = useState<string | null>(null);
 
   // Initialize form
   const form = useForm<z.infer<typeof workshopSchema>>({
@@ -71,7 +78,7 @@ const WorkshopForm = () => {
       description: "",
       dateFrom: new Date(),
       dateTo: new Date(),
-      mode: "online",
+      mode: "offline",
       location: "",
       link: "",
       thumbnail: undefined,
@@ -81,8 +88,7 @@ const WorkshopForm = () => {
   });
 
   const mode = form.watch("mode");
-  // const dateFrom = form.watch("dateFrom");
-  // const dateTo = form.watch("dateTo");
+
   const timeFrom = form.watch("timeFrom");
 
   const formatTime12Hour = (time24: string) => {
@@ -97,10 +103,64 @@ const WorkshopForm = () => {
     }
   };
 
+  const steps = ["Basic Information", "Date & Time", "Thumbnail"];
+
+  const handleNext = async () => {
+    let isValid = false;
+
+    if (activeStep === 0) {
+      isValid = await form.trigger(["title", "description"]);
+    } else if (activeStep === 1) {
+      // First validate all basic fields
+      isValid = await form.trigger([
+        "dateFrom",
+        "dateTo",
+        "timeFrom",
+        "timeTo",
+        "mode",
+      ]);
+
+      if (isValid) {
+        const mode = form.getValues("mode");
+        const values = form.getValues();
+
+        // Manually validate mode-specific field
+        if (mode === "online") {
+          if (!values.link || values.link === "") {
+            form.setError("link", {
+              type: "manual",
+              message: "Meeting link is required for online events",
+            });
+            isValid = false;
+          }
+        } else {
+          if (!values.location || values.location === "") {
+            form.setError("location", {
+              type: "manual",
+              message: "Location is required for offline events",
+            });
+            isValid = false;
+          }
+        }
+      }
+    } else if (activeStep === 2) {
+      isValid = true;
+    }
+
+    if (isValid) {
+      setActiveStep((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    setActiveStep((prev) => Math.max(0, prev - 1));
+  };
+
   const onSubmit = async (data: z.infer<typeof workshopSchema>) => {
     try {
       data.timeFrom = formatTime12Hour(data.timeFrom);
       data.timeTo = formatTime12Hour(data.timeTo);
+
       const thumnailBase64 = await convertToBase64(data.thumbnail);
       const validateWebinar = await validateAndFilterWebinar(
         { title: data.title, description: data.description },
@@ -131,7 +191,6 @@ const WorkshopForm = () => {
       if (!createdWorkshopId) {
         return;
       }
-      toast.success("Workshop Created");
       // Redirect to the workshop details page
       navigate(`/workshops/${createdWorkshopId}`);
     } catch (error) {
@@ -139,366 +198,325 @@ const WorkshopForm = () => {
     }
   };
 
-
   return (
-    <Card className="w-full max-w-3xl mx-auto shadow-lg">
-      <CardContent className="p-6">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Create New Workshop
-        </h2>
+    <>
+      <Stepper activeStep={activeStep} alternativeLabel className="mb-8">
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Title */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-700 font-medium">
-                    Workshop Title
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter workshop title"
-                      {...field}
-                      className="focus:ring-2 focus:ring-primary"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-
-            {/* Description */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-700 font-medium">
-                    Description
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe your workshop"
-                      className="min-h-32 focus:ring-2 focus:ring-primary resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-
-            {/* Date Range
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {activeStep === 0 && (
+            <div className="space-y-4">
               <FormField
                 control={form.control}
-                name="dateFrom"
+                name="title"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-gray-700 font-medium">
-                      Start Date
-                    </FormLabel>
-                    <Popover>
-                       <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                     </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={(date) => {
-                            if (date) {
-                              field.onChange(date);
-                              if (dateTo < date) {
-                                form.setValue("dateTo", date); // Correct way to set "dateTo"
-                              }
-                            }
-                          }}
-                          disabled={(date) =>
-                            date < new Date(new Date().setHours(0, 0, 0, 0))
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>
-                      Start date of your workshop
-                    </FormDescription>
-                    <FormMessage className="text-red-500" />
+                  <FormItem>
+                    <FormLabel>Workshop Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter workshop title"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e); // Update field value
+                          form.trigger("title"); // Trigger validation immediately
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
-                name="dateTo"
+                name="description"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel className="text-gray-700 font-medium">
-                      End Date
-                    </FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < dateFrom}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>End date of your workshop</FormDescription>
-                    <FormMessage className="text-red-500" />
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe your workshop"
+                        className="min-h-32"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e); // Update field value
+                          form.trigger("description"); // Trigger validation immediately
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </div> */}
+            </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Start Date */}
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="Start Date"
-                  value={dateFrom}
-                  onChange={(newValue: Dayjs | null) => {
-                    setDateFrom(newValue);
-                    if (newValue && dateTo && newValue.isAfter(dateTo)) {
+          {activeStep === 1 && (
+            <div className="space-y-4">
+              {/* Date Pickers - Responsive Grid */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Start Date */}
+                <DemoContainer components={["DatePicker"]}>
+                  <DatePicker
+                    label="Start Date"
+                    value={dateFrom}
+                    onChange={(newValue: Dayjs | null) => {
+                      setDateFrom(newValue);
+                      if (newValue && dateTo && newValue.isAfter(dateTo)) {
+                        setDateTo(newValue);
+                        form.setValue(
+                          "dateTo",
+                          newValue?.toDate() || new Date()
+                        );
+                      }
+                      form.setValue(
+                        "dateFrom",
+                        newValue?.toDate() || new Date()
+                      );
+                      form.trigger(["dateFrom", "dateTo"]);
+                    }}
+                    minDate={dayjs()}
+                    format="MMM DD, YYYY"
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                      },
+                    }}
+                  />
+                </DemoContainer>
+
+                {/* End Date */}
+                <DemoContainer components={["DatePicker"]}>
+                  <DatePicker
+                    label="End Date"
+                    value={dateTo}
+                    onChange={(newValue: Dayjs | null) => {
                       setDateTo(newValue);
                       form.setValue("dateTo", newValue?.toDate() || new Date());
-                    }
-                    form.setValue("dateFrom", newValue?.toDate() || new Date());
-                  }}
-                  minDate={dayjs()}
-                  format="MMM DD, YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      variant: "outlined",
-                    },
-                  }}
+                      form.trigger(["dateFrom", "dateTo"]);
+                    }}
+                    minDate={dateFrom || dayjs()}
+                    format="MMM DD, YYYY"
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        variant: "outlined",
+                      },
+                    }}
+                  />
+                </DemoContainer>
+              </div>
+              {/* Time Range */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="timeFrom"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">
+                        Start Time
+                      </FormLabel>
+                      <Select
+                        onValueChange={(time: string) => {
+                          field.onChange(time);
+                          form.setValue("timeTo", "");
+                          form.trigger("timeFrom");
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select start time">
+                              {formatTime12Hour(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-[var(--radix-select-content-available-height)]">
+                          <div className="max-h-[200px] overflow-y-auto">
+                            {" "}
+                            {/* Fixed height container */}
+                            {timeOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="h-[40px]" // Fixed item height
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
                 />
-              </DemoContainer>
-
-              {/* End Date */}
-              <DemoContainer components={["DatePicker"]}>
-                <DatePicker
-                  label="End Date"
-                  value={dateTo}
-                  onChange={(newValue: Dayjs | null) => {
-                    setDateTo(newValue);
-                    form.setValue("dateTo", newValue?.toDate() || new Date());
-                  }}
-                  minDate={dateFrom || dayjs()}
-                  format="MMM DD, YYYY"
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      variant: "outlined",
-                    },
-                  }}
+                <FormField
+                  control={form.control}
+                  name="timeTo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">
+                        End Time
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          form.trigger("timeTo"); // Validate on change
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select end time">
+                              {formatTime12Hour(field.value)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-[var(--radix-select-content-available-height)]">
+                          <div className="max-h-[200px] overflow-y-auto">
+                            {" "}
+                            {/* Fixed height container */}
+                            {timeOptions
+                              .filter((option) => {
+                                return option.value > timeFrom;
+                              })
+                              .map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                          </div>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
                 />
-              </DemoContainer>
-            </div>
+              </div>
 
-            {/* Time Range */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="timeFrom"
+                name="mode"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">
-                      Start Time
-                    </FormLabel>
-                    <Select
-                      onValueChange={(time: string) => {
-                        field.onChange(time);
-                        form.setValue("timeTo", "");
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select start time">
-                            {formatTime12Hour(field.value)}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {timeOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-red-500" />
+                  <FormItem className="space-y-3">
+                    <FormLabel>Event Mode</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={(value) => {
+                          field.onChange(value); // Update the mode value
+                          form.trigger("mode");
+                          // Clear the opposite field when mode changes
+                          if (value === "offline") {
+                            form.setValue("location", ""); // Clear location
+                            form.clearErrors("location"); // Clear any location errors
+                            setLocationValue("");
+                          } else {
+                            form.setValue("link", ""); // Clear link
+                            form.clearErrors("link"); // Clear any link errors
+                            setLinkValue("");
+                          }
+                        }}
+                        defaultValue={field.value}
+                        className="flex flex-row space-x-4"
+                      >
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem value="online" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Online</FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <RadioGroupItem value="offline" />
+                          </FormControl>
+                          <FormLabel className="font-normal">Offline</FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="timeTo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">
-                      End Time
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select end time">
-                            {formatTime12Hour(field.value)}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {timeOptions
-                          .filter((option) => {
-                            return option.value > timeFrom;
-                          })
-                          .map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-            </div>
 
-            {/* Mode (Online/Offline) */}
-            <FormField
-              control={form.control}
-              name="mode"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-gray-700 font-medium">
-                    Event Mode
-                  </FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-row space-x-4"
-                    >
-                      <FormItem className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-gray-50">
+              {mode === "offline" ? (
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
                         <FormControl>
-                          <RadioGroupItem value="online" />
+                          <Input
+                            placeholder="Enter physical location"
+                            value={locationValue}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setLocationValue(value); // Update local state immediately
+                              field.onChange(value); // Update form state
+                              form.trigger("location");
+                            }}
+                            onBlur={() => {
+                              field.onBlur(); // Handle blur event
+                              form.trigger("location"); // Validate on blur
+                            }}
+                            ref={field.ref}
+                          />
                         </FormControl>
-                        <FormLabel className="font-normal text-gray-700 cursor-pointer">
-                          Online
-                        </FormLabel>
+                        <FormMessage />
                       </FormItem>
-                      <FormItem className="flex items-center space-x-2 rounded-md border p-3 cursor-pointer hover:bg-gray-50">
+                    );
+                  }}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="link"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Meeting Link</FormLabel>
                         <FormControl>
-                          <RadioGroupItem value="offline" />
+                          <Input
+                            placeholder="https://zoom.us/j/example"
+                            value={linkValue}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setLinkValue(value); // Update local state immediately
+                              field.onChange(value); // Update form state
+                              form.trigger("link");
+                            }}
+                            onBlur={() => {
+                              field.onBlur(); // Handle blur event
+                              form.trigger("link"); // Validate on blur
+                            }}
+                            ref={field.ref}
+                          />
                         </FormControl>
-                        <FormLabel className="font-normal text-gray-700 cursor-pointer">
-                          Offline
-                        </FormLabel>
+                        <FormMessage />
                       </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage className="text-red-500" />
-                </FormItem>
+                    );
+                  }}
+                />
               )}
-            />
+            </div>
+          )}
 
-            {/* Conditional Fields based on Mode */}
-            {mode === "offline" ? (
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">
-                      Location
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter physical location"
-                        {...field}
-                        className="focus:ring-2 focus:ring-primary"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">
-                      Meeting Link
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://zoom.us/j/example"
-                        {...field}
-                        className="focus:ring-2 focus:ring-primary"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-            )}
-
+          {activeStep === 2 && (
             <FormField
               control={form.control}
               name="thumbnail"
               render={({ field: { value, onChange, ...fieldProps } }) => {
-                const [preview, setPreview] = useState<string | null>(null);
-
                 const handleFileChange = (
                   e: React.ChangeEvent<HTMLInputElement>
                 ) => {
@@ -507,6 +525,7 @@ const WorkshopForm = () => {
                     onChange(file);
                     const imageUrl = URL.createObjectURL(file);
                     setPreview(imageUrl);
+                    form.trigger("thumbnail");
                   }
                 };
 
@@ -559,136 +578,36 @@ const WorkshopForm = () => {
                 );
               }}
             />
+          )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-md transition-all"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create Workshop/Webinar"
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          <div className="flex justify-end gap-4">
+            {activeStep > 0 && (
+              <Button type="button" variant="outline" onClick={handleBack}>
+                Back
+              </Button>
+            )}
+            {activeStep < steps.length - 1 ? (
+              <Button
+                type="button" // Explicitly set to button
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent default form submission
+                  handleNext();
+                }}
+              >
+                Next
+              </Button>
+            ) : (
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting
+                  ? "Creating..."
+                  : "Create Workshop"}
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
+    </>
   );
 };
 
 export default WorkshopForm;
-
-// "use client";
-
-// import { zodResolver } from "@hookform/resolvers/zod";
-// import { format } from "date-fns";
-// import { CalendarIcon } from "lucide-react";
-// import { useForm } from "react-hook-form";
-// import { z } from "zod";
-
-// import { cn } from "@/lib/utils";
-// // import { toast } from "@/components/hooks/use-toast"
-// import { Button } from "@/components/ui/button";
-// import { Calendar } from "@/components/ui/calendar";
-// import {
-//   Form,
-//   FormControl,
-//   FormDescription,
-//   FormField,
-//   FormItem,
-//   FormLabel,
-//   FormMessage,
-// } from "@/components/ui/form";
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "@/components/ui/popover";
-// import { useState } from "react";
-
-// const FormSchema = z.object({
-//   dob: z.date({
-//     required_error: "A date of birth is required.",
-//   }),
-// });
-
-// const WorkShopForm = () => {
-//   const [open, setOpen] = useState(false); // Add this at the top of your component
-//   const form = useForm<z.infer<typeof FormSchema>>({
-//     resolver: zodResolver(FormSchema),
-//   });
-
-//   function onSubmit(data: z.infer<typeof FormSchema>) {
-//     // toast({
-//     //   title: "You submitted the following values:",
-//     //   description: (
-//     //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-//     //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-//     //     </pre>
-//     //   ),
-//     // })
-//   }
-
-//   console.log("Open : ", open);
-
-//   return (
-//     <Form {...form}>
-//       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-//         <FormField
-//           control={form.control}
-//           name="dob"
-//           render={({ field }) => (
-//             <FormItem className="flex flex-col">
-//               <FormLabel>Date of birth</FormLabel>
-//               <Popover open={true} onOpenChange={setOpen}>
-//                 <PopoverTrigger asChild>
-//                   <FormControl>
-//                     <Button
-//                       type="button" // Crucial addition
-//                       variant={"outline"}
-//                       className={cn(
-//                         "w-[240px] pl-3 text-left font-normal",
-//                         !field.value && "text-muted-foreground"
-//                       )}
-//                     >
-//                       {/* ... existing button content ... */}
-//                     </Button>
-//                   </FormControl>
-//                 </PopoverTrigger>
-//                 <PopoverContent   onOpenAutoFocus={(e) => e.preventDefault()} // Prevent focus loss
-//         onCloseAutoFocus={(e) => e.preventDefault()}    className="w-auto p-0" align="start">
-//                   <Calendar
-//                     mode="single"
-//                     selected={field.value}
-//                     onSelect={(date) => {
-//                       field.onChange(date);
-//                       setOpen(false); // Close after selection
-//                     }}
-//                     disabled={(date) =>
-//                       date > new Date() || date < new Date("1900-01-01")
-//                     }
-//                     initialFocus
-//                   />
-//                 </PopoverContent>
-//               </Popover>
-//               Key Fixes:
-//               <FormDescription>
-//                 Your date of birth is used to calculate your age.
-//               </FormDescription>
-//               <FormMessage />
-//             </FormItem>
-//           )}
-//         />
-//         <Button type="submit">Submit</Button>
-//       </form>
-//     </Form>
-//   );
-// };
-
-// export default WorkShopForm;
