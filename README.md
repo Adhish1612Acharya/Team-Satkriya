@@ -112,7 +112,7 @@ VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 VITE_CLOUDINARY_API_KEY=your_api_key
 VITE_CLOUDINARY_API_SECRET=your_api_secret
 ```
-#### ☁️ Gemini Configuration(gemini-2.0-flash)
+#### ☁️ Gemini Configuration (gemini-2.0-flash)
 ```bash
 VITE_GEMINI_API_KEY
 ```
