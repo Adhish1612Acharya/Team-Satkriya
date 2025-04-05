@@ -77,20 +77,24 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
 ## Installation
 
 1. Clone the repository
-   bash
+   ```bash
    git clone https://github.com/Adhish1612Acharya/Team-Satkriya.git
+   ```
 
 2. Navigate to project directory
-   bash
+   ```bash
    cd Team-Satkriya
+   ```
 
 3. Install dependencies
-   bash
+   ```bash
    npm install
+   ```
 
 4. Run development server
-   bash
+   ```bash
    npm run dev
+   ```
 
 <a id="environment-variables"></a>
 
@@ -131,14 +135,5 @@ _Website:_ [https://gopushti.netlify.app](https://gopushti.netlify.app)
 
 ```
 
-Key improvements made:
-1. Added anchor tags for each section to enable proper navigation
-2. Organized Git commands under clear headings with proper code blocks
-3. Added copy-paste functionality by using proper Markdown code blocks
-4. Improved the environment variables section with clear formatting
-5. Added Node.js as a prerequisite
-6. Made the contact section more visually distinct
-7. Fixed some formatting inconsistencies
 
-The table of contents will now properly link to each section when clicked. The code blocks are now easily copy-pasteable for users.
-```
+
