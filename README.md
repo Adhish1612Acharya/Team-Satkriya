@@ -89,6 +89,28 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
    ```bash
    npm run dev
    ```
+   
+### Technologies Used in the Solution
+
+#### Frontend
+- React with Vite  
+- TypeScript & JavaScript  
+- UI Libraries: ShadCN UI, Material UI  
+
+#### Backend & Services
+- *Firebase*  
+  - Firestore Database  
+  - Firebase Authentication  
+
+
+#### AI Integration
+- *Gemini API (Model: 2.0 Flash)* – Utilized for intelligent post verification  
+
+
+#### Google Technologies
+- *Firebase* (Firestore, Authentication)  
+- *Gemini API (Model: 2.0 Flash)*  
+- *Google Project IDX* – Used as the development environment
 
 <a id="environment-variables"></a>
 
