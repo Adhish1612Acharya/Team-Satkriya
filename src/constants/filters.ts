@@ -3,7 +3,13 @@ import { Filters } from "@/types/filter.types";
 const filters: Filters = {
   UserType: {
     selectType: "single",
-    subFilters: ["Doctor", "NGO", "Volunteer", "Farmer"],
+    subFilters: [
+      "Doctor",
+      "NGO",
+      "Volunteer",
+      "Farmer",
+      "Research Institution",
+    ],
   },
   TechnologyInnovation: {
     selectType: "double",

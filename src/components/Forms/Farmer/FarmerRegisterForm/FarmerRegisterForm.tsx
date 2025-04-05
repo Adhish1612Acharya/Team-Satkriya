@@ -192,9 +192,13 @@ export const FarmerRegisterForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Create Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a strong password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -207,6 +211,7 @@ export const FarmerRegisterForm = () => {
             type="submit"
             fullWidth
             disabled={form.formState.isSubmitting}
+               className="cursor-pointer"
           >
             {form.formState.isSubmitting ? (
               <Loader2 className="animate-spin" />

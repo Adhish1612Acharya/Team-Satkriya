@@ -157,9 +157,10 @@ const useWorkShop = () => {
       // 4. Data Processing
       const workshopData = workshopSnap.data();
 
-        // Check if current user is registered
-        const isRegistered =
-        workshopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid)
+      // Check if current user is registered
+      const isRegistered = workshopData.registrations.some(
+        (reg: Registration) => reg.id === auth.currentUser?.uid
+      );
 
       // 5. Return Typed Workshop Object
       return {
@@ -206,9 +207,10 @@ const useWorkShop = () => {
       return querySnapshot.docs.map((doc) => {
         const workshopData = doc.data();
 
-         // Check if current user is registered
-         const isRegistered =
-         workshopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid)
+        // Check if current user is registered
+        const isRegistered = workshopData.registrations.some(
+          (reg: Registration) => reg.id === auth.currentUser?.uid
+        );
 
         return {
           id: doc.id,
@@ -228,48 +230,65 @@ const useWorkShop = () => {
     filters,
     userType
   ) => {
+    // Early return if no authenticated user
     if (!auth.currentUser) {
+      console.warn("No authenticated user - cannot fetch workshops");
       return null;
     }
+
     try {
-      const postsRef = collection(db, "workshops");
+      const workshopsRef = collection(db, "workshops");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day
 
-      let q;
+      // Base query conditions for all scenarios
+      const baseConditions = [
+        where("dateFrom", ">=", Timestamp.fromDate(today)), // Only future workshops
+        orderBy("dateFrom", "asc"), // Earliest first
+      ];
 
-      if (userType !== null && filters.length > 0) {
-        q = query(
-          postsRef,
-          where("filters", "array-contains-any", filters),
-          where("role", "==", userType)
-        );
-      } else if (userType === null && filters.length > 0) {
-        q = query(postsRef, where("filters", "array-contains-any", filters));
-      } else {
-        q = query(postsRef, where("role", "==", userType));
+      // Add role condition if specified
+      if (userType !== null) {
+        baseConditions.push(where("role", "==", userType));
       }
-      const querySnapshot = await getDocs(q);
+
+      // Handle filter conditions
+      let finalQuery;
+      if (filters.length > 0) {
+        finalQuery = query(
+          workshopsRef,
+          ...baseConditions,
+          where("filters", "array-contains-any", filters)
+        );
+      } else {
+        finalQuery = query(workshopsRef, ...baseConditions);
+      }
+
+      const querySnapshot = await getDocs(finalQuery);
 
       if (querySnapshot.empty) {
         return [];
       }
 
-      const filteredWorkShops = querySnapshot.docs.map((doc) => {
-        const workShopData = doc.data();
-
-        // Check if current user is registered
-        const isRegistered =
-        workShopData.registrations.some((reg: Registration) => reg.id === auth.currentUser?.uid);
+      // Process workshop data with user registration status
+      const currentUserId = auth.currentUser.uid;
+      const filteredWorkshops = querySnapshot.docs.map((doc) => {
+        const workshopData = doc.data();
 
         return {
           id: doc.id,
-          currUserRegistered: isRegistered,
-          ...workShopData,
+          currUserRegistered:
+            workshopData.registrations?.some(
+              (reg: Registration) => reg.id === currentUserId
+            ) || false,
+          ...workshopData,
         } as WorkShop;
       });
 
-      return filteredWorkShops;
+      return filteredWorkshops;
     } catch (error) {
-      console.error("Error fetching filtered posts:", error);
+      console.error("Error fetching workshops:", error);
+      // Consider adding error tracking here (e.g., Sentry, LogRocket)
       return [];
     }
   };
@@ -389,62 +408,63 @@ const useWorkShop = () => {
       }
     };
 
-
-    const getUserRegistrations:GetUserRegistrationsDetailsType = async (userType) => {
-      try {
-        // Validate current user
-        const user = auth.currentUser;
-        if (!user) {
-          toast.error("Please login to view your registrations");
-          navigate("/auth");
-          return;
-        }
-    
-        // 1. Get user document
-        const userDocRef = doc(db, userType, user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-    
-        if (!userDocSnap.exists()) {
-          toast.error("User profile not found");
-          navigate("/workshops");
-          return;
-        }
-    
-        // 2. Get registered workshop IDs (with fallback for empty array)
-        const workshopIds = userDocSnap.data()?.registrations || [];
-        if (!workshopIds.length) {
-          return []; // Return empty array if no registrations
-        }
-    
-        // 3. Fetch all workshops in parallel for better performance
-        const workshopPromises = workshopIds.map(async (workshopId: string) => {
-          const workshopDocRef = doc(db, "workshops", workshopId);
-          const workshopSnap = await getDoc(workshopDocRef);
-    
-          if (!workshopSnap.exists()) {
-            console.warn(`Missing workshop: ${workshopId}`);
-            return // Skip deleted workshops
-          }
-    
-          return {
-            id: workshopSnap.id,
-            currUserRegistered: true, // Flag indicating user registration
-            ...workshopSnap.data()
-          } as WorkShop;
-        });
-    
-        // 4. Wait for all promises and filter out nulls
-        const workshops = (await Promise.all(workshopPromises)).filter(Boolean) as WorkShop[];
-        
-        return workshops;
-    
-      } catch (error) {
-        console.error("Failed to fetch registrations:", error);
-        toast.error("Failed to load your registrations");
+  const getUserRegistrations: GetUserRegistrationsDetailsType = async (
+    userType
+  ) => {
+    try {
+      // Validate current user
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error("Please login to view your registrations");
+        navigate("/auth");
         return;
       }
-    };
 
+      // 1. Get user document
+      const userDocRef = doc(db, userType, user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        toast.error("User profile not found");
+        navigate("/workshops");
+        return;
+      }
+
+      // 2. Get registered workshop IDs (with fallback for empty array)
+      const workshopIds = userDocSnap.data()?.registrations || [];
+      if (!workshopIds.length) {
+        return []; // Return empty array if no registrations
+      }
+
+      // 3. Fetch all workshops in parallel for better performance
+      const workshopPromises = workshopIds.map(async (workshopId: string) => {
+        const workshopDocRef = doc(db, "workshops", workshopId);
+        const workshopSnap = await getDoc(workshopDocRef);
+
+        if (!workshopSnap.exists()) {
+          console.warn(`Missing workshop: ${workshopId}`);
+          return; // Skip deleted workshops
+        }
+
+        return {
+          id: workshopSnap.id,
+          currUserRegistered: true, // Flag indicating user registration
+          ...workshopSnap.data(),
+        } as WorkShop;
+      });
+
+      // 4. Wait for all promises and filter out nulls
+      const workshops = (await Promise.all(workshopPromises)).filter(
+        Boolean
+      ) as WorkShop[];
+
+      return workshops;
+    } catch (error) {
+      console.error("Failed to fetch registrations:", error);
+      toast.error("Failed to load your registrations");
+      return;
+    }
+  };
 
   return {
     createWorkshop,
@@ -454,7 +474,7 @@ const useWorkShop = () => {
     registerWorkShop,
     getWorkshopRegistrationDetails,
     getAllYourWorkshops,
-    getUserRegistrations
+    getUserRegistrations,
   };
 };
 

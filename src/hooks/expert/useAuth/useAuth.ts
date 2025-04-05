@@ -57,6 +57,8 @@ const useAuth = () => {
       await signInWithGooglePopup().then(async (data) => {
         const docRef = doc(db, "experts", `${data.user.uid}`);
 
+        console.log(role);
+
         const docSnap = await getDoc(docRef);
 
         if (!docSnap.exists()) {
@@ -68,10 +70,12 @@ const useAuth = () => {
             contactNo: phoneNumber,
             role: role,
             profileData: profileData,
+            postsVerified:
+              role === "doctor" || role === "researchInstitution" ? [] : null,
             posts: [],
             workshops: [],
             registrations: [],
-            bookmarks:[],
+            bookmarks: [],
             createdAt: new Date(),
             updatedAt: new Date(),
           });
@@ -99,7 +103,7 @@ const useAuth = () => {
     } catch (err: any) {
       console.log(err);
 
-      toast.error(err.message || "Email or password is not correct");
+      toast.error("Email or password is not correct");
     }
   };
 
@@ -121,7 +125,11 @@ const useAuth = () => {
           posts: [],
           workshops: [],
           registrations: [],
-          bookmarks:[],
+          bookmarks: [],
+          postsVerified:
+            data.role === "doctor" || data.role === "researchInstitution"
+              ? []
+              : null,
           role: data.role,
           profileData: data.profileData,
           createdAt: new Date(),

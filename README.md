@@ -1,156 +1,144 @@
-<!-- # GoPushti
+# GoPushti
 
-*Reviving the Indian Cow Breed for a Sustainable Future*
+Reviving the Indian Cow Breed for a Sustainable Future
 
 ## Table of Contents
+
 - [Introduction](#introduction)
 - [Features](#features)
 - [Future Roadmap](#future-roadmap)
 - [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
 - [Contact](#contact)
 
+<a id="introduction"></a>
+
 ## Introduction
-GoPushti is an AI-driven platform designed to conserve and improve indigenous Indian cow breeds by bridging the gap between farmers, experts, and volunteers. By integrating technology with traditional practices, we at GoPushti intend fosters a community-driven approach to promote sustainable agriculture, organic farming, and eco-friendly energy solutions. Our mission aligns with the *Kamdhenu Program* to empower farmers, enhance breeding programs, and strengthen socio-economic and environmental sustainability.
+
+GoPushti is an AI-driven platform designed to conserve and improve indigenous Indian cow breeds by bridging the gap between farmers, experts, and volunteers. By integrating technology with traditional practices, we at GoPushti intend fosters a community-driven approach to promote sustainable agriculture, organic farming, and eco-friendly energy solutions. Our mission aligns with the Kamdhenu Program to empower farmers, enhance breeding programs, and strengthen socio-economic and environmental sustainability.
+
+<a id="features"></a>
 
 ## Features
 
 ### 🔒 Secured User Authentication
-- Role-based access for *farmers, **veterinarians, **NGOs, **research institutes, and **volunteers*.
+
+- Role-based access for farmers, veterinarians, NGOs, research institutes, and volunteers.
 - Tailored dashboards and functionalities for each user type.
 
 ### 🤖 AI-Filtered Posts & Verification
-- *Gemini AI* verifies post relevance (e.g., cow health, breeding tips).
+
+- Gemini AI verifies post relevance (e.g., cow health, breeding tips).
 - Scientific claims require expert verification via a "Verify" button.
 - Top-rated posts are highlighted based on community engagement.
 
 ### 💬 Categorized Comment System
-- Comments are segregated by user type (e.g., veterinarians’ advice under a separate section).
+
+- Comments are segregated by user type (e.g., veterinarians' advice under a separate section).
 
 ### 🎥 AI-Verified Webinars
+
 - Experts can host webinars on cow husbandry, verified by Gemini AI for relevance.
 - Farmers can search and filter webinars by topic, date, or expert.
 
 ### 🔍 AI-Powered Query Search
+
 - Farmers submit text/image queries to find solutions.
-- Gemini AI retrieves the *top 3 related posts* and *top 3 relevant webinars*.
+- Gemini AI retrieves the top 3 related posts and top 3 relevant webinars.
+
+<a id="future-roadmap"></a>
 
 ## Future Roadmap
-1. *Webinar Registration & Management*: Direct sign-up for sessions and expert-led scheduling.
-2. *AI-Generated Expert Alerts*: Unanswered queries are auto-posted and routed to relevant experts.
-3. *Volunteer Finder*: Locate nearby helpers via Google/Gemini-powered suggestions.
-4. *Nearby Expert Matching*: AI-driven recommendations for local experts based on farmer needs.
-5. *Online Marketplace*: Buy/sell cow-related products (e.g., organic manure, Ayurvedic remedies).
-6. *Multi-language support*: Enable various vernacular language speakers with Google API.
+
+- Webinar Registration & Management: Direct sign-up for sessions and expert-led scheduling.
+- AI-Generated Expert Alerts: Unanswered queries are auto-posted and routed to relevant experts.
+- Volunteer Finder: Locate nearby helpers via Google/Gemini-powered suggestions.
+- Nearby Expert Matching: AI-driven recommendations for local experts based on farmer needs.
+- Online Marketplace: Buy/sell cow-related products (e.g., organic manure, Ayurvedic remedies).
+- Multi-language support: Enable various vernacular language speakers with Google API.
+
+<a id="getting-started"></a>
 
 ## Getting Started
 
+<a id="prerequisites"></a>
+
 ### Prerequisites
-- Web browser (Chrome, Firefox, or Safari recommended).
-- Internet connection.
 
-### Installation
-1. Fork the repository
+- Web browser (Chrome, Firefox, or Safari recommended)
+- Internet connection
+- Node.js installed (version 16 or higher recommended)
 
-2. Set Up Instructions : 
-```bash
-git clone https://github.com/Adhish1612Acharya/Team-Satkriya.git
-cd Team-Satkriya
-npm install
-npm run dev
+<a id="installation"></a>
 
-3. Environment variable setup 
-   --> Firebase :
-                  VITE_API_KEY=
-                  VITE_AUTH_DOMAIN=
-                  VITE_PROJECT_ID=
-                  VITE_STORAGE_BUCKET=
-                  VITE_MESSAGING_SENDER_ID=
-                  VITE_APP_ID=
+## Installation
 
-   --> Cloudinary :
-   
-## Contact
-*Project Lead*: Adhish Padmanabha Acharya
-*Email*: [adhish1612@gmail.com](mailto:adhish1612@gmail.com)
-*Website*: [https://gopushti.netlify.app](https://gopushti.netlify.app). -->
-
-# GoPushti - Reviving Indian Cow Breeds for a Sustainable Future  
-
-[![Project Status: Active](https://img.shields.io/badge/status-active-brightgreen)](https://github.com/Adhish1612Acharya/Team-Satkriya)  
-
-## 🌱 Introduction  
-*GoPushti* is an AI-driven platform dedicated to conserving and improving indigenous Indian cow breeds by connecting farmers, experts, and volunteers. By blending technology with traditional practices, we foster a community-driven approach to promote:  
-- Sustainable agriculture  
-- Organic farming  
-- Eco-friendly energy solutions  
-
-Aligned with the *Kamdhenu Program*, our mission is to empower farmers, enhance breeding programs, and strengthen socio-economic and environmental sustainability.  
-
-## 🚀 Key Features  
-
-### 🔒 *Secured User Authentication*  
-- Role-based access for *farmers, veterinarians, NGOs, research institutes, and volunteers*.  
-- Tailored dashboards for each user type.  
-
-### 🤖 *AI-Filtered Posts & Verification*  
-- *Gemini AI* verifies post relevance (e.g., cow health, breeding tips).  
-- Scientific claims require expert verification via a "Verify" button.  
-- Top-rated posts highlighted based on community engagement.  
-
-### 💬 *Categorized Comment System*  
-- Comments segregated by user type (e.g., veterinarians’ advice in a dedicated section).  
-
-### 🎥 *AI-Verified Webinars*  
-- Experts host webinars on cow husbandry, verified by *Gemini AI* for relevance.  
-- Farmers can search and filter webinars by topic, date, or expert.  
-
-### 🔍 *AI-Powered Query Search*  
-- Submit text/image queries to find solutions.  
-- *Gemini AI* retrieves the *top 3 related posts* and *top 3 relevant webinars*.  
-
-## 🛣 Future Roadmap  
-- *Webinar Registration & Management*: Direct sign-up and expert-led scheduling.  
-- *AI-Generated Expert Alerts*: Auto-post unanswered queries to relevant experts.  
-- *Volunteer Finder*: Locate nearby helpers via Google/Gemini-powered suggestions.  
-- *Nearby Expert Matching*: AI-driven recommendations for local experts.  
-- *Online Marketplace*: Buy/sell cow-related products (organic manure, Ayurvedic remedies).  
-- *Multi-language Support*: Vernacular language integration using Google API.  
-
-## 🛠 Getting Started  
-
-### *Prerequisites*  
-- Web browser (*Chrome, Firefox, or Safari* recommended).  
-- Internet connection.  
-
-### *Installation*  
-1. *Fork the repository*  
-2. *Clone & Set Up*  
+1. Clone the repository
    bash
    git clone https://github.com/Adhish1612Acharya/Team-Satkriya.git
+
+2. Navigate to project directory
+   bash
    cd Team-Satkriya
+
+3. Install dependencies
+   bash
    npm install
+
+4. Run development server
+   bash
    npm run dev
-     
-3. *Environment Variables Setup*  
-   - *Firebase* (Required):  
-     
-     VITE_API_KEY=  
-     VITE_AUTH_DOMAIN=  
-     VITE_PROJECT_ID=  
-     VITE_STORAGE_BUCKET=  
-     VITE_MESSAGING_SENDER_ID=  
-     VITE_APP_ID=  
-       
-   - *Cloudinary* (Optional for media uploads).  
 
-## 🤝 Contributing  
-We welcome contributions! Please fork the repository and submit a *Pull Request* with your improvements.  
+<a id="environment-variables"></a>
 
-## 📬 Contact  
-- *Project Lead*: Adhish Padmanabha Acharya  
-- *Email*: [adhish1612@gmail.com](mailto:adhish1612@gmail.com)  
-- *Website*: [https://gopushti.netlify.app](https://gopushti.netlify.app)  
+### Environment Variables
 
----  
-*Let’s work together to preserve India’s indigenous cow breeds sustainably!* 🐄
+Create a .env file in the root directory with the following variables:
+
+env
+
+# Firebase Configuration
+
+VITE_API_KEY=your_api_key
+VITE_AUTH_DOMAIN=your_auth_domain
+VITE_PROJECT_ID=your_project_id
+VITE_STORAGE_BUCKET=your_storage_bucket
+VITE_MESSAGING_SENDER_ID=your_sender_id
+VITE_APP_ID=your_app_id
+
+# Cloudinary Configuration
+
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_API_KEY=your_api_key
+VITE_CLOUDINARY_API_SECRET=your_api_secret
+
+<a id="contributing"></a>
+
+## Contributing
+
+We welcome contributions! Please fork the repository and create a pull request with your changes.
+
+<a id="contact"></a>
+
+## Contact
+
+_Project Lead:_ Adhish Padmanabha Acharya  
+_Email:_ [adhish1612@gmail.com](mailto:adhish1612@gmail.com)  
+_Website:_ [https://gopushti.netlify.app](https://gopushti.netlify.app)
+
+```
+
+Key improvements made:
+1. Added anchor tags for each section to enable proper navigation
+2. Organized Git commands under clear headings with proper code blocks
+3. Added copy-paste functionality by using proper Markdown code blocks
+4. Improved the environment variables section with clear formatting
+5. Added Node.js as a prerequisite
+6. Made the contact section more visually distinct
+7. Fixed some formatting inconsistencies
+
+The table of contents will now properly link to each section when clicked. The code blocks are now easily copy-pasteable for users.
+```

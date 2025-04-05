@@ -25,6 +25,7 @@ import WorkshopRegistration from "./pages/Expert/WorkShopRegistration/WorkShopRe
 import YourPostPage from "./pages/YourPostsPage/YourPostPage";
 import YourRegistrationsPage from "./pages/YourRegistrationsPage/YourRegistrationsPage";
 import YourWorkShopsPage from "./pages/Expert/YourWorkShopsPage/YourWorkShopsPage";
+import CreatePostPage from "./pages/CreatePostPage/CreatePostPage";
 
 const App = () => {
   const { nav } = useAuthContext();
@@ -65,6 +66,7 @@ const App = () => {
               path="/user/registrations"
               element={<YourRegistrationsPage />}
             />
+            <Route path="/posts/create" element={<CreatePostPage/>}/>
           </Route>
           <Route element={<FarmerProtectRoute />}>
             <Route path="/solve-query" element={<AiSolveQuery />} />
@@ -77,14 +79,6 @@ const App = () => {
               element={<WorkshopRegistration />}
             />
             <Route path="/user/workshops" element={<YourWorkShopsPage />} />
-            {/* <Route path="/profile/farmer" element={<FarmerProfile />} />
-            <Route path="/profile/doctor" element={<DoctorProfile />} />
-            <Route path="/profile/ngo" element={<NGOProfile />} />
-            <Route
-              path="/profile/researchinsti"
-              element={<ResearchInstituteProfile />}
-            />
-            <Route path="/profile/volunteer" element={<VolunteerProfile />} /> */}
           </Route>
           <Route path="*" element={<PageNotFound />} />
         </Routes>

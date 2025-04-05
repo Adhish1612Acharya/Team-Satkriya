@@ -16,9 +16,19 @@ import Button from "@/components/Button/Button";
 import useAuth from "@/hooks/expert/useAuth/useAuth";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
 import { toast } from "react-toastify";
+import { City, State } from "country-state-city";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const DoctorSignUpForm = () => {
   const { expertSignUp, googleSignUp } = useAuth();
+  const [selectedState, setSelectedState] = useState("");
 
   const form = useForm<z.infer<typeof doctorSignUpSchema>>({
     resolver: zodResolver(doctorSignUpSchema),
@@ -29,6 +39,8 @@ const DoctorSignUpForm = () => {
       password: "",
       phoneNumber: "",
       address: "",
+      state: "",
+      city: "",
       name: "",
       uniqueId: "",
       education: "",
@@ -36,8 +48,15 @@ const DoctorSignUpForm = () => {
     },
   });
 
+  // Get Indian states
+  const indianStates = State.getStatesOfCountry("IN");
+
+  // Get cities for selected state
+  const stateCities = selectedState
+    ? City.getCitiesOfState("IN", selectedState)
+    : [];
+
   const onSubmit = async (data: z.infer<typeof doctorSignUpSchema>) => {
-  
     const dataToPass: SignUpArguTypes = {
       name: data.name,
       email: data.email,
@@ -49,19 +68,22 @@ const DoctorSignUpForm = () => {
         uniqueId: Number(data.uniqueId),
         education: data.education,
         yearsOfPractice: Number(data.yearsOfPractice),
+        state: data.state,
+        city: data.city,
       },
     };
     await expertSignUp(dataToPass);
   };
 
   const signUpWithGoogle = async () => {
-
     const profileFields: (keyof z.infer<typeof doctorSignUpSchema>)[] = [
       "phoneNumber",
       "address",
       "uniqueId",
       "education",
       "yearsOfPractice",
+      "state",
+      "city",
     ];
 
     let isValid = true;
@@ -82,6 +104,8 @@ const DoctorSignUpForm = () => {
         uniqueId: Number(form.getValues("uniqueId")),
         education: form.getValues("education"),
         yearsOfPractice: Number(form.getValues("yearsOfPractice")),
+        state: form.getValues("state"),
+        city: form.getValues("city"),
       };
       await googleSignUp("doctor", profileData, address, phoneNumber);
     }
@@ -97,12 +121,84 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="9989786754" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Enter 10-digit mobile number"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* State Field */}
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  setSelectedState(value);
+                  form.setValue("city", ""); // Reset city when state changes
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {indianStates.map((state) => (
+                    <SelectItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* City Field */}
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!selectedState}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedState ? "Select city" : "Select state first"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {stateCities.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="address"
@@ -110,7 +206,10 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Clinic Location</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  placeholder="Enter your clinic/hospital address"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,7 +223,11 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Unique ID</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  type="number"
+                  placeholder="Enter your medical license number"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -137,7 +240,10 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Education</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  placeholder="Enter your medical qualifications"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -150,13 +256,16 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Years of Practice</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="5" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Enter years of experience (e.g., 5)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-       
 
         <FormField
           control={form.control}
@@ -165,7 +274,10 @@ const DoctorSignUpForm = () => {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  placeholder="Enter your full name as per medical license"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -177,9 +289,9 @@ const DoctorSignUpForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Professional Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input placeholder="professional@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -191,9 +303,13 @@ const DoctorSignUpForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Enter password</FormLabel>
+              <FormLabel>Create Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="*******" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a strong password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -202,8 +318,19 @@ const DoctorSignUpForm = () => {
 
         {/* Buttons */}
         <div className="space-y-4">
-          <Button variant="outline" className="cursor-pointer" icon={Lock} disabled={form.formState.isSubmitting} type="submit" fullWidth>
-          {form.formState.isSubmitting ? <Loader2 className="animate-spin"/> : "Create Account"}
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            icon={Lock}
+            disabled={form.formState.isSubmitting}
+            type="submit"
+            fullWidth
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </Button>
           <Button
             variant="outline"

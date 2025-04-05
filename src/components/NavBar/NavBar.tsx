@@ -12,6 +12,7 @@ import {
   Home,
   LogIn,
   HomeIcon,
+  PenSquare,
 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import Profile from "./Profile";
@@ -48,7 +49,12 @@ const NavBar = () => {
             icon: <Calendar className="h-4 w-4" />,
             color: "text-amber-500",
           },
-          
+          {
+            title: "Create Post",
+            href: "/posts/create",
+            icon: <PenSquare className="h-4 w-4" />,
+            color: "text-green-500",
+          },
         ]
       : []),
 

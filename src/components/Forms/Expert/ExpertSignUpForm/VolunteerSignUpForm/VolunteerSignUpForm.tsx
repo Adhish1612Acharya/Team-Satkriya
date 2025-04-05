@@ -16,9 +16,19 @@ import Button from "@/components/Button/Button";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
 import useAuth from "@/hooks/expert/useAuth/useAuth";
 import { toast } from "react-toastify";
+import { City, State } from "country-state-city";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const VolunteerSignUpForm = () => {
   const { expertSignUp, googleSignUp } = useAuth();
+  const [selectedState, setSelectedState] = useState("");
 
   const form = useForm<z.infer<typeof volunteerSignUpSchema>>({
     resolver: zodResolver(volunteerSignUpSchema),
@@ -28,10 +38,20 @@ const VolunteerSignUpForm = () => {
       password: "",
       phoneNumber: "",
       address: "",
+      state: "",
+      city: "",
       name: "",
       education: "",
     },
   });
+
+  // Get Indian states
+  const indianStates = State.getStatesOfCountry("IN");
+
+  // Get cities for selected state
+  const stateCities = selectedState
+    ? City.getCitiesOfState("IN", selectedState)
+    : [];
 
   const onSubmit = async (data: z.infer<typeof volunteerSignUpSchema>) => {
     const dataToPass: SignUpArguTypes = {
@@ -43,6 +63,8 @@ const VolunteerSignUpForm = () => {
       role: data.type,
       profileData: {
         education: data.education,
+        state: data.state,
+        city: data.city,
       },
     };
     await expertSignUp(dataToPass);
@@ -53,6 +75,8 @@ const VolunteerSignUpForm = () => {
       "phoneNumber",
       "address",
       "education",
+      "state",
+      "city",
     ];
 
     let isValid = true;
@@ -72,6 +96,8 @@ const VolunteerSignUpForm = () => {
       const address = form.getValues("address");
       const profileData = {
         education: form.getValues("education"),
+        state: form.getValues("state"),
+        city: form.getValues("city"),
       };
       await googleSignUp("volunteer", profileData, address, phoneNumber);
     }
@@ -87,20 +113,97 @@ const VolunteerSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="9987868576" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Enter 10-digit mobile number"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* State Field */}
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  setSelectedState(value);
+                  form.setValue("city", "");
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your state" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {indianStates.map((state) => (
+                    <SelectItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* City Field */}
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!selectedState}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedState
+                          ? "Select your city"
+                          : "Please select state first"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {stateCities.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Office/working Address</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter your complete Office/working  address"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,7 +217,10 @@ const VolunteerSignUpForm = () => {
             <FormItem>
               <FormLabel>Education</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter your highest qualification (e.g., B.Sc Agriculture)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -128,25 +234,34 @@ const VolunteerSignUpForm = () => {
             <FormItem>
               <FormLabel>Email Address</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input
+                  placeholder="Enter your active email address"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Enter password</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="*******" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a strong password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="name"
@@ -154,12 +269,16 @@ const VolunteerSignUpForm = () => {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter your full name as per ID proof"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <div className="space-y-4">
           <Button
             variant="outline"
@@ -169,7 +288,11 @@ const VolunteerSignUpForm = () => {
             type="submit"
             fullWidth
           >
-            {form.formState.isSubmitting ? <Loader2  className="animate-spin"/> : "Create Account"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </Button>
           <Button
             variant="outline"

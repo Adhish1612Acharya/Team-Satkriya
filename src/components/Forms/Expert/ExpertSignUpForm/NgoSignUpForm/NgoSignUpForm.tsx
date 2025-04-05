@@ -16,9 +16,19 @@ import Button from "@/components/Button/Button";
 import { toast } from "react-toastify";
 import useAuth from "@/hooks/expert/useAuth/useAuth";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
+import { City, State } from "country-state-city";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const NgoSignUpForm = () => {
   const { expertSignUp, googleSignUp } = useAuth();
+  const [selectedState, setSelectedState] = useState("");
 
   const form = useForm<z.infer<typeof ngoSignUpSchema>>({
     resolver: zodResolver(ngoSignUpSchema),
@@ -28,10 +38,20 @@ const NgoSignUpForm = () => {
       password: "",
       phoneNumber: "",
       address: "",
+      state: "",
+      city: "",
       name: "",
       organization: "",
     },
   });
+
+  // Get Indian states
+  const indianStates = State.getStatesOfCountry("IN");
+
+  // Get cities for selected state
+  const stateCities = selectedState
+    ? City.getCitiesOfState("IN", selectedState)
+    : [];
 
   const onSubmit = async (data: z.infer<typeof ngoSignUpSchema>) => {
     const dataToPass: SignUpArguTypes = {
@@ -39,21 +59,25 @@ const NgoSignUpForm = () => {
       email: data.email,
       password: data.password,
       address: data.address,
+
       contactNo: Number(data.phoneNumber),
       role: data.type,
       profileData: {
         organization: data.organization,
+        state: data.state,
+        city: data.city,
       },
     };
     await expertSignUp(dataToPass);
   };
 
   const signUpWithGoogle = async () => {
-
     const profileFields: (keyof z.infer<typeof ngoSignUpSchema>)[] = [
       "phoneNumber",
       "address",
       "organization",
+      "state",
+      "city",
     ];
 
     let isValid = true;
@@ -73,6 +97,8 @@ const NgoSignUpForm = () => {
       const address = form.getValues("address");
       const profileData = {
         organization: form.getValues("organization"),
+        state: form.getValues("state"),
+        city: form.getValues("city"),
       };
       await googleSignUp("ngo", profileData, address, phoneNumber);
     }
@@ -94,14 +120,85 @@ const NgoSignUpForm = () => {
             </FormItem>
           )}
         />
+
+        {/* State Field */}
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  setSelectedState(value);
+                  form.setValue("city", ""); // Reset city when state changes
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {indianStates.map((state) => (
+                    <SelectItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* City Field */}
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!selectedState}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedState ? "Select city" : "Select state first"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {stateCities.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Organization Address</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter complete organization address"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -113,9 +210,12 @@ const NgoSignUpForm = () => {
           name="organization"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Organization</FormLabel>
+              <FormLabel>Organization Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter registered organization name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,9 +227,12 @@ const NgoSignUpForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Official Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input
+                  placeholder="Enter organization's official email"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -142,7 +245,8 @@ const NgoSignUpForm = () => {
             <FormItem>
               <FormLabel>Enter password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="*******" {...field} />
+                <Input   type="password"
+                  placeholder="Create a strong password (min 8 characters)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -154,17 +258,31 @@ const NgoSignUpForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>NGO Name</FormLabel>
+              <FormLabel>Representative Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter representative's full name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="space-y-4">
-        <Button variant="outline" className="cursor-pointer" icon={Lock} disabled={form.formState.isSubmitting} type="submit" fullWidth>
-          {form.formState.isSubmitting ? <Loader2 className="animate-spin"/> : "Create Account"}
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            icon={Lock}
+            disabled={form.formState.isSubmitting}
+            type="submit"
+            fullWidth
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </Button>
           <Button
             variant="outline"

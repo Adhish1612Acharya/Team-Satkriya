@@ -28,8 +28,8 @@ const ExpertLoginForm: FC = () => {
     },
   });
 
-  function onSubmit(data: z.infer<typeof loginSchema>) {
-    signInWithEmailPassword(data.email, data.password);
+  async function onSubmit(data: z.infer<typeof loginSchema>) {
+    await signInWithEmailPassword(data.email, data.password);
   }
 
   return (
@@ -56,7 +56,11 @@ const ExpertLoginForm: FC = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Enter password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

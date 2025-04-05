@@ -72,13 +72,12 @@ const Profile = () => {
 
   return (
     <DropdownMenu>
-      <div onClick={() => console.log("Clicked")}>
+      <div>
         <DropdownMenuTrigger>
           <Button
             variant="ghost"
             size="icon"
             className="relative z-50 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 mr-2 cursor-pointer"
-            onClick={() => console.log("Clicked")}
           >
             <Avatar className="h-8 w-8 ring-2 ring-blue-500 ring-offset-2 transition-all hover:ring-indigo-500">
               <AvatarImage

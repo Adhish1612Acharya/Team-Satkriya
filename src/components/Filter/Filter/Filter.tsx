@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,11 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
   const [expandedCategories, setExpandedCategories] = useState<
     Record<string, boolean>
   >(Object.keys(filters).reduce((acc, key) => ({ ...acc, [key]: false }), {}));
+  const [totalSelected, setTotalSelected] = useState<number>(0);
+
+  useEffect(() => {
+    setTotalSelected(Object.values(selectedFilters).flat().length);
+  }, [selectedFilters]);
 
   // Auto-close other dropdowns when one is opened
   const toggleCategory = (category: string) => {
@@ -72,6 +77,7 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
       setLoading(true);
       responseData = await getAllPosts();
     } else {
+      setLoading(true);
       responseData = await fetchAllWorkshops();
     }
     if (responseData) {
@@ -100,12 +106,18 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
       if (isPost) {
         responseData = await getFilteredPosts(
           appliedFilters,
-          userTypeSelected?.[0].toLowerCase() || null
+          (userTypeSelected?.[0] === "Research Institution" &&
+            "researchInstitution") ||
+            userTypeSelected?.[0].toLowerCase() ||
+            null
         );
       } else {
         responseData = await fetchFilteredWorkshops(
           appliedFilters,
-          userTypeSelected?.[0].toLowerCase() || null
+          (userTypeSelected?.[0] === "Research Institution" &&
+            "researchInstitution") ||
+            userTypeSelected?.[0].toLowerCase() ||
+            null
         );
       }
       if (responseData) {
@@ -122,8 +134,6 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
     return selectedFilters[category]?.length || 0;
   };
 
-  const totalSelected = Object.values(selectedFilters).flat().length;
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -131,12 +141,8 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
           variant="outline"
           className="w-full cursor-pointer py-3 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-purple-500 hover:to-blue-500 transition-all duration-300 shadow-lg"
         >
-          Filter
-          {totalSelected > 0 && (
-            <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {totalSelected}
-            </span>
-          )}
+          <span className="mr-1">Filter</span>
+          <span>{totalSelected > 0 && `(${totalSelected})`}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl h-[85vh] sm:h-[80vh] w-[95vw] sm:w-full flex flex-col p-0 overflow-hidden">
@@ -145,11 +151,8 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
           <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-background z-10">
             <DialogTitle className="text-lg">Filters</DialogTitle>
             <div className="flex items-center space-x-2">
-              {totalSelected > 0 && (
-                <span className="bg-primary text-white text-xs px-2 py-1 rounded-full">
-                  {totalSelected} selected
-                </span>
-              )}
+              <span>{totalSelected} selected</span>
+
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 rounded-full hover:bg-gray-100"
@@ -314,7 +317,7 @@ const Filter: FC<FilterProps> = ({ setData, filters, isPost, setLoading }) => {
         <div className="hidden md:flex flex-col md:flex-row flex-1 overflow-hidden">
           <div className="w-full md:w-1/3 border-r">
             <DialogHeader className="p-4">
-              <DialogTitle>Filters</DialogTitle>
+              <DialogTitle>Filters {totalSelected > 0 && `(${totalSelected})`}</DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[calc(100%-73px)]">
               <div className="flex flex-col">

@@ -16,9 +16,19 @@ import Button from "@/components/Button/Button";
 import { SignUpArguTypes } from "@/hooks/expert/useAuth/useAuth.types";
 import useAuth from "@/hooks/expert/useAuth/useAuth";
 import { toast } from "react-toastify";
+import { City, State } from "country-state-city";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const ResearchInstSignUpForm = () => {
   const { expertSignUp, googleSignUp } = useAuth();
+  const [selectedState, setSelectedState] = useState("");
 
   const form = useForm<z.infer<typeof researchInstSignUpSchema>>({
     resolver: zodResolver(researchInstSignUpSchema),
@@ -28,10 +38,20 @@ const ResearchInstSignUpForm = () => {
       password: "",
       phoneNumber: "",
       address: "",
+      state: "",
+      city: "",
       name: "",
       researchArea: "",
     },
   });
+
+  // Get Indian states
+  const indianStates = State.getStatesOfCountry("IN");
+
+  // Get cities for selected state
+  const stateCities = selectedState
+    ? City.getCitiesOfState("IN", selectedState)
+    : [];
 
   const onSubmit = async (data: z.infer<typeof researchInstSignUpSchema>) => {
     const dataToPass: SignUpArguTypes = {
@@ -43,6 +63,8 @@ const ResearchInstSignUpForm = () => {
       role: data.type,
       profileData: {
         researchArea: data.researchArea,
+        state: form.getValues("state"),
+        city: form.getValues("city"),
       },
     };
     await expertSignUp(dataToPass);
@@ -53,6 +75,8 @@ const ResearchInstSignUpForm = () => {
       "phoneNumber",
       "address",
       "researchArea",
+      "state",
+      "city",
     ];
 
     let isValid = true;
@@ -72,8 +96,15 @@ const ResearchInstSignUpForm = () => {
       const address = form.getValues("address");
       const profileData = {
         researchArea: form.getValues("researchArea"),
+        state: form.getValues("state"),
+        city: form.getValues("city"),
       };
-      await googleSignUp("volunteer", profileData, address, phoneNumber);
+      await googleSignUp(
+        "researchInstitution",
+        profileData,
+        address,
+        phoneNumber
+      );
     }
   };
 
@@ -87,33 +118,112 @@ const ResearchInstSignUpForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="9987868576" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Enter 10-digit official contact number"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* State Field */}
+        <FormField
+          control={form.control}
+          name="state"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  setSelectedState(value);
+                  form.setValue("city", ""); // Reset city when state changes
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {indianStates.map((state) => (
+                    <SelectItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* City Field */}
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>City</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!selectedState}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedState ? "Select city" : "Select state first"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {stateCities.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Institution Address</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter complete institution address"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="researchArea"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Research Area</FormLabel>
+              <FormLabel>Primary Research Focus</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter main research areas (e.g., Agricultural Biotechnology)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,9 +235,12 @@ const ResearchInstSignUpForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Research Institue Name</FormLabel>
+              <FormLabel>Research Institution Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  placeholder="Enter official registered institution name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -139,9 +252,12 @@ const ResearchInstSignUpForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Official Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input
+                  placeholder="Enter institution's official email address"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -154,7 +270,11 @@ const ResearchInstSignUpForm = () => {
             <FormItem>
               <FormLabel>Enter password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="*******" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a strong password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

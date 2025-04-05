@@ -22,7 +22,7 @@ const breeds = [
       "https://www.farmerjunction.com/wp-content/uploads/2016/08/Red-sindhi-1-700x525.jpg",
     description: "Hardy breed suitable for tropical climate",
     traits: ["Heat Resistant", "Low Maintenance", "Regular Breeder"],
-    navigateLink:"/posts/FRw4kKrZ3MtKiX471Gnt"
+    navigateLink:"/posts/fxgiPoWkYVJ6E3ZgiAcZ"
   },
 ];
 
