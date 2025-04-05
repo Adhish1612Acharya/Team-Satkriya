@@ -118,8 +118,9 @@ VITE_CLOUDINARY_API_SECRET=your_api_secret
 VITE_GEMINI_API_KEY
 ```
 
-## MVP Video
-[![Watch the demo](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID)
+## MVP Video/PPT
+[![Watch the demo](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
+📊 [View Presentation](./docs/project-presentation.pptx)
 
 <a id="Technologies"></a>
 ## 🧑‍💻 Technologies Used in the Solution
