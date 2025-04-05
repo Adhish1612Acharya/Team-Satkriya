@@ -1,4 +1,4 @@
-# 🐄 [GoPushti](https://gopushti.netlify.app)
+# 🍃 [GoPushti](https://gopushti.netlify.app)
 
 **Reviving the Indian Cow Breed for a Sustainable Future**
 
