@@ -3,7 +3,7 @@ import {
   LinkedInLogoIcon,
   TwitterLogoIcon,
 } from "@radix-ui/react-icons";
-import { Heart, Mail, Phone, MapPin } from "lucide-react";
+import { Heart, Mail, Phone, MapPin, Leaf } from "lucide-react";
 import { FC } from "react";
 
 const Footer: FC = () => {
@@ -15,15 +15,13 @@ const Footer: FC = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">About Us</h3>
             <p>
-              The Cattle Breed Platform is a comprehensive online resource
-              dedicated to providing detailed information on various cattle
-              breeds worldwide. It offers breed profiles, characteristics, and
-              management tips to help farmers, breeders, and enthusiasts make
-              informed decisions.
+              GoPushti is an AI-driven platform designed to conserve and improve
+              indigenous Indian cow breeds by bridging the gap between farmers,
+              experts, and volunteers
             </p>
             <div className="flex items-center space-x-2 text-indigo-400">
-              <Heart className="w-5 h-5" />
-              <span className="text-sm">Making healthcare better together</span>
+              <Leaf className="w-5 h-5" />
+              <span className="text-sm">Reviving India's cattle heritage</span>
             </div>
           </div>
 
