@@ -11,7 +11,7 @@
   - [🔧 Prerequisites](#prerequisites)  
   - [⚙️ Installation](#installation)  
   - [📁 Environment Variables](#environment-variables)
-- [🤝 Technologies Used](#Technologies)
+- [🧑‍💻 Technologies Used](#Technologies)
 - [🤝 Contributing](#contributing)
 - [📞 Contact](#contact)
 
@@ -119,7 +119,7 @@ VITE_GEMINI_API_KEY
 ```
 
 <a id="Technologies"></a>
-## 🚀 Technologies Used in the Solution
+## 🧑‍💻 Technologies Used in the Solution
 
 #### 🖥️ Frontend  
 - ⚛️ React with Vite  
