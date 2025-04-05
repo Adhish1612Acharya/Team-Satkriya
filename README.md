@@ -41,6 +41,7 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
 
 ### 🎥 AI-Verified Webinars
 
+- Webinar Registration & Management: Direct sign-up for sessions and expert-led scheduling.
 - Experts can host webinars on cow husbandry, verified by Gemini AI for relevance.
 - Farmers can search and filter webinars by topic, date, or expert.
 
@@ -53,7 +54,7 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
 
 ## Future Roadmap
 
-- Webinar Registration & Management: Direct sign-up for sessions and expert-led scheduling.
+- Government scheme finders
 - AI-Generated Expert Alerts: Unanswered queries are auto-posted and routed to relevant experts.
 - Volunteer Finder: Locate nearby helpers via Google/Gemini-powered suggestions.
 - Nearby Expert Matching: AI-driven recommendations for local experts based on farmer needs.
@@ -75,23 +76,23 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
 <a id="installation"></a>
 
 ## Installation
-
-1. Clone the repository
+1. Fork the repository
+2. Clone the repository
    ```bash
    git clone https://github.com/Adhish1612Acharya/Team-Satkriya.git
    ```
 
-2. Navigate to project directory
+3. Navigate to project directory
    ```bash
    cd Team-Satkriya
    ```
 
-3. Install dependencies
+4. Install dependencies
    ```bash
    npm install
    ```
 
-4. Run development server
+5. Run development server
    ```bash
    npm run dev
    ```
