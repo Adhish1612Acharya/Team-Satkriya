@@ -5,6 +5,7 @@ import {
   fetchPostByIdType,
   GetAllPostType,
   GetFilteredPostType,
+  VerificationData,
 } from "./usePost.types";
 import {
   addDoc,
@@ -654,7 +655,6 @@ const usePost = () => {
           await updateDoc(doc(db, "posts", postId), {
             likesCount: increment(-1),
           });
-          console.log("Likes removed");
         } else {
           // User hadn't liked - now adding like
           await addDoc(likesRef, {
@@ -665,7 +665,6 @@ const usePost = () => {
           await updateDoc(doc(db, "posts", postId), {
             likesCount: increment(1),
           });
-          console.log("Likes added");
         }
       } catch (error) {
         console.error("Error toggling like:", error);
@@ -682,45 +681,67 @@ const usePost = () => {
     }, 500); // 500ms debounce delay
   };
 
-  const verifyPost = async (postId: string) => {
+  /**
+   * Verifies a post and updates verification records
+   * @param postId - ID of the post to verify
+   * @returns Verification data if successful, false otherwise
+   */
+  const verifyPost = async (
+    postId: string
+  ): Promise<VerificationData | false> => {
     const user = auth.currentUser;
 
+    // Check if user is authenticated
     if (!user) {
-      toast.warn("You need to login");
+      toast.warn("Please login to verify posts");
       navigate("/expert/login");
       return false;
     }
 
     try {
+      // Get expert user info
       const userInfo = await getUserInfo(user.uid, "experts");
 
-      const postRef = doc(db, "posts", postId);
-
+      // Validate user has verification privileges
       if (
-        userInfo &&
-        (userInfo.role === "doctor" || userInfo.role === "researchInstitution")
+        !userInfo ||
+        !["doctor", "researchInstitution"].includes(userInfo.role)
       ) {
-        await updateDoc(postRef, {
-          verified: arrayUnion({
-            id: user.uid,
-            name: userInfo.name,
-            profilePic: userInfo.profilePic || "",
-            role: userInfo.role,
-          }),
-        });
-
-        return {
-          id: user.uid,
-          name: userInfo.name,
-          profilePic: userInfo.profilePic || "",
-          role: userInfo.role,
-        };
-      } else {
         return false;
       }
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error);
+
+      // Prepare verification data
+      const verificationData = {
+        id: user.uid,
+        name: userInfo.name,
+        profilePic: userInfo.profilePic || "",
+        role: userInfo.role,
+      };
+
+      // Create batch for atomic updates
+      const batch = writeBatch(db);
+
+      // Update post verification
+      const postRef = doc(db, "posts", postId);
+      batch.update(postRef, {
+        verified: arrayUnion(verificationData),
+      });
+
+      // Update expert's verification history
+      const expertRef = doc(db, "experts", user.uid);
+      batch.update(expertRef, {
+        postsVerified: arrayUnion(postId),
+      });
+
+      // Commit both updates atomically
+      await batch.commit();
+
+      return verificationData;
+    } catch (error) {
+      console.error("Post verification failed:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Verification failed"
+      );
       return false;
     }
   };

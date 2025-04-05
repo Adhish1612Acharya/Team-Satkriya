@@ -14,9 +14,20 @@ import Button from "@/components/Button/Button";
 import farmerRegisterSchema from "./FarmerRegisterSchema";
 import useAuth from "@/hooks/farmer/useAuth/useAuth";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { State, City } from "country-state-city";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export const FarmerRegisterForm = () => {
   const { farmerSignUp } = useAuth();
+  const [selectedState, setSelectedState] = useState("");
+
   const form = useForm({
     resolver: zodResolver(farmerRegisterSchema),
     defaultValues: {
@@ -29,6 +40,14 @@ export const FarmerRegisterForm = () => {
       password: "",
     },
   });
+
+  // Get Indian states
+  const indianStates = State.getStatesOfCountry("IN");
+
+  // Get cities for selected state
+  const stateCities = selectedState
+    ? City.getCitiesOfState("IN", selectedState)
+    : [];
 
   const onSubmit = async (data: z.infer<typeof farmerRegisterSchema>) => {
     const newData = {
@@ -52,7 +71,7 @@ export const FarmerRegisterForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="123-456-7890" {...field} />
+                <Input placeholder="9987968756" type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,29 +106,68 @@ export const FarmerRegisterForm = () => {
           )}
         />
 
+        {/* State Field */}
         <FormField
           control={form.control}
           name="state"
           render={({ field }) => (
             <FormItem>
               <FormLabel>State</FormLabel>
-              <FormControl>
-                <Input placeholder="California" {...field} />
-              </FormControl>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  setSelectedState(value);
+                  form.setValue("city", ""); // Reset city when state changes
+                }}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select state" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {indianStates.map((state) => (
+                    <SelectItem key={state.isoCode} value={state.isoCode}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* City Field */}
         <FormField
           control={form.control}
           name="city"
           render={({ field }) => (
             <FormItem>
               <FormLabel>City</FormLabel>
-              <FormControl>
-                <Input placeholder="Los Angeles" {...field} />
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!selectedState}
+              >
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedState ? "Select city" : "Select state first"
+                      }
+                    />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="max-h-[300px] overflow-y-auto">
+                  {stateCities.map((city) => (
+                    <SelectItem key={city.name} value={city.name}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -122,7 +180,7 @@ export const FarmerRegisterForm = () => {
             <FormItem>
               <FormLabel>Experience</FormLabel>
               <FormControl>
-                <Input placeholder="5 years" {...field} />
+                <Input placeholder="5" type="number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -134,9 +192,13 @@ export const FarmerRegisterForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Create Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Create a strong password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -148,10 +210,14 @@ export const FarmerRegisterForm = () => {
             variant="outline"
             type="submit"
             fullWidth
-            className="bg-green-600 hover:bg-green-700"
             disabled={form.formState.isSubmitting}
+               className="cursor-pointer"
           >
-              {form.formState.isSubmitting ?<Loader2/>:"Create Account"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </Button>
         </div>
 

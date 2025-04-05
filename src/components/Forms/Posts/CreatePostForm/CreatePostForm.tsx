@@ -16,7 +16,7 @@ import { CreatePostFormProps } from "./CreatePostForm.types";
 import { PostArgu } from "@/hooks/usePost/usePost.types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageIcon, VideoIcon, X, FileText, Loader2 } from "lucide-react";
+import { ImageIcon, X, FileText, Loader2, VideoIcon } from "lucide-react";
 import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
 import { toast } from "react-toastify";
@@ -60,7 +60,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
     resolver: zodResolver(postSchema),
     defaultValues: {
       content: editForm ? post?.content : "",
-      media: editPostMedia
+      media: editPostMedia,
     },
   });
 
@@ -159,7 +159,11 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
       if (cleanResponse) {
         jsonData = JSON.parse(cleanResponse);
       } else if (!cleanResponse) {
-        toast.error("Post verification error");
+        toast.error(
+          "Video analysis temporarily unavailable - Our gemini free tier has reached its limit. " +
+            "Text-based , (image , document analysis) works" +
+            "Try asking without video"
+        );
         return;
       }
 

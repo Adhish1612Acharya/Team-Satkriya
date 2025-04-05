@@ -24,7 +24,7 @@ const AlertDialogBox: FC<AlertDialogBoxProps> = ({
   setPosts,
   setPostLoading,
 }) => {
-  const { deletePost, getAllPosts } = usePost();
+  const { deletePost, getAllPosts, getYourPosts } = usePost();
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleDeletePost = async () => {
@@ -37,7 +37,13 @@ const AlertDialogBox: FC<AlertDialogBoxProps> = ({
     setLoading(false);
     setOpen(false);
     setPostLoading(true);
-    const posts = await getAllPosts();
+    let posts;
+    if (window.location.pathname.startsWith("/user/posts")) {
+      posts = await getYourPosts();
+    } else {
+      posts = await getAllPosts();
+    }
+
     setPosts(posts);
     setPostLoading(false);
   };
@@ -49,7 +55,9 @@ const AlertDialogBox: FC<AlertDialogBoxProps> = ({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={()=>setOpen(false)}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setOpen(false)}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
             onClick={handleDeletePost}

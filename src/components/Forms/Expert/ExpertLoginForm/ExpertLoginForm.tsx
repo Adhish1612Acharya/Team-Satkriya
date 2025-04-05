@@ -28,8 +28,8 @@ const ExpertLoginForm: FC = () => {
     },
   });
 
-  function onSubmit(data: z.infer<typeof loginSchema>) {
-    signInWithEmailPassword(data.email, data.password);
+  async function onSubmit(data: z.infer<typeof loginSchema>) {
+    await signInWithEmailPassword(data.email, data.password);
   }
 
   return (
@@ -56,7 +56,11 @@ const ExpertLoginForm: FC = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Enter password (min 8 characters)"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -64,8 +68,19 @@ const ExpertLoginForm: FC = () => {
         />
 
         <div className="space-y-4">
-          <Button type="submit" className="cursor-pointer" variant="outline" disabled={form.formState.isSubmitting} fullWidth icon={LogIn}>
-            {form.formState.isSubmitting ? <Loader2/> : "Sign in"}
+          <Button
+            type="submit"
+            className="cursor-pointer"
+            variant="outline"
+            disabled={form.formState.isSubmitting}
+            fullWidth
+            icon={LogIn}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Sign in"
+            )}
           </Button>
 
           <Button
@@ -76,7 +91,7 @@ const ExpertLoginForm: FC = () => {
             fullWidth
             icon={GoogleIcon}
           >
-          Sign In with Google
+            Sign In with Google
           </Button>
         </div>
 

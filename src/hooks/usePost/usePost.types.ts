@@ -24,9 +24,9 @@ export type CreatePostType = (
 
 export type EditPostType = (
   postId: string,
-  postOwnerId:string,
+  postOwnerId: string,
   updatedPostData: EditPostArgu,
-  existingFilters: string[],
+  existingFilters: string[]
 ) => Promise<string | void>;
 
 export type deletePostType = (
@@ -45,3 +45,11 @@ export type GetFilteredPostType = (
 export type fetchPostByIdType = (id: string) => Promise<Post | null>;
 
 export type GetYourPostType = () => Promise<Post[]>;
+
+// Type definition for verification data
+export interface VerificationData {
+  id: string;
+  name: string;
+  profilePic: string;
+  role: "doctor" | "researchInstitution";
+}

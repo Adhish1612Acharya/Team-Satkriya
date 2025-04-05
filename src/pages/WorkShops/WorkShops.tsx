@@ -73,36 +73,36 @@ const WorkshopsPage = () => {
               </div>
             ))}
           </div>
+        ) : workshops.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-full p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
+          >
+            <div className="flex flex-col items-center justify-center">
+              <AlertCircle
+                size={48}
+                className="text-gray-500 dark:text-gray-400"
+              />
+              <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
+                No Workshops/Webinars Found
+              </h2>
+              <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
+                It looks like there are no Workshops available at the
+                moment
+              </p>
+            </div>
+          </motion.div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
-            {workshops.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-md"
-              >
-                <AlertCircle
-                  size={48}
-                  className="text-gray-500 dark:text-gray-400"
-                />
-                <h2 className="mt-4 text-xl font-semibold text-gray-700 dark:text-gray-200">
-                  No Workshops/webinars Found
-                </h2>
-                <p className="mt-2 text-gray-500 dark:text-gray-400 text-center">
-                  It looks like there are no Workshops/webinars available at the
-                  moment
-                </p>
-              </motion.div>
-            ) : (
-              workshops.map((workshop) => (
-                <WorkshopCard
-                  key={workshop.id}
-                  userType={userType as "farmers" | "experts"}
-                  workshop={workshop}
-                />
-              ))
-            )}
+            {workshops.map((workshop) => (
+              <WorkshopCard
+                key={workshop.id}
+                userType={userType as "farmers" | "experts"}
+                workshop={workshop}
+              />
+            ))}
           </div>
         )}
       </div>

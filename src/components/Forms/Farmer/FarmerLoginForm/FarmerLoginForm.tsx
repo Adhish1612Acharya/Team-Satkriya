@@ -45,7 +45,11 @@ const FarmerLoginForm = () => {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="123-456-7890" {...field} />
+                <Input
+                  placeholder="Enter 10-digit mobile number"
+                  type="number"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -59,7 +63,7 @@ const FarmerLoginForm = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password"   placeholder="Enter password (min 8 characters)" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,10 +76,14 @@ const FarmerLoginForm = () => {
             variant="outline"
             fullWidth
             icon={LogIn}
-            className="bg-green-600 hover:bg-green-700"
             disabled={form.formState.isSubmitting}
+            className="cursor-pointer"
           >
-            {form.formState.isSubmitting ?<Loader2/>:"Sign in"}
+            {form.formState.isSubmitting ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Sign in"
+            )}
           </Button>
         </div>
       </form>

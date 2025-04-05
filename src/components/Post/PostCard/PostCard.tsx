@@ -485,10 +485,15 @@ const PostCard: FC<PostCardProps> = ({
             <div className="flex items-start space-x-2 mt-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
-                  alt="Your profile"
+                  src={post.profileData.profilePic || ""}
+                  alt={`${post.profileData.name}'s profile`}
+                  className="object-cover"
                 />
-                <AvatarFallback>YP</AvatarFallback>
+                <AvatarFallback className="bg-gray-200 dark:bg-gray-600 text-sm font-medium">
+                  {post.profileData.name
+                    ? post.profileData.name.charAt(0).toUpperCase()
+                    : "?"}
+                </AvatarFallback>
               </Avatar>
               <div className=" flex-1 flex items-center">
                 <Textarea

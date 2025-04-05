@@ -15,8 +15,9 @@ import WorkShop from "@/types/workShop.types";
 const AiQueryForm: FC<AiQueryFormProps> = ({
   setResults,
   setPostFetchLoading,
+  setQueryAsked,
 }) => {
-  const { fetchAllWorkshops,fetchWorkshopById } = useWorkShop();
+  const { fetchAllWorkshops, fetchWorkshopById } = useWorkShop();
 
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -78,20 +79,22 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     }
   };
 
-  const fetchWebinarsByIds = async (webinarIds: string[]): Promise<WorkShop[]> => {
+  const fetchWebinarsByIds = async (
+    webinarIds: string[]
+  ): Promise<WorkShop[]> => {
     if (webinarIds.length === 0) return []; // If no IDs, return empty array
 
     try {
       // Fetch each post individually using getDoc for optimal performance
       const webinarFetchPromises = webinarIds.map(async (id) => {
         const webinarSnap = await fetchWorkshopById(id);
-        return  webinarSnap;
+        return webinarSnap;
       });
 
       // Wait for all webinar fetch operations to complete
-      const workShopsAndWebinars = (await Promise.all(webinarFetchPromises)).filter(
-        (webinar) => webinar !== null
-      ) as WorkShop[];
+      const workShopsAndWebinars = (
+        await Promise.all(webinarFetchPromises)
+      ).filter((webinar) => webinar !== null) as WorkShop[];
 
       return workShopsAndWebinars;
     } catch (error) {
@@ -139,15 +142,17 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     setPostFetchLoading(true);
 
     const relevantPostIds: string[] = jsonData.relevantPosts || [];
-    const relevantWebinarIds: string[] = jsonData.relevantWebinars|| [];
+    const relevantWebinarIds: string[] = jsonData.relevantWebinars || [];
 
     // Fetch only relevant posts using their IDs
     const relevantPosts = await fetchPostsByIds(relevantPostIds);
-    const relevantWorkShopsAndWebinars=await fetchWebinarsByIds(relevantWebinarIds);
+    const relevantWorkShopsAndWebinars = await fetchWebinarsByIds(
+      relevantWebinarIds
+    );
 
     setResults({
-      posts:relevantPosts || [],
-      workShops:relevantWorkShopsAndWebinars || [],
+      posts: relevantPosts || [],
+      workShops: relevantWorkShopsAndWebinars || [],
     });
 
     setPostFetchLoading(false);
@@ -155,6 +160,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     setIsLoading(false);
     setQuery("");
     setImages([]);
+    setQueryAsked(true);
   };
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -168,19 +174,22 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
           {images.map((image, index) => (
-            <div key={index} className="relative group">
-              <img
-                src={image.url}
-                alt={`Uploaded image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                className="absolute top-2 right-2 p-1 bg-black/50 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="h-4 w-4 text-white" />
-              </button>
+            <div key={index} className="relative group aspect-square">
+              <div className="relative w-full h-full">
+                <img
+                  src={image.url}
+                  alt={`Uploaded image ${index + 1}`}
+                  className="w-full h-full object-contain bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-2 right-2 p-1 bg-black/70 hover:bg-black/90 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  aria-label="Remove image"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
