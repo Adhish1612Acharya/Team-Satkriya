@@ -3,7 +3,7 @@ import {
   LinkedInLogoIcon,
   TwitterLogoIcon,
 } from "@radix-ui/react-icons";
-import { Heart, Mail, Phone, MapPin, Leaf } from "lucide-react";
+import {  Mail, Phone, MapPin, Leaf } from "lucide-react";
 import { FC } from "react";
 
 const Footer: FC = () => {
