@@ -11,6 +11,7 @@
   - [🔧 Prerequisites](#prerequisites)  
   - [⚙️ Installation](#installation)  
   - [📁 Environment Variables](#environment-variables)
+- [🧑‍💻 MVP Video and PPT](#MVP)
 - [🧑‍💻 Technologies Used](#Technologies)
 - [🤝 Contributing](#contributing)
 - [📞 Contact](#contact)
@@ -118,11 +119,10 @@ VITE_CLOUDINARY_API_SECRET=your_api_secret
 VITE_GEMINI_API_KEY
 ```
 
-## 📺 MVP Video
-🎥 [Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
-
-## 📈 MVP PPT
-📊 [View Presentation](./docs/project-presentation.pptx)
+<a id="MVP"></a>
+## 📺 MVP Video and PPT
+- 🎥 [Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
+- 📊 [View Presentation](./docs/project-presentation.pptx)
 
 <a id="Technologies"></a>
 ## 🧑‍💻 Technologies Used in the Solution
