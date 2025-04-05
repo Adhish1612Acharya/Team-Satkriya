@@ -105,20 +105,21 @@ Create a .env file in the root directory with the following variables:
 env
 
 # Firebase Configuration
-
+```bash
 VITE_API_KEY=your_api_key
 VITE_AUTH_DOMAIN=your_auth_domain
 VITE_PROJECT_ID=your_project_id
 VITE_STORAGE_BUCKET=your_storage_bucket
 VITE_MESSAGING_SENDER_ID=your_sender_id
 VITE_APP_ID=your_app_id
+```
 
 # Cloudinary Configuration
-
+```bash
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 VITE_CLOUDINARY_API_KEY=your_api_key
 VITE_CLOUDINARY_API_SECRET=your_api_secret
-
+```
 <a id="contributing"></a>
 
 ## Contributing
@@ -133,7 +134,7 @@ _Project Lead:_ Adhish Padmanabha Acharya
 _Email:_ [adhish1612@gmail.com](mailto:adhish1612@gmail.com)  
 _Website:_ [https://gopushti.netlify.app](https://gopushti.netlify.app)
 
-```
+
 
 
 
