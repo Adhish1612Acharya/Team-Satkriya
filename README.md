@@ -120,7 +120,7 @@ VITE_GEMINI_API_KEY
 ```
 
 <a id="MVP"></a>
-## 📺 MVP Video and PPT
+## 📺 MVP Video and PPT 📉
 - 🎥 [Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
 - 📊 [View Presentation](./docs/project-presentation.pptx)
 
