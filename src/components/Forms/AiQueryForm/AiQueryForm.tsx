@@ -165,7 +165,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Textarea
-        placeholder="Describe your farming query here... (e.g., 'I noticed brown spots on my tomato leaves, what could be the cause?')"
+        placeholder="Describe your farming query here... (e.g., 'I noticed reduced milk yield in my Gir cow. What could be the cause?')"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="min-h-[120px]"
