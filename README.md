@@ -90,7 +90,7 @@ GoPushti is an AI-driven platform designed to conserve and improve indigenous In
    npm run dev
    ```
    
-### 🚀 Technologies Used in the Solution
+## 🚀 Technologies Used in the Solution
 
 #### 🖥️ Frontend  
 - ⚛️ React with Vite  
