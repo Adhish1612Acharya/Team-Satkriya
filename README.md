@@ -1,4 +1,4 @@
-# 🐄 GoPushti
+# 🐄 GoPushti (https://gopushti.netlify.app)
 
 **Reviving the Indian Cow Breed for a Sustainable Future**
 
@@ -112,6 +112,10 @@ VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 VITE_CLOUDINARY_API_KEY=your_api_key
 VITE_CLOUDINARY_API_SECRET=your_api_secret
 ```
+#### ☁️ Gemini Configuration
+```bash
+VITE_GEMINI_API_KEY
+```
 
 <a id="contributing"></a>
 
@@ -124,6 +128,6 @@ We welcome contributions! Please fork the repository and create a pull request w
 ## 📞 Contact
 
 **_Project Lead:_** Adhish Padmanabha Acharya  
-📧 **Email:** [adhish1612@gmail.com](mailto:adhish1612@gmail.com)  
+📧 **Email:** [adhish1612@gmail.com](mailto:teamsatkriya@gmail.com)  
 🌐 **Website:** [https://gopushti.netlify.app](https://gopushti.netlify.app)
 
