@@ -119,9 +119,9 @@ VITE_GEMINI_API_KEY
 ```
 
 ## 📺 MVP Video
-🎥[![Watch the demo](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
+🎥[![Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
 
-## MVP PPT
+## 📈 MVP PPT
 📊 [View Presentation](./docs/project-presentation.pptx)
 
 <a id="Technologies"></a>
