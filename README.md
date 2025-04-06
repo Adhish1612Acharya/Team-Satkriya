@@ -122,7 +122,7 @@ VITE_GEMINI_API_KEY
 <a id="MVP"></a>
 ## 📺 MVP Video and PPT 📉
 - 🎥 [Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
-- 📊 [View Presentation](./docs/project-presentation.pptx)
+- 📊 [View Presentation](https://docs.google.com/presentation/d/14YcRohgt6N1dyL_7vKCZDISq2sHEKx6e/edit?usp=sharing&ouid=108812050458477943365&rtpof=true&sd=true)
 
 <a id="Technologies"></a>
 ## 🧑‍💻 Technologies Used in the Solution
@@ -157,6 +157,6 @@ We welcome contributions! Please fork the repository and create a pull request w
 
 **_Project Lead:_** Adhish Padmanabha Acharya  
 📧 **Email:** [teamsatkriya@gmail.com](mailto:teamsatkriya@gmail.com)  
-🌐 **Website:** [https://gopushti.netlify.app/](https://gopushti.netlify.app/)
+🌐 **Website:** [https://gopushti.netlify.app](https://gopushti.netlify.app)
 
 
