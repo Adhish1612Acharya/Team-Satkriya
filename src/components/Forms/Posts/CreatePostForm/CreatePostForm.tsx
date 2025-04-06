@@ -19,9 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, X, FileText, Loader2, VideoIcon } from "lucide-react";
 import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import  {verifyIndigenousDairyMedia} from "@/utils/geminiApiCalls";
+import getMediaType from "@/utils/getFileMediaType";
+import { verifyUploadedMedia } from "@/utils/verifyMedia";
 
 const CreatePostForm: FC<CreatePostFormProps> = ({
   firebaseDocuemntType,
@@ -60,7 +60,7 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
   const form = useForm<z.infer<typeof postSchema>>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      content: editForm ? post?.content : "",
+      content: editForm ? post?.content.replace(/\\n/g, "\n") : "",
       media: editPostMedia,
     },
   });
@@ -85,11 +85,19 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
     }
   };
 
+  /**
+   * Handles media file selection and updates the form state accordingly.
+   * - Supports only one type of media at a time (image, video, or document)
+   * - Clears previously selected media of other types
+   * - Sets media preview for UI display
+   */
   const handleFileChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     mediaType: "image" | "video" | "document"
   ) => {
     const file = event.target.files?.[0];
+
+    // Reset all media types and set only the selected one
     if (file) {
       if (mediaType === "image") {
         setNewPostImage([file]);
@@ -104,40 +112,43 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
         setNewPostImage([]);
         setNewPostVideo([]);
       }
+
+      // Set a local preview URL for display
       const url = URL.createObjectURL(file);
       form.setValue("media", { url, type: mediaType });
 
+      // Clear input value so same file can be reselected
       event.target.value = "";
     }
   };
 
+  /**
+   * Resets all media states and input refs
+   * - Clears preview
+   * - Clears file input fields
+   */
   const handleRemoveMedia = () => {
     form.setValue("media", null);
     setNewPostImage([]);
     setNewPostVideo([]);
     setNewPostDocument([]);
 
+    // Reset file input refs to allow re-uploading the same file
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
-  const  getMediaType=(file: File): 'image' | 'video' | 'pdf'=> {
-    const type = file.type.split('/')[0]; // 'image', 'video', or 'application'
-    
-    switch(type) {
-      case 'image': return 'image';
-      case 'video': return 'video';
-      case 'application': 
-        if (file.type === 'application/pdf') return 'pdf';
-        break;
-    }
-    
-    throw new Error(`Unsupported MIME type: ${file.type}`);
-  }
-
+  /**
+   * Handles the post form submission.
+   * - Supports both create and edit flows
+   * - Validates and verifies media and content
+   * - Categorizes content using AI
+   * - Navigates to the post detail page on success
+   */
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     if (editForm && post) {
+      // Edit existing post
       const updatedData = {
         content: data.content,
         images: newPostImage,
@@ -145,94 +156,73 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
         documents: newPostDocument,
       };
       await editPost(post.id, post.ownerId, updatedData, post.filters);
-    } else {
-      const file =
-        newPostImage.length === 1
-          ? newPostImage[0]
-          : newPostDocument.length === 1
-          ? newPostDocument[0]
-          : newPostVideo.length === 1
-          ? newPostVideo[0]
-          : "";
-
-       
-
-      let base64File = "";
-
-      if (file !== "" && file instanceof File) {
-        const fileType=getMediaType(file);
-        base64File = await convertToBase64(file as File);
-
-      const validatedImage=await verifyIndigenousDairyMedia(base64File,fileType); 
-
-      console.log("Image Validation : ",validatedImage);
-      }
-
-
-      // const aiVarification = await validateAndVerifyPost(
-      //   {
-      //     content: data.content,
-      //   },
-      //   base64File
-      // );
-      // const cleanResponse = aiVarification?.replace(/```json|```/g, "");
-
-      // let jsonData;
-
-      // if (cleanResponse) {
-      //   jsonData = JSON.parse(cleanResponse);
-      // } else if (!cleanResponse) {
-      //   toast.error(
-      //     "Video analysis temporarily unavailable - Our gemini free tier has reached its limit. " +
-      //       "Text-based , (image , document analysis) works" +
-      //       "Try asking without video"
-      //   );
-      //   return;
-      // }
-
-      // console.log("Ai Verification : ",aiVarification)
-
-      // if (aiVarification?.valid) {
-      //   const postFilters = await categorizePost(
-      //     data.content,
-      //     newPostImage[0] as File
-      //   );
-
-      //   let newPost: PostArgu;
-
-      //   if (aiVarification?.verify) {
-      //     newPost = {
-      //       content: data.content.replace(/\n/g, "\\n"),
-      //       images: newPostImage as File[],
-      //       videos: newPostVideo as File[],
-      //       documents: newPostDocument as File[],
-      //       filters: postFilters,
-      //       verified: [],
-      //     };
-      //   } else {
-      //     newPost = {
-      //       content: data.content.replace(/\n/g, "\\n"),
-      //       images: newPostImage as File[],
-      //       videos: newPostVideo as File[],
-      //       documents: newPostDocument as File[],
-      //       filters: postFilters,
-      //       verified: null,
-      //     };
-      //   }
-
-      //   console.log("New post : ",newPost);
-
-      //   // const newPostId = await createPost(newPost, firebaseDocuemntType);
-      //   // if (newPostId) {
-      //   //   navigate(`/posts/${newPostId}`);
-      //   // }
-      // } else {
-      //   toast.error("Irrelavant posts");
-      //   return;
-      // }
+      return;
     }
 
-    // form.reset();
+    // --- Create new post flow ---
+
+    let base64File = "";
+    let mediaVerification = false;
+
+    // Select the first file from available media types
+    const file =
+      newPostImage.length === 1
+        ? newPostImage[0]
+        : newPostDocument.length === 1
+        ? newPostDocument[0]
+        : newPostVideo.length === 1
+        ? newPostVideo[0]
+        : "";
+
+    // Run media verification if a file is present
+    if (file && file instanceof File) {
+      const fileType = getMediaType(file);
+      base64File = await convertToBase64(file);
+
+      const response = await verifyUploadedMedia(file, fileType, base64File);
+
+      // Reject post if media is invalid
+      if (!response.valid) {
+        return;
+      }
+
+      // Set media verification flag if needed
+      mediaVerification = response.verification ?? false;
+    }
+
+    // Run AI verification on the content
+    const aiVerification = await validateAndVerifyPost({
+      content: data.content,
+    });
+
+    if (!aiVerification?.valid) {
+      return; // Stop if AI flags content as invalid
+    }
+
+    // Determine file type again for categorization
+    const fileType = file instanceof File ? getMediaType(file) : "";
+
+    // Categorize post using AI based on content and (optional) media
+    const postFilters = await categorizePost(
+      data.content,
+      fileType === "video" ? "" : base64File
+    );
+
+    // Construct new post object
+    const newPost: PostArgu = {
+      content: data.content.replace(/\n/g, "\\n"),
+      images: newPostImage as File[],
+      videos: newPostVideo as File[],
+      documents: newPostDocument as File[],
+      filters: postFilters,
+      verified: aiVerification.verify || mediaVerification ? [] : null,
+    };
+
+    // Create post in DB
+    const newPostId = await createPost(newPost, firebaseDocuemntType);
+    if (newPostId) {
+      navigate(`/posts/${newPostId}`);
+    }
   };
 
   return (

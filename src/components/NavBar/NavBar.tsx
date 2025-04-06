@@ -3,7 +3,7 @@ import { NavigationMenu, NavigationMenuList } from "../ui/navigation-menu";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
-import { Button } from "../ui/button";
+
 import {
   Menu,
   Calendar,
@@ -21,6 +21,7 @@ import { useState } from "react";
 
 import logo from "@/assets/logo.svg";
 import { Avatar } from "@mui/material";
+import Button from "../Button/Button";
 
 const NavBar = () => {
   const { currentUser, userType } = useAuthContext();
@@ -137,7 +138,6 @@ const NavBar = () => {
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                size="icon"
                 className="hover:bg-blue-100 dark:hover:bg-blue-900/30"
               >
                 <Menu className="h-6 w-6" />

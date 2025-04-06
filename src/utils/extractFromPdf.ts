@@ -1,12 +1,16 @@
-import { getDocument, PDFDocumentProxy } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions, PDFDocumentProxy } from "pdfjs-dist";
 
-const extractTextFromPdf = async (pdfBuffer: Buffer): Promise<string> => {
+// @ts-ignore – temporarily ignore missing type until pdfjs includes type for this
+import workerSrc from 'pdfjs-dist/build/pdf.worker?url'; // 👈 This is Vite magic
+
+GlobalWorkerOptions.workerSrc = workerSrc;
+
+const extractTextFromPdf = async (pdfBuffer: Uint8Array): Promise<string> => {
   try {
     const loadingTask = getDocument({ data: pdfBuffer });
     const pdfDoc: PDFDocumentProxy = await loadingTask.promise;
     let extractedText = "";
 
-    // Process each page sequentially to maintain order
     for (let i = 1; i <= pdfDoc.numPages; i++) {
       const page = await pdfDoc.getPage(i);
       const textContent = await page.getTextContent();
@@ -14,9 +18,9 @@ const extractTextFromPdf = async (pdfBuffer: Buffer): Promise<string> => {
       extractedText +=
         textContent.items
           .map((item: any) => item.str)
-          .join(" ") // Words within same line
-          .replace(/([^\n])\n([^\n])/g, "$1 $2") + // Fix mid-paragraph line breaks
-        "\n\n"; // Separate paragraphs
+          .join(" ")
+          .replace(/([^\n])\n([^\n])/g, "$1 $2") +
+        "\n\n";
     }
 
     return extractedText.trim();

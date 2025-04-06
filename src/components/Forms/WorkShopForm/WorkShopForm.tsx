@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { z } from "zod";
-import { toast } from "react-toastify";
 import {
   Select,
   SelectContent,
@@ -34,6 +33,8 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { format } from "date-fns";
 import { Step, StepLabel, Stepper } from "@mui/material";
+import getMediaType from "@/utils/getFileMediaType";
+import { verifyUploadedMedia } from "@/utils/verifyMedia";
 
 // Generate time options in 12-hour format
 const generateTimeOptions = () => {
@@ -105,13 +106,23 @@ const WorkshopForm = () => {
 
   const steps = ["Basic Information", "Date & Time", "Thumbnail"];
 
+  /**
+   * Handles navigation to the next step in a multi-step form
+   * - Validates fields based on the current active step
+   * - Includes custom logic for online/offline mode validations
+   * - Advances step only if current inputs are valid
+   */
   const handleNext = async () => {
     let isValid = false;
 
+    // Step 0: Validate basic details
     if (activeStep === 0) {
       isValid = await form.trigger(["title", "description"]);
-    } else if (activeStep === 1) {
-      // First validate all basic fields
+    }
+
+    // Step 1: Validate schedule + conditional fields
+    else if (activeStep === 1) {
+      // Validate common fields first
       isValid = await form.trigger([
         "dateFrom",
         "dateTo",
@@ -122,80 +133,93 @@ const WorkshopForm = () => {
 
       if (isValid) {
         const mode = form.getValues("mode");
-        const values = form.getValues();
+        const { link, location } = form.getValues();
 
-        // Manually validate mode-specific field
-        if (mode === "online") {
-          if (!values.link || values.link === "") {
-            form.setError("link", {
-              type: "manual",
-              message: "Meeting link is required for online events",
-            });
-            isValid = false;
-          }
-        } else {
-          if (!values.location || values.location === "") {
-            form.setError("location", {
-              type: "manual",
-              message: "Location is required for offline events",
-            });
-            isValid = false;
-          }
+        // Mode-specific validation
+        if (mode === "online" && (!link || link.trim() === "")) {
+          form.setError("link", {
+            type: "manual",
+            message: "Meeting link is required for online events",
+          });
+          isValid = false;
+        } else if (
+          mode === "offline" &&
+          (!location || location.trim() === "")
+        ) {
+          form.setError("location", {
+            type: "manual",
+            message: "Location is required for offline events",
+          });
+          isValid = false;
         }
       }
-    } else if (activeStep === 2) {
+    }
+
+    // Step 2: No validation required
+    else if (activeStep === 2) {
       isValid = true;
     }
 
+    // If valid, move to next step
     if (isValid) {
       setActiveStep((prev) => prev + 1);
     }
   };
-
   const handleBack = () => {
     setActiveStep((prev) => Math.max(0, prev - 1));
   };
 
+  /**
+   * Handles submission of the workshop creation form
+   * - Converts time fields to 12-hour format
+   * - Validates uploaded thumbnail (if any)
+   * - Uses AI to validate and filter webinar content
+   * - Stores validated workshop with generated filters
+   * - Navigates to the newly created workshop page
+   */
   const onSubmit = async (data: z.infer<typeof workshopSchema>) => {
     try {
+      // 1. Convert time fields to 12-hour format for consistency
       data.timeFrom = formatTime12Hour(data.timeFrom);
       data.timeTo = formatTime12Hour(data.timeTo);
 
-      const thumnailBase64 = await convertToBase64(data.thumbnail);
+      // 2. Thumbnail media validation (if present)
+      const file = data.thumbnail;
+      if (file && file instanceof File) {
+        const fileType = getMediaType(file);
+        const base64File = await convertToBase64(file);
+
+        const response = await verifyUploadedMedia(file, fileType, base64File);
+
+        if (!response.valid) {
+          // Early return if file validation fails
+          return;
+        }
+      }
+
+      // 3. AI-assisted validation of workshop content (title & description)
       const validateWebinar = await validateAndFilterWebinar(
         { title: data.title, description: data.description },
-        thumnailBase64,
         webinarFilters
       );
 
-      if (!validateWebinar?.replace(/```json|```/g, "")) {
-        toast.error("Some error occured");
+      if (!validateWebinar.valid) {
+        // Content rejected by AI validator
         return;
       }
 
-      const cleanResponse = validateWebinar?.replace(/```json|```/g, "");
-      const jsonData: { valid: boolean; filters: string[]; error?: string } =
-        JSON.parse(cleanResponse);
+      const filters = validateWebinar.filters;
 
-      if (!jsonData.valid && jsonData.error) {
-        toast.error("Some error occured");
-        return;
-      } else if (!jsonData.valid) {
-        toast.error("Webinar not  valid/relevant");
-        return;
-      }
-
-      const filters = jsonData.filters;
-
-
+      // 4. Create the workshop with validated filters
       const createdWorkshopId = await createWorkshop(data, filters);
       if (!createdWorkshopId) {
         return;
       }
-      // Redirect to the workshop details page
+
+      // 5. Redirect user to the new workshop detail page
       navigate(`/workshops/${createdWorkshopId}`);
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error adding workshop:", error);
     }
   };
 

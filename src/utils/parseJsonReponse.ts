@@ -1,4 +1,4 @@
-const parseJsonResponse = (responseText: string): any| null => {
+const parseJsonResponse = (responseText: string): any => {
   try {
     // Try to clean out ```json...``` wrappers if they exist
     const cleaned = responseText.replace(/```json|```/g, "").trim();

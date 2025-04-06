@@ -1,18 +1,15 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  // signInWithPhoneNumber,
 } from "firebase/auth";
 import {
   doc,
-  // getDoc,
   setDoc,
 } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { FarmerSignUp, PhonePasswordLogin } from "./useAuth.types";
-// import { setupRecaptcha } from "../../utils/firebaseUtils";
 
 const useAuth = () => {
   const navigate = useNavigate();
