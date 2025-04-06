@@ -347,9 +347,12 @@ const usePost = () => {
         updatedPostData.videos[0] ||
         null;
 
+      console.log("Uploaded url : ", uploadedMedia);
+
       // 4. Handle Media Conversion (if new media is uploaded)
       if (uploadedMedia && uploadedMedia instanceof File) {
         try {
+          console.log("base 64 : ", uploadedMedia);
           base64MediaUrl = await convertToBase64(uploadedMedia);
         } catch (error) {
           console.error("Media conversion error:", error);
@@ -388,6 +391,7 @@ const usePost = () => {
           uploadedMedia instanceof File &&
           uploadedMedia.type.startsWith("image/")
         ) {
+          console.log("Cludinary  aupload : ", uploadedMedia);
           const imageUrls = await uploadFilesToCloudinary([uploadedMedia]);
           images = imageUrls.filter((url) => url);
         }
@@ -397,6 +401,7 @@ const usePost = () => {
           uploadedMedia instanceof File &&
           uploadedMedia.type.startsWith("video/")
         ) {
+          console.log("Cludinary  aupload : ", uploadedMedia);
           const videoUrls = await uploadFilesToCloudinary([uploadedMedia]);
           videos = videoUrls.filter((url) => url);
         }
@@ -406,6 +411,7 @@ const usePost = () => {
           uploadedMedia instanceof File &&
           uploadedMedia.type.startsWith("application/pdf")
         ) {
+          console.log("Cludinary  aupload : ", uploadedMedia);
           const documentUrls = await uploadFilesToCloudinary([uploadedMedia]);
           documents = documentUrls.filter((url) => url);
         }
@@ -418,9 +424,9 @@ const usePost = () => {
       // 7. Prepare Update Data Object
       const updatedData = {
         content: updatedPostData.content.trim(),
-        images: images,
-        videos: videos,
-        documents: documents,
+        images: (images.length === 1 &&  images) || (updatedPostData.images.length===1 &&  updatedPostData.images) || [],
+        videos: (videos.length === 1 &&  videos) || (updatedPostData.videos.length===1 &&  updatedPostData.videos) || [],
+        documents: (documents.length === 1 &&  documents) || (updatedPostData.documents.length===1 &&  updatedPostData.documents) || [],
         filters: aiVerificationResponse.filters,
         verified: aiVerificationResponse.verification ? [] : null,
         updatedAt: new Date(),
