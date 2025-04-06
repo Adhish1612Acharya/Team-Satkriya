@@ -21,6 +21,7 @@ import { validateAndVerifyPost } from "@/utils/geminiApiCalls";
 import convertToBase64 from "@/utils/covertToBase64";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import  {verifyIndigenousDairyMedia} from "@/utils/geminiApiCalls";
 
 const CreatePostForm: FC<CreatePostFormProps> = ({
   firebaseDocuemntType,
@@ -121,6 +122,20 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
     if (documentInputRef.current) documentInputRef.current.value = "";
   };
 
+  const  getMediaType=(file: File): 'image' | 'video' | 'pdf'=> {
+    const type = file.type.split('/')[0]; // 'image', 'video', or 'application'
+    
+    switch(type) {
+      case 'image': return 'image';
+      case 'video': return 'video';
+      case 'application': 
+        if (file.type === 'application/pdf') return 'pdf';
+        break;
+    }
+    
+    throw new Error(`Unsupported MIME type: ${file.type}`);
+  }
+
   const onSubmit = async (data: z.infer<typeof postSchema>) => {
     if (editForm && post) {
       const updatedData = {
@@ -140,72 +155,84 @@ const CreatePostForm: FC<CreatePostFormProps> = ({
           ? newPostVideo[0]
           : "";
 
+       
+
       let base64File = "";
 
-      if (file !== "") {
+      if (file !== "" && file instanceof File) {
+        const fileType=getMediaType(file);
         base64File = await convertToBase64(file as File);
+
+      const validatedImage=await verifyIndigenousDairyMedia(base64File,fileType); 
+
+      console.log("Image Validation : ",validatedImage);
       }
 
-      const aiVarification = await validateAndVerifyPost(
-        {
-          content: data.content,
-        },
-        base64File
-      );
-      const cleanResponse = aiVarification?.replace(/```json|```/g, "");
 
-      let jsonData;
+      // const aiVarification = await validateAndVerifyPost(
+      //   {
+      //     content: data.content,
+      //   },
+      //   base64File
+      // );
+      // const cleanResponse = aiVarification?.replace(/```json|```/g, "");
 
-      if (cleanResponse) {
-        jsonData = JSON.parse(cleanResponse);
-      } else if (!cleanResponse) {
-        toast.error(
-          "Video analysis temporarily unavailable - Our gemini free tier has reached its limit. " +
-            "Text-based , (image , document analysis) works" +
-            "Try asking without video"
-        );
-        return;
-      }
+      // let jsonData;
 
-      if (jsonData?.valid === "true") {
-        const postFilters = await categorizePost(
-          data.content,
-          newPostImage[0] as File
-        );
+      // if (cleanResponse) {
+      //   jsonData = JSON.parse(cleanResponse);
+      // } else if (!cleanResponse) {
+      //   toast.error(
+      //     "Video analysis temporarily unavailable - Our gemini free tier has reached its limit. " +
+      //       "Text-based , (image , document analysis) works" +
+      //       "Try asking without video"
+      //   );
+      //   return;
+      // }
 
-        let newPost: PostArgu;
+      // console.log("Ai Verification : ",aiVarification)
 
-        if (jsonData?.verify) {
-          newPost = {
-            content: data.content.replace(/\n/g, "\\n"),
-            images: newPostImage as File[],
-            videos: newPostVideo as File[],
-            documents: newPostDocument as File[],
-            filters: postFilters,
-            verified: [],
-          };
-        } else {
-          newPost = {
-            content: data.content.replace(/\n/g, "\\n"),
-            images: newPostImage as File[],
-            videos: newPostVideo as File[],
-            documents: newPostDocument as File[],
-            filters: postFilters,
-            verified: null,
-          };
-        }
+      // if (aiVarification?.valid) {
+      //   const postFilters = await categorizePost(
+      //     data.content,
+      //     newPostImage[0] as File
+      //   );
 
-        const newPostId = await createPost(newPost, firebaseDocuemntType);
-        if (newPostId) {
-          navigate(`/posts/${newPostId}`);
-        }
-      } else {
-        toast.error("Irrelavant posts");
-        return;
-      }
+      //   let newPost: PostArgu;
+
+      //   if (aiVarification?.verify) {
+      //     newPost = {
+      //       content: data.content.replace(/\n/g, "\\n"),
+      //       images: newPostImage as File[],
+      //       videos: newPostVideo as File[],
+      //       documents: newPostDocument as File[],
+      //       filters: postFilters,
+      //       verified: [],
+      //     };
+      //   } else {
+      //     newPost = {
+      //       content: data.content.replace(/\n/g, "\\n"),
+      //       images: newPostImage as File[],
+      //       videos: newPostVideo as File[],
+      //       documents: newPostDocument as File[],
+      //       filters: postFilters,
+      //       verified: null,
+      //     };
+      //   }
+
+      //   console.log("New post : ",newPost);
+
+      //   // const newPostId = await createPost(newPost, firebaseDocuemntType);
+      //   // if (newPostId) {
+      //   //   navigate(`/posts/${newPostId}`);
+      //   // }
+      // } else {
+      //   toast.error("Irrelavant posts");
+      //   return;
+      // }
     }
 
-    form.reset();
+    // form.reset();
   };
 
   return (

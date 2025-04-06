@@ -1,5 +1,7 @@
 import Post from "@/types/posts.types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import parseJsonResponse from "./parseJsonReponse";
+import { toast } from "react-toastify";
 
 // Initialize the API with your Gemini API Key
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -500,65 +502,222 @@ export const verifyAndValidateAndFilterEditedPost = async (
   }
 };
 
-export const verifyIndigenousDairyMedia = async (
-  mediaBase64: string,
-  mediaType: 'image' | 'video' | 'pdf'
+export const verifyIndigenousDairyImage = async (
+  imageBase64: string
 ): Promise<boolean> => {
   try {
+    const base64Data = imageBase64.split(",")[1]; // Remove data URI prefix
+
     const prompt = `
-    You are an AI media validator specialized in indigenous dairy farming. Strictly analyze the provided ${mediaType} and return JSON response.
+You are an AI media validator specialized in indigenous dairy farming. Strictly analyze the provided image and return JSON response.
 
-    ### Validation Criteria:
-    1. Must show clear evidence of:
-       - Indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
-       - Dairy farming activities (milking, feeding, cattle sheds)
-       - Traditional/sustainable farming practices
-    
-    2. Automatic rejection for:
-       - Non-indigenous breeds (Jersey, Holstein, etc.)
-       - Other livestock (goats, poultry, buffalo)
-       - Crop farming or irrelevant agriculture
-       - Commercial/promotional content
+### Validation Criteria:
+1. Must show clear evidence of:
+   - Indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
+   - Dairy farming activities (milking, feeding, cattle sheds)
+   - Traditional/sustainable farming practices
 
-    ### Media-Specific Rules:
-    ${
-      mediaType === 'image' 
-        ? `- Analyze visual elements (cow breed identification, farming activities)`
-        : mediaType === 'video' 
-        ? `- Scan key frames for indigenous cows and dairy practices`
-        : `- Extract text/content focusing on indigenous dairy topics`
-    }
+2. Automatic rejection for:
+   - Non-indigenous breeds (Jersey, Holstein, etc.)
+   - Other livestock (goats, poultry, buffalo)
+   - Crop farming or irrelevant agriculture
+   - Commercial/promotional content
 
-    ### Response Format:
-    { "valid": boolean }
-
-    ### Strict Rules:
-    - Return ONLY JSON (no explanations)
-    - False positives are unacceptable
-    - 95% confidence required for 'true'
-    `;
+### Response Format:
+{ "valid": boolean }
+`;
 
     const result = await model.generateContent({
-      contents: [{
-        role: "user",
-        parts: [{
-          [mediaType === 'pdf' ? 'text' : mediaType]: {
-            [mediaType === 'pdf' ? 'text' : 'data']: mediaBase64,
-            mimeType: mediaType === 'image' ? 'image/jpeg' 
-                     : mediaType === 'video' ? 'video/mp4' 
-                     : 'application/pdf'
-          }
-        }, {
-          text: prompt
-        }]
-      }]
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Data,
+                mimeType: "image/jpeg",
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ],
     });
 
-    const response = JSON.parse((await result.response).text());
-    return response.valid === true;
-    
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
+    if (parsed?.valid === true) {
+      toast.success("Image is verified as valid indigenous dairy content.");
+      return true;
+    } else {
+      toast.error(
+        "Image does not meet indigenous dairy verification criteria."
+      );
+      return false;
+    }
   } catch (error) {
-    console.error(`Error verifying ${mediaType}:`, error);
-    return false; // Fail-safe to false
+    console.error("Error verifying image:", error);
+    toast.error("Verification failed due to an internal error.");
+    return false;
+  }
+};
+
+interface VerificationResult {
+  isRelevant: boolean;
+  requiresVerification: boolean;
+}
+
+/**
+ * Verifies PDF content with Gemini AI for indigenous dairy farming relevance
+ * @param {string} textContent - Extracted PDF text
+ * @returns {Promise<VerificationResult>} Verification results
+ */
+export const verifyPDFWithGemini = async (
+  textContent: string
+): Promise<VerificationResult> => {
+  const prompt = `
+Analyze this document for indigenous dairy farming relevance:
+
+**Indigenous Breeds**: Gir, Sahiwal, Red Sindhi, Tharparkar, Kankrej
+
+**Rules**:
+1. RELEVANT if:
+   - Mentions specific breeds
+   - Discusses dairy farming practices
+   - Covers health/nutrition of indigenous cows
+2. REQUIRES VERIFICATION if:
+   - Contains medical/scientific claims
+   - Recommends treatments/breeding techniques
+   - Makes nutritional assertions
+
+**Document Content**:
+${textContent.substring(0, 30000)}
+
+**Respond EXACTLY in this JSON format**:
+{
+  "isRelevant": boolean,
+  "requiresVerification": boolean,
+  "relevantBreeds": string[],
+  "keyTopics": string[]
+}
+`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    const parsed = parseJsonResponse(responseText);
+
+    if (parsed) {
+      if (!parsed.isRelevant) {
+        toast.error("PDF is not relevant to indigenous dairy farming.");
+      }
+      return parsed;
+    } else {
+      toast.error("Unable to analyze PDF content. Please try again.");
+      return {
+        isRelevant: false,
+        requiresVerification: false,
+      };
+    }
+  } catch (error) {
+    console.error("Gemini verification error:", error);
+    toast.error("Failed to verify PDF due to an internal error.");
+    return {
+      isRelevant: false,
+      requiresVerification: false,
+    };
+  }
+};
+
+export interface VideoVerificationResult {
+  valid: boolean;
+  requiresVerification: boolean;
+}
+
+/**
+ * Verifies if the uploaded video shows indigenous dairy farming
+ * Allows fallback post if billing fails (demo mode)
+ */
+export const verifyIndigenousDairyVideo = async (
+  videoBase64: string
+): Promise<VideoVerificationResult> => {
+  const base64Data = videoBase64.split(",")[1];
+
+  const prompt = `
+You are an AI media validator specialized in indigenous dairy farming. Analyze the provided video and return a JSON object to determine:
+
+### Evaluation Criteria:
+
+1. **Valid Content**:
+   - Shows indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
+   - Depicts dairy farming practices (milking, feeding, cattle sheds)
+   - Highlights traditional/sustainable farming methods
+
+2. **Invalid Content**:
+   - Features non-indigenous breeds (Jersey, Holstein, etc.)
+   - Includes other livestock (goats, poultry, buffalo)
+   - Irrelevant topics like crop farming or promotional content
+
+3. **Requires Expert Verification** if:
+   - Scientific, medical, nutritional, or breeding claims are made
+   - Advice is given on diet, health, treatment, or reproduction
+
+### Response Format (strictly JSON):
+{
+  "valid": boolean,
+  "requiresVerification": boolean
+}
+`;
+
+  try {
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Data,
+                mimeType: "video/mp4",
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ],
+    });
+
+    const responseText = (await result.response).text();
+    const parsed = parseJsonResponse(responseText);
+
+    if (parsed) {
+      if (!parsed.valid) {
+        toast.error("Video is not valid for indigenous dairy farming.");
+      }
+      return parsed;
+    } else {
+      toast.error(
+        "Unable to analyze video content. For demo purposes, the video will still be posted."
+      );
+      return {
+        valid: true,
+        requiresVerification: true,
+      };
+    }
+  } catch (error: any) {
+    console.error("Video verification error:", error);
+    const message = error?.message || "";
+    if (message.includes("insufficient_quota") || message.includes("billing")) {
+      toast.error(
+        "Billing issue: Gemini quota exceeded. Video will still be posted for demo purposes."
+      );
+    } else {
+      toast.error("Verification failed. Posting the video for demo purposes.");
+    }
+    return {
+      valid: true,
+      requiresVerification: true,
+    };
   }
 };
