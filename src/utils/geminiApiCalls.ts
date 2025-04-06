@@ -499,3 +499,66 @@ export const verifyAndValidateAndFilterEditedPost = async (
     return { valid: false, verification: false, filters: [] };
   }
 };
+
+export const verifyIndigenousDairyMedia = async (
+  mediaBase64: string,
+  mediaType: 'image' | 'video' | 'pdf'
+): Promise<boolean> => {
+  try {
+    const prompt = `
+    You are an AI media validator specialized in indigenous dairy farming. Strictly analyze the provided ${mediaType} and return JSON response.
+
+    ### Validation Criteria:
+    1. Must show clear evidence of:
+       - Indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
+       - Dairy farming activities (milking, feeding, cattle sheds)
+       - Traditional/sustainable farming practices
+    
+    2. Automatic rejection for:
+       - Non-indigenous breeds (Jersey, Holstein, etc.)
+       - Other livestock (goats, poultry, buffalo)
+       - Crop farming or irrelevant agriculture
+       - Commercial/promotional content
+
+    ### Media-Specific Rules:
+    ${
+      mediaType === 'image' 
+        ? `- Analyze visual elements (cow breed identification, farming activities)`
+        : mediaType === 'video' 
+        ? `- Scan key frames for indigenous cows and dairy practices`
+        : `- Extract text/content focusing on indigenous dairy topics`
+    }
+
+    ### Response Format:
+    { "valid": boolean }
+
+    ### Strict Rules:
+    - Return ONLY JSON (no explanations)
+    - False positives are unacceptable
+    - 95% confidence required for 'true'
+    `;
+
+    const result = await model.generateContent({
+      contents: [{
+        role: "user",
+        parts: [{
+          [mediaType === 'pdf' ? 'text' : mediaType]: {
+            [mediaType === 'pdf' ? 'text' : 'data']: mediaBase64,
+            mimeType: mediaType === 'image' ? 'image/jpeg' 
+                     : mediaType === 'video' ? 'video/mp4' 
+                     : 'application/pdf'
+          }
+        }, {
+          text: prompt
+        }]
+      }]
+    });
+
+    const response = JSON.parse((await result.response).text());
+    return response.valid === true;
+    
+  } catch (error) {
+    console.error(`Error verifying ${mediaType}:`, error);
+    return false; // Fail-safe to false
+  }
+};
