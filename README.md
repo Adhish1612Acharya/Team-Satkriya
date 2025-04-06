@@ -157,5 +157,6 @@ We welcome contributions! Please fork the repository and create a pull request w
 
 **_Project Lead:_** Adhish Padmanabha Acharya  
 📧 **Email:** [teamsatkriya@gmail.com](mailto:teamsatkriya@gmail.com)  
-🌐 **Website:** [https://gopushti.netlify.app](https://gopushti.netlify.app)
+🌐 **Website:** [https://gopushti.netlify.app/](https://gopushti.netlify.app/)
+
 
