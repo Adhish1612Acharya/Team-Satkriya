@@ -84,14 +84,7 @@ export function PostsPage() {
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Community Posts</h1>
 
-          <Card className="mb-8 overflow-hidden">
-            {/* <CardTitle>Create Post</CardTitle> */}
-            <CreatePostForm
-              firebaseDocuemntType={userType as "farmers" | "experts"}
-              post={null}
-              editForm={false}
-            />
-          </Card>
+          
 
           {/* Posts Feed */}
           <div>
