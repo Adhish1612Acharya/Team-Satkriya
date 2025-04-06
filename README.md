@@ -121,8 +121,8 @@ VITE_GEMINI_API_KEY
 
 <a id="MVP"></a>
 ## 📺 MVP Video and PPT 📉
-- 🎥 [Watch the demo](https://youtu.be/tQEwFf5U4s0?si=S8civgstml7cujF_)
-- 📊 [View Presentation](https://docs.google.com/presentation/d/14YcRohgt6N1dyL_7vKCZDISq2sHEKx6e/edit?usp=sharing&ouid=108812050458477943365&rtpof=true&sd=true)
+- 🎥 [Watch the demo](https://youtu.be/XjQUMn_a-1w)
+- 📊 [View Presentation](https://docs.google.com/presentation/d/1A9ha5VVMLVAP1voyhhaZZfJnTc1O5sl4/edit?usp=sharing&ouid=108812050458477943365&rtpof=true&sd=true)
 
 <a id="Technologies"></a>
 ## 🧑‍💻 Technologies Used in the Solution
