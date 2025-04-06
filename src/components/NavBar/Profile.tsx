@@ -159,10 +159,11 @@ const Profile = () => {
           </div>
         </div>
         <DropdownMenuSeparator />
-        {profileItem.map((eachItem) => {
+        {profileItem.map((eachItem,index) => {
           return (
             <DropdownMenuItem
               onClick={() => navigate(eachItem.href)}
+              key={index}
               className={cn(
                 "cursor-pointer flex items-center gap-2",
                 location.pathname === eachItem.href

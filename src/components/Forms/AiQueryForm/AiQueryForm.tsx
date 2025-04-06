@@ -23,37 +23,37 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<{ url: string; file: File }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // const [savedQuery, setSavedQuery] = useState<{
-  //   query: string;
-  //   images: { url: string; file: File }[];
-  // }>({ query: "", images: [] });  //future implementation
 
+  // Handles image upload from file input
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
+    // Convert FileList to array of previewable image objects
     const newImages = Array.from(files).map((file) => ({
-      url: URL.createObjectURL(file),
-      file,
+      url: URL.createObjectURL(file), // Preview URL
+      file, // Actual file
     }));
 
     setImages((prev) => [...prev, ...newImages]);
 
-    // Reset input value to allow uploading the same file again
+    // Reset file input to allow uploading the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
+  // Removes an image from the uploaded list
   const removeImage = (index: number) => {
     setImages((prev) => {
       const newImages = [...prev];
-      URL.revokeObjectURL(newImages[index].url); // Clean up the object URL
-      newImages.splice(index, 1);
+      URL.revokeObjectURL(newImages[index].url); // Clean up memory
+      newImages.splice(index, 1); // Remove from array
       return newImages;
     });
   };
 
+// Fetches post data from Firestore based on post IDs
   const fetchPostsByIds = async (postIds: string[]): Promise<Post[]> => {
     if (postIds.length === 0) return []; // If no IDs, return empty array
 
@@ -79,6 +79,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     }
   };
 
+  // Fetches webinar/workshop data based on IDs
   const fetchWebinarsByIds = async (
     webinarIds: string[]
   ): Promise<WorkShop[]> => {
@@ -103,21 +104,24 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
     }
   };
 
+  // Handles the main query submission logic
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate user input
     if (!query.trim()) {
       toast.warn("Please enter your question before submitting.");
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(true); // Show loading spinner
 
+    // Convert uploaded images to base64
     const base64Images = await Promise.all(
       images.map((image) => convertToBase64(image.file))
     );
 
-    // setSavedQuery({ query, images }); //future implementation
-
+    // Get all posts and workshops
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const posts: Post[] = postsSnapshot.docs.map(
       (doc) =>
@@ -129,6 +133,7 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
 
     const workShops = await fetchAllWorkshops();
 
+    // Call AI to find relevant content based on query and uploaded images
     const aiRelevantPosts = await findRelevantContent(
       query,
       base64Images,
@@ -136,32 +141,41 @@ const AiQueryForm: FC<AiQueryFormProps> = ({
       workShops || []
     );
 
+    // Clean AI response and parse to JSON
     const cleanResponse = aiRelevantPosts.replace(/```json|```/g, "");
-    const jsonData = JSON.parse(cleanResponse);
+    let jsonData;
+    if (cleanResponse) {
+      jsonData = JSON.parse(cleanResponse);
+    } else {
+      jsonData = JSON.parse(aiRelevantPosts);
+    }
 
-    setPostFetchLoading(true);
+    setPostFetchLoading(true); // Start loading spinner for content fetch
 
+    // Extract post and webinar IDs from AI response
     const relevantPostIds: string[] = jsonData.relevantPosts || [];
     const relevantWebinarIds: string[] = jsonData.relevantWebinars || [];
 
-    // Fetch only relevant posts using their IDs
+    // Fetch only relevant content by IDs
     const relevantPosts = await fetchPostsByIds(relevantPostIds);
     const relevantWorkShopsAndWebinars = await fetchWebinarsByIds(
       relevantWebinarIds
     );
 
+    // Set results to display
     setResults({
       posts: relevantPosts || [],
       workShops: relevantWorkShopsAndWebinars || [],
     });
 
+    // Reset UI state
     setPostFetchLoading(false);
-
     setIsLoading(false);
     setQuery("");
     setImages([]);
     setQueryAsked(true);
   };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Textarea

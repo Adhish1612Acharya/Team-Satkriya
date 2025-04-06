@@ -1,5 +1,7 @@
 import Post from "@/types/posts.types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import parseJsonResponse from "./parseJsonReponse";
+import { toast } from "react-toastify";
 
 // Initialize the API with your Gemini API Key
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
@@ -181,9 +183,8 @@ export const findRelevantContent: findRelavantContentCall = async (
 
 export const validateAndFilterWebinar = async (
   webinarDetails: { title: string; description: string },
-  thumbnailBase64: string,
   webinarFilters: any
-): Promise<string | null> => {
+): Promise<{ valid: boolean; filters: string[] }> => {
   try {
     // Flatten all valid subfilters for reference
     const validSubfilters = Object.values(webinarFilters).flatMap(
@@ -206,43 +207,39 @@ export const validateAndFilterWebinar = async (
 
     ### Input Data
     - Webinar Details: ${JSON.stringify(webinarDetails)}
-    - Thumbnail (Base64): ${thumbnailBase64}
     - Predefined Filters: ${JSON.stringify(validSubfilters)}
 
     ### Task Instructions
     1. **Relevance Validation**:
-       - Analyze the webinar title, description, and thumbnail (if provided)
+       - Analyze the webinar title, description
        - The content must specifically relate to dairy farming through indigenous cows
        - Specific mention of indigenous/desi cow breeds (Gir, Sahiwal, Red Sindhi, etc.)
-       - Focus on dairy farming aspects (milk production, breeding, health management)
+       - Focus on dairy farming aspects (milk production, breeding, health management ,etc )
        - Traditional or sustainable dairy practices
        - Return \`valid: false\` if:
          * Content is about general agriculture without dairy focus
          * Focuses on non-indigenous cattle breeds
          * Contains irrelevant commercial content
-    
-     2. **Thumbnail Must Show** (if provided):
-       - Indigenous cow breeds (not hybrid or foreign breeds)
-       - Dairy farming scenes (milking, feeding, cattle sheds)
-       - Relevant equipment (traditional milking utensils, organic feed)
-       - Reject if shows:
-         * Poultry or other livestock
-         * Commercial dairy farms with foreign breeds
-         * Unrelated agricultural scenes
+  
 
-    4. **Automatic Rejection For**:
+    2. **Automatic Rejection For**:
        - General agriculture without dairy focus
        - Non-indigenous cattle breeds (Holstein, Jersey, etc.)
        - Poultry, goat, or other livestock content
        - Commercial/marketing content without educational value
 
-    5. **Filter Application**:
+     3. SPECIAL CASES:
+   - General cow health content ONLY valid if applicable to all breeds
+   - Must pass both title AND description check
+
+
+    4. **Filter Application**:
        - Only proceed if \`valid: true\`
        - Match webinar content against all subfilters (ignore main filter categories)
        - Include all matching subfilters (can be multiple)
        - Be precise - only include filters that clearly match the content
 
-    6. **Response Format**:
+    5. **Response Format**:
        - If relevant:
          {
            "valid": true,
@@ -256,7 +253,7 @@ export const validateAndFilterWebinar = async (
 
     ### Important Rules
     - NEVER include main filter categories (TechnologyInnovation, MilkProduction etc.)
-    - ONLY return subfilter values that exactly match the predefined list
+    - ONLY return subfilter values that exactly  match the predefined list
     - Be strict about relevance - false positives are worse than false negatives
     - Return PURE JSON ONLY - no explanations or markdown formatting
     `;
@@ -274,19 +271,35 @@ export const validateAndFilterWebinar = async (
       ],
     });
 
-    const response = await result.response;
-    const responseText = response.text();
-    return responseText;
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
+
+    const valid = parsed?.valid === "true" || parsed?.valid === true;
+
+    if (!valid) {
+      toast.error("Invalid wrokshop content");
+    }
+    return {
+      valid: valid,
+      filters: parsed.filters,
+    };
   } catch (error) {
     console.error("Error validating webinar:", error);
-    return null;
+    return {
+      valid: false,
+      filters: [],
+    };
   }
 };
 
-export const validateAndVerifyPost = async (
-  postDetails: { content: string },
-  postMediaBase64: string
-): Promise<string | null> => {
+type PostValidationResponse = {
+  valid: boolean;
+  verify: boolean;
+};
+
+export const validateAndVerifyPost = async (postDetails: {
+  content: string;
+}): Promise<PostValidationResponse> => {
   try {
     const prompt = `
     You are an AI assistant specializing in dairy farming using indigenous cows. Your task is to:
@@ -295,12 +308,11 @@ export const validateAndVerifyPost = async (
 
     ### Input Data:
     - Post Details: ${JSON.stringify(postDetails)}
-    - Attached Media (Base64): ${postMediaBase64}
 
     ### Task Instructions:
 
     #### **1. Relevance Validation**
-    - Analyze the post description, images, PDFs, or videos.
+    - Analyze the post description,
     - The content must specifically relate to **dairy farming using indigenous cows**.
     - Must include **desi breeds** (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.).
     - Content should focus on **dairy farming**, such as:
@@ -312,20 +324,6 @@ export const validateAndVerifyPost = async (
       - Non-indigenous cattle breeds (Holstein, Jersey, etc.)
       - Poultry, goat farming, or other livestock topics
       - Commercial or promotional content without educational value
-
-      #### **2. Strict Media Validation (Images, PDFs, Videos)**
-- **Images must clearly show**:
-  ✅ Indigenous cow breeds (Gir, Sahiwal, etc.)  
-  ✅ Dairy farming activities (milking, feeding, cattle sheds)  
-  ✅ Traditional or sustainable farming methods  
-- **Reject images if they show**:
-  ❌ Poultry, goats, or other livestock  
-  ❌ Foreign cow breeds (Jersey, Holstein, etc.)  
-  ❌ Irrelevant agriculture (crops, tractors, fertilizers, etc.)  
-  ❌ Commercial content (ads, logos, promotions)  
-- **PDFs & Videos**:
-  - Must focus on indigenous cow dairy farming.
-  - Reject if unrelated or promotional.
 
     #### **3. Verification Requirement**
     - If **valid**, determine whether the content requires expert verification:
@@ -354,7 +352,7 @@ export const validateAndVerifyPost = async (
     ### **Important Rules**
     - STRICTLY return JSON **only** (no extra text, markdown, or explanations).
     - Maintain high accuracy - **false positives are worse than false negatives**.
-    - Consider all provided content (text, images, PDFs, or videos) before making a decision.
+    - Consider all provided content (text) before making a decision.
     `;
 
     const result = await model.generateContent({
@@ -369,19 +367,38 @@ export const validateAndVerifyPost = async (
         },
       ],
     });
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
 
-    const response = await result.response;
-    const responseText = response.text();
-    return responseText;
+    const valid =
+      (parsed && (parsed.valid === "true" || parsed.valid === true)) || false;
+    const verify =
+      (parsed && (parsed.verify === "true" || parsed.verify === true)) || false;
+
+    if (!parsed || !valid) {
+      toast.error("Post is not relevant to indigenous dairy farming.");
+      return {
+        valid: false,
+        verify: false,
+      };
+    }
+
+    return {
+      valid: valid,
+      verify: verify,
+    };
   } catch (error) {
     console.error("Error validating post:", error);
-    return null;
+    toast.error("Failed to validate post due to an internal error.");
+    return {
+      valid: false,
+      verify: false,
+    };
   }
 };
 
 export const verifyAndValidateAndFilterEditedPost = async (
   postDetails: { content: string; existingFilters: string[] },
-  postMedia: { base64: string | null; cloudinaryUrl: string | null },
   predefinedFilters: any // Pass the filters object you provided
 ): Promise<{
   valid: true | false;
@@ -398,13 +415,6 @@ export const verifyAndValidateAndFilterEditedPost = async (
     ### Input Data:
     - Post Content: ${JSON.stringify(postDetails.content)}
     - Existing Filters: ${JSON.stringify(postDetails.existingFilters)}
-    - Media: ${
-      postMedia.base64
-        ? `${postMedia.base64} [NEW MEDIA]`
-        : postMedia.cloudinaryUrl
-        ? `${postMedia.cloudinaryUrl}[EXISTING MEDIA]`
-        : "No media"
-    }
 
     ### Task Instructions:
 
@@ -460,20 +470,18 @@ export const verifyAndValidateAndFilterEditedPost = async (
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
-    const response = await result.response;
-    const responseText = response.text();
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
 
-    const cleanResponse = responseText?.replace(/```json|```/g, "");
+    const valid =
+      (parsed && (parsed.valid === "true" || parsed.valid === true)) || false;
+    const verify =
+      (parsed &&
+        (parsed.verification === "true" || parsed.verification === true)) ||
+      false;
 
-    // Parse and validate response
-    let parsed;
-    if (cleanResponse) {
-      parsed = JSON.parse(cleanResponse);
-    } else {
-      parsed = JSON.parse(responseText);
-    }
-
-    if (parsed.valid === "false" || parsed.valid === false) {
+    if (!parsed || !valid) {
+      toast.error("Post is not relevant to indigenous dairy farming.");
       return { valid: false, verification: false, filters: [] };
     }
 
@@ -487,11 +495,8 @@ export const verifyAndValidateAndFilterEditedPost = async (
     );
 
     return {
-      valid: parsed.valid === "true" || parsed.valid === true ? true : false,
-      verification:
-        parsed.verification === "true" || parsed.verification === true
-          ? true
-          : false,
+      valid: valid,
+      verification: verify,
       filters: Array.from(new Set(filteredFilters)), // Remove duplicates
     };
   } catch (error) {
@@ -500,65 +505,266 @@ export const verifyAndValidateAndFilterEditedPost = async (
   }
 };
 
-export const verifyIndigenousDairyMedia = async (
-  mediaBase64: string,
-  mediaType: 'image' | 'video' | 'pdf'
+export const verifyIndigenousDairyImage = async (
+  imageBase64: string
 ): Promise<boolean> => {
   try {
+    const base64Data = imageBase64.split(",")[1]; // Remove data URI prefix
+
     const prompt = `
-    You are an AI media validator specialized in indigenous dairy farming. Strictly analyze the provided ${mediaType} and return JSON response.
+You are an AI media validator specialized in indigenous dairy farming. Strictly analyze the provided image and return JSON response.
 
-    ### Validation Criteria:
-    1. Must show clear evidence of:
-       - Indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
-       - Dairy farming activities (milking, feeding, cattle sheds)
-       - Traditional/sustainable farming practices
-    
-    2. Automatic rejection for:
-       - Non-indigenous breeds (Jersey, Holstein, etc.)
-       - Other livestock (goats, poultry, buffalo)
-       - Crop farming or irrelevant agriculture
-       - Commercial/promotional content
+### Validation Criteria:
+### Detailed Validation Rules:
 
-    ### Media-Specific Rules:
-    ${
-      mediaType === 'image' 
-        ? `- Analyze visual elements (cow breed identification, farming activities)`
-        : mediaType === 'video' 
-        ? `- Scan key frames for indigenous cows and dairy practices`
-        : `- Extract text/content focusing on indigenous dairy topics`
-    }
+1. VALID if image contains ANY of these:
+   - Recognizable indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar , etc)
+   - Dairy activities with desi cows (milking, feeding, grazing , etc)
+   - Cattle sheds/farms with indigenous breeds
+   - Educational content about indigenous dairy farming
+   - Health/management practices applicable to all cows but shown with desi breeds
 
-    ### Response Format:
-    { "valid": boolean }
+2. INVALID if image contains ANY of these:
+   - Non-indigenous breeds (Jersey, Holstein ,etc .) as primary focus
+   - Other livestock (buffalo, goats,etc) as main subject
+   - Crop farming without dairy connection
+   - Pure commercial ads without educational value
+   - General agriculture not specific to dairy
 
-    ### Strict Rules:
-    - Return ONLY JSON (no explanations)
-    - False positives are unacceptable
-    - 95% confidence required for 'true'
-    `;
+3. SPECIAL CASES:
+   - Accept general cow health content if could apply to indigenous breeds
+   - Accept text/images mentioning "indigenous" or "desi" cows
+   - Reject if breed is unidentifiable and no dairy context
+
+2. Automatic rejection for:
+   - Non-indigenous breeds (Jersey, Holstein, etc.)
+   - Other livestock (goats, poultry, buffalo , etc)
+   - Crop farming or irrelevant agriculture
+   - Commercial/promotional content
+    - General agriculture without dairy focus
+    - Non-indigenous cattle breeds (Holstein, Jersey, etc.)
+    - Poultry, goat farming, or other livestock topics
+    - Commercial or promotional content without educational value
+
+### Response Format:
+{ "valid": boolean }
+`;
 
     const result = await model.generateContent({
-      contents: [{
-        role: "user",
-        parts: [{
-          [mediaType === 'pdf' ? 'text' : mediaType]: {
-            [mediaType === 'pdf' ? 'text' : 'data']: mediaBase64,
-            mimeType: mediaType === 'image' ? 'image/jpeg' 
-                     : mediaType === 'video' ? 'video/mp4' 
-                     : 'application/pdf'
-          }
-        }, {
-          text: prompt
-        }]
-      }]
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Data,
+                mimeType: "image/jpeg",
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ],
     });
 
-    const response = JSON.parse((await result.response).text());
-    return response.valid === true;
-    
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
+
+    const valid = parsed?.valid === "true" || parsed?.valid === true;
+    if (valid) {
+      return true;
+    } else {
+      toast.error(
+        "Image does not meet indigenous dairy verification criteria."
+      );
+      return false;
+    }
   } catch (error) {
-    console.error(`Error verifying ${mediaType}:`, error);
-    return false; // Fail-safe to false
+    console.error("Error verifying image:", error);
+    toast.error("Verification failed due to an internal error.");
+    return false;
+  }
+};
+
+interface VerificationResult {
+  isRelevant: boolean;
+  requiresVerification: boolean;
+}
+
+/**
+ * Verifies PDF content with Gemini AI for indigenous dairy farming relevance
+ * @param {string} textContent - Extracted PDF text
+ * @returns {Promise<VerificationResult>} Verification results
+ */
+export const verifyPDFWithGemini = async (
+  textContent: string
+): Promise<VerificationResult> => {
+  const prompt = `
+Analyze this document for indigenous dairy farming relevance:
+
+**Indigenous Breeds**: Gir, Sahiwal, Red Sindhi, Tharparkar, Kankrej
+
+**Rules**:
+1. RELEVANT if:
+   - Mentions specific breeds
+   - Discusses dairy farming practices
+   - Covers health/nutrition of indigenous cows
+2. REQUIRES VERIFICATION if:
+   - Contains medical/scientific claims
+   - Recommends treatments/breeding techniques
+   - Makes nutritional assertions
+
+**Document Content**:
+${textContent.substring(0, 30000)}
+
+**Respond EXACTLY in this JSON format**:
+{
+  "isRelevant": boolean,
+  "requiresVerification": boolean,
+}
+`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    const parsed = parseJsonResponse(responseText);
+
+    const isRelevant =
+      parsed?.isRelevant === "true" || parsed?.isRelevant === true;
+    const requiresVerification =
+      parsed?.requiresVerification === "true" ||
+      parsed?.requiresVerification === true;
+
+    if (parsed) {
+      if (!isRelevant) {
+        toast.error("PDF is not relevant to indigenous dairy farming.");
+        return {
+          isRelevant: false,
+          requiresVerification: false,
+        };
+      }
+      return {
+        isRelevant: true,
+        requiresVerification: requiresVerification,
+      };
+    } else {
+      toast.error("Unable to analyze PDF content. Please try again.");
+      return {
+        isRelevant: false,
+        requiresVerification: false,
+      };
+    }
+  } catch (error) {
+    console.error("Gemini verification error:", error);
+    toast.error("Failed to verify PDF due to an internal error.");
+    return {
+      isRelevant: false,
+      requiresVerification: false,
+    };
+  }
+};
+
+export interface VideoVerificationResult {
+  valid: boolean;
+  requiresVerification: boolean;
+}
+
+/**
+ * Verifies if the uploaded video shows indigenous dairy farming
+ * Allows fallback post if billing fails (demo mode)
+ */
+export const verifyIndigenousDairyVideo = async (
+  videoBase64: string
+): Promise<VideoVerificationResult> => {
+  const base64Data = videoBase64.split(",")[1];
+
+  const prompt = `
+You are an AI media validator specialized in indigenous dairy farming. Analyze the provided video and return a JSON object to determine:
+
+### Evaluation Criteria:
+
+1. **Valid Content**:
+   - Shows indigenous cow breeds (Gir, Sahiwal, Red Sindhi, Tharparkar, etc.)
+   - Depicts dairy farming practices (milking, feeding, cattle sheds)
+   - Highlights traditional/sustainable farming methods
+
+2. **Invalid Content**:
+   - Features non-indigenous breeds (Jersey, Holstein, etc.)
+   - Includes other livestock (goats, poultry, buffalo)
+   - Irrelevant topics like crop farming or promotional content
+
+3. **Requires Expert Verification** if:
+   - Scientific, medical, nutritional, or breeding claims are made
+   - Advice is given on diet, health, treatment, or reproduction
+
+### Response Format (strictly JSON):
+{
+  "valid": boolean,
+  "requiresVerification": boolean
+}
+`;
+
+  try {
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: base64Data,
+                mimeType: "video/mp4",
+              },
+            },
+            { text: prompt },
+          ],
+        },
+      ],
+    });
+
+    const responseText = result.response.text();
+    const parsed = parseJsonResponse(responseText);
+
+    const valid = parsed?.valid === "true" || parsed?.valid === true;
+    const requiresVerification =
+      parsed?.requiresVerification === "true" ||
+      parsed?.requiresVerification === true;
+
+    if (parsed) {
+      if (!valid) {
+        toast.error("Video is not valid for indigenous dairy farming.");
+        return {
+          valid: false,
+          requiresVerification: false,
+        };
+      }
+      return {
+        valid: true,
+        requiresVerification: requiresVerification,
+      };
+    } else {
+      toast.error(
+        "Unable to analyze video content. For demo purposes, the video will still be posted."
+      );
+      return {
+        valid: true,
+        requiresVerification: true,
+      };
+    }
+  } catch (error: any) {
+    console.error("Video verification error:", error);
+    const message = error?.message || "";
+    if (message.includes("insufficient_quota") || message.includes("billing")) {
+      toast.error(
+        "Billing issue: Gemini quota exceeded. Video will still be posted for demo purposes."
+      );
+    } else {
+      toast.error("Verification failed. Posting the video for demo purposes.");
+    }
+    return {
+      valid: true,
+      requiresVerification: true,
+    };
   }
 };

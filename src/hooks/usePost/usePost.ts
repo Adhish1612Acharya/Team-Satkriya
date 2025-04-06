@@ -10,11 +10,9 @@ import {
 import {
   addDoc,
   arrayRemove,
-  // arrayRemove,
   arrayUnion,
   collection,
   deleteDoc,
-  // deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -22,7 +20,6 @@ import {
   orderBy,
   query,
   QueryConstraint,
-  serverTimestamp,
   updateDoc,
   where,
   writeBatch,
@@ -37,10 +34,18 @@ import Comment from "@/types/comment.types";
 import convertToBase64 from "@/utils/covertToBase64";
 import { verifyAndValidateAndFilterEditedPost } from "@/utils/geminiApiCalls";
 import filters from "@/constants/filters";
+import getMediaType from "@/utils/getFileMediaType";
+import { verifyUploadedMedia } from "@/utils/verifyMedia";
 
 const usePost = () => {
   const navigate = useNavigate();
 
+  /**
+   * Fetches authenticated user's posts with like status
+   * - Parallel fetches posts + likes for efficiency
+   * - Uses Set for O(1) like lookups
+   * - Returns empty array on error/no posts
+   */
   const getYourPosts = async () => {
     try {
       const user = auth.currentUser;
@@ -98,6 +103,12 @@ const usePost = () => {
     }
   };
 
+  /**
+   * Retrieves all posts with current user's like status
+   * - Optimized with parallel fetching
+   * - Returns chronologically sorted (newest first)
+   * - Handles auth and errors gracefully
+   */
   const getAllPosts: GetAllPostType = async () => {
     // Validate user authentication first
     const currentUser = auth.currentUser;
@@ -143,11 +154,16 @@ const usePost = () => {
     } catch (error) {
       console.error("Error fetching posts:", error);
       toast.error("Failed to load posts. Please try again later.");
-      // Consider returning an error object or throwing for better error handling
       return [];
     }
   };
 
+  /**
+   * Gets single post by ID with engagement data
+   * - Fetches post + like status in parallel
+   * - Verifies post existence
+   * - Returns null for errors/not found
+   */
   const fetchPostById: fetchPostByIdType = async (id: string) => {
     if (!auth.currentUser) {
       toast.warn("You need to login to view posts");
@@ -187,6 +203,12 @@ const usePost = () => {
     }
   };
 
+  /**
+   * Retrieves posts filtered by tags/user type
+   * - Dynamic query building based on filters
+   * - Maintains like status tracking
+   * - Returns [] for no matches/errors
+   */
   const getFilteredPosts: GetFilteredPostType = async (
     filters: string[],
     userType: string | null
@@ -254,68 +276,96 @@ const usePost = () => {
     }
   };
 
+  /**
+   * Creates a new post with media uploads and user metadata
+   * - Handles parallel media uploads (images/videos/documents)
+   * - Maintains user profile association
+   * - Returns new post ID or null on failure
+   */
   const createPost: CreatePostType = async (postData, firebaseDocument) => {
-    if (auth.currentUser) {
-      try {
-        const userData = await getUserInfo(
-          auth.currentUser.uid,
-          firebaseDocument
-        );
-        let imageUrls: string[] = [];
-        let videoUrls: string[] = [];
-        let documentUrls: string[] = [];
-        if (postData.images.length !== 0) {
-          imageUrls = await uploadFilesToCloudinary(postData.images);
-        }
-        if (postData.videos.length !== 0) {
-          videoUrls = await uploadFilesToCloudinary(postData.videos);
-        }
-
-        if (postData.documents.length !== 0) {
-          documentUrls = await uploadFilesToCloudinary(postData.documents);
-        }
-
-        const contentData = {
-          content: postData.content,
-          images: imageUrls,
-          videos: videoUrls,
-          documents: documentUrls,
-          filters: postData.filters,
-          likesCount: 0,
-          commentsCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          ownerId: auth.currentUser.uid,
-          role: userData?.role,
-          profileData: {
-            name: userData?.name,
-            profilePic: userData?.profileData?.profilePic || "",
-          },
-          verified:
-            userData?.role === "doctor" ||
-            userData?.role === "researchInstitution"
-              ? null
-              : postData.verified,
-        };
-
-        const newPost = await addDoc(collection(db, "posts"), contentData);
-
-        const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
-
-        await updateDoc(postRef, { posts: arrayUnion(newPost.id) });
-        return newPost.id;
-      } catch (error: any) {
-        console.error("Error updating post:", error);
-        toast.error("Post creation error");
-        return null;
-      }
-    } else {
+    // 1. Authentication Check
+    if (!auth.currentUser) {
       toast.warn("You need to login");
       navigate("/expert/login");
       return null;
     }
+
+    try {
+      // 2. Fetch User Data
+      const userData = await getUserInfo(
+        auth.currentUser.uid,
+        firebaseDocument
+      );
+      if (!userData) {
+        toast.error("User profile not found");
+        return null;
+      }
+
+      // 3. Parallel Media Uploads
+      const [imageUrls, videoUrls, documentUrls] = await Promise.all([
+        postData.images.length
+          ? uploadFilesToCloudinary(postData.images)
+          : Promise.resolve([]),
+        postData.videos.length
+          ? uploadFilesToCloudinary(postData.videos)
+          : Promise.resolve([]),
+        postData.documents.length
+          ? uploadFilesToCloudinary(postData.documents)
+          : Promise.resolve([]),
+      ]);
+
+      // 4. Prepare Post Content
+      const contentData = {
+        content: postData.content,
+        images: imageUrls,
+        videos: videoUrls,
+        documents: documentUrls,
+        filters: postData.filters,
+        likesCount: 0, // Initialize counters
+        commentsCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ownerId: auth.currentUser.uid,
+        role: userData.role,
+        profileData: {
+          name: userData.name,
+          profilePic: userData.profileData?.profilePic || "",
+        },
+        // Special verification handling for certain roles
+        verified: ["doctor", "researchInstitution"].includes(userData.role)
+          ? null
+          : postData.verified,
+      };
+
+      // 5. Create Post Document
+      const newPost = await addDoc(collection(db, "posts"), contentData);
+
+      // 6. Update User's Posts Reference
+      const postRef = doc(db, firebaseDocument, auth.currentUser.uid);
+      await updateDoc(postRef, {
+        posts: arrayUnion(newPost.id),
+        updatedAt: new Date(), // Track user document update
+      });
+
+      toast.success("Post created successfully!");
+      return newPost.id;
+    } catch (error) {
+      console.error("Post creation error:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create post"
+      );
+      return null;
+    }
   };
 
+
+  /**
+   * Edits an existing post with comprehensive validation and media handling
+   * - Performs authentication, ownership verification, and content validation
+   * - Handles media verification and uploads
+   * - Updates post data atomically
+   * - Provides clear user feedback throughout the process
+   */
   const editPost: EditPostType = async (
     postId,
     postOwnerId,
@@ -323,123 +373,113 @@ const usePost = () => {
     existingFilters
   ) => {
     try {
-      // 1. Authentication & Authorization Checks
+      // 1. AUTHENTICATION & AUTHORIZATION ==============================
       if (!auth.currentUser) {
         toast.warn("Please login to edit posts");
         navigate("/auth");
         return;
       }
 
-      // 2. Verify Post Existence and Ownership
       if (auth.currentUser.uid !== postOwnerId) {
-        toast.error("Ownership verification failed");
+        toast.error("You can only edit your own posts");
         return navigate("/posts");
       }
 
-      // 3. Initialize media arrays
-      let images: string[] = [];
-      let documents: string[] = [];
-      let videos: string[] = [];
-      let base64MediaUrl: string | null = null;
-      let uploadedMedia: string | File | null =
-        updatedPostData.images[0] ||
-        updatedPostData.documents[0] ||
-        updatedPostData.videos[0] ||
-        null;
+      // 2. MEDIA VERIFICATION ==========================================
+      let mediaVerification = false;
+      const uploadedMedia = [
+        updatedPostData.images[0],
+        updatedPostData.documents[0],
+        updatedPostData.videos[0],
+      ].find((item): item is File => item instanceof File);
 
-      console.log("Uploaded url : ", uploadedMedia);
-
-      // 4. Handle Media Conversion (if new media is uploaded)
-      if (uploadedMedia && uploadedMedia instanceof File) {
+      if (uploadedMedia) {
         try {
-          console.log("base 64 : ", uploadedMedia);
-          base64MediaUrl = await convertToBase64(uploadedMedia);
+          const fileType = getMediaType(uploadedMedia);
+          const base64File = await convertToBase64(uploadedMedia);
+          const verification = await verifyUploadedMedia(
+            uploadedMedia,
+            fileType,
+            base64File
+          );
+
+          if (!verification.valid) return;
+          mediaVerification = verification.verification ?? false;
         } catch (error) {
-          console.error("Media conversion error:", error);
-          toast.error("Failed to process media file");
+          console.error("Media verification failed:", error);
+          toast.error("Media verification service unavailable");
           return;
         }
       }
 
-      // 5. AI Content Validation & Filtering
-      let aiVerificationResponse;
+      // 3. CONTENT VALIDATION ==========================================
+      let aiVerification;
       try {
-        aiVerificationResponse = await verifyAndValidateAndFilterEditedPost(
+        aiVerification = await verifyAndValidateAndFilterEditedPost(
           { content: updatedPostData.content, existingFilters },
-          {
-            base64: base64MediaUrl,
-            cloudinaryUrl:
-              (typeof uploadedMedia === "string" && uploadedMedia) || null,
-          },
           filters
         );
-
-        if (!aiVerificationResponse.valid) {
-          toast.error("Post content doesn't meet community guidelines");
-          return;
-        }
+        if (!aiVerification.valid) return;
       } catch (error) {
-        console.error("AI validation error:", error);
+        console.error("Content validation failed:", error);
         toast.error("Content validation service unavailable");
         return;
       }
 
-      // 6. Upload New Media Files (if any)
-      try {
-        if (
-          uploadedMedia &&
-          uploadedMedia instanceof File &&
-          uploadedMedia.type.startsWith("image/")
-        ) {
-          console.log("Cludinary  aupload : ", uploadedMedia);
-          const imageUrls = await uploadFilesToCloudinary([uploadedMedia]);
-          images = imageUrls.filter((url) => url);
-        }
+      // 4. MEDIA UPLOAD ================================================
+      const mediaUploads = {
+        images: [] as string[],
+        videos: [] as string[],
+        documents: [] as string[],
+      };
 
-        if (
-          uploadedMedia &&
-          uploadedMedia instanceof File &&
-          uploadedMedia.type.startsWith("video/")
-        ) {
-          console.log("Cludinary  aupload : ", uploadedMedia);
-          const videoUrls = await uploadFilesToCloudinary([uploadedMedia]);
-          videos = videoUrls.filter((url) => url);
-        }
+      if (uploadedMedia) {
+        try {
+          const urls = await uploadFilesToCloudinary([uploadedMedia]);
+          const type = uploadedMedia.type.split("/")[0];
 
-        if (
-          uploadedMedia &&
-          uploadedMedia instanceof File &&
-          uploadedMedia.type.startsWith("application/pdf")
-        ) {
-          console.log("Cludinary  aupload : ", uploadedMedia);
-          const documentUrls = await uploadFilesToCloudinary([uploadedMedia]);
-          documents = documentUrls.filter((url) => url);
+          if (type === "image") mediaUploads.images = urls.filter(Boolean);
+          else if (type === "video") mediaUploads.videos = urls.filter(Boolean);
+          else if (uploadedMedia.type === "application/pdf") {
+            mediaUploads.documents = urls.filter(Boolean);
+          }
+        } catch (error) {
+          console.error("Media upload failed:", error);
+          toast.error("Failed to upload media files");
+          return;
         }
-      } catch (uploadError) {
-        console.error("Media upload failed:", uploadError);
-        toast.error("Failed to upload media files");
-        return;
       }
 
-      // 7. Prepare Update Data Object
+      // 5. DATA PREPARATION ============================================
       const updatedData = {
         content: updatedPostData.content.trim(),
-        images: (images.length === 1 &&  images) || (updatedPostData.images.length===1 &&  updatedPostData.images) || [],
-        videos: (videos.length === 1 &&  videos) || (updatedPostData.videos.length===1 &&  updatedPostData.videos) || [],
-        documents: (documents.length === 1 &&  documents) || (updatedPostData.documents.length===1 &&  updatedPostData.documents) || [],
-        filters: aiVerificationResponse.filters,
-        verified: aiVerificationResponse.verification ? [] : null,
+        images: mediaUploads.images.length
+          ? mediaUploads.images
+          : updatedPostData.images.length
+          ? updatedPostData.images
+          : [],
+        videos: mediaUploads.videos.length
+          ? mediaUploads.videos
+          : updatedPostData.videos.length
+          ? updatedPostData.videos
+          : [],
+        documents: mediaUploads.documents.length
+          ? mediaUploads.documents
+          : updatedPostData.documents.length
+          ? updatedPostData.documents
+          : [],
+        filters: aiVerification.filters,
+        verified: aiVerification.verification || mediaVerification ? [] : null,
         updatedAt: new Date(),
       };
 
-      // 8. Database Update Operation
+      // 6. DATABASE UPDATE =============================================
       try {
-        const postRef = doc(db, "posts", postId);
-        await updateDoc(postRef, updatedData);
+        await updateDoc(doc(db, "posts", postId), updatedData);
         toast.success("Post updated successfully");
         navigate(`/posts/${postId}`);
-      } catch (dbError) {
-        console.error("Database update failed:", dbError);
+      } catch (error) {
+        console.error("Database update failed:", error);
         toast.error("Failed to save changes");
         navigate("/posts");
       }
@@ -450,6 +490,19 @@ const usePost = () => {
     }
   };
 
+
+/**
+ * Deletes a post along with all related data (comments, likes)
+ * 
+ * Steps:
+ * 1. Validates authentication and post ownership
+ * 2. Queries for related comments and likes using the postId
+ * 3. Uses batched writes for atomic deletion:
+ *    - Deletes the post document
+ *    - Deletes all associated comments and likes
+ *    - Updates the user's post reference
+ * 4. Provides user feedback and handles errors gracefully
+ */
   const deletePost: deletePostType = async (
     postId,
     postOwnerId,
@@ -458,34 +511,60 @@ const usePost = () => {
     try {
       // 1. Authentication & Authorization Validation
       const user = auth.currentUser;
-
+  
       if (!user) {
         toast.warn("Please login to delete posts");
         navigate("/auth");
         return;
       }
-
+  
       if (user.uid !== postOwnerId) {
         toast.warn("Unauthorized: You can only delete your own posts");
         navigate("/posts");
         return;
       }
-
+  
       // 2. Database References
       const postRef = doc(db, "posts", postId);
       const userRef = doc(db, firebaseDocument, user.uid);
-
-      // 3. Atomic Deletion Operation
+  
+      // 3. Query related comments and likes
+      const commentsQuery = query(
+        collection(db, "comments"),
+        where("postId", "==", postId)
+      );
+      const likesQuery = query(
+        collection(db, "likes"),
+        where("postId", "==", postId)
+      );
+  
+      const [commentsSnap, likesSnap] = await Promise.all([
+        getDocs(commentsQuery),
+        getDocs(likesQuery),
+      ]);
+  
+      // 4. Batch Deletion
       const batch = writeBatch(db);
+  
+      // Delete the post
       batch.delete(postRef);
+  
+      // Update user's post list and audit
       batch.update(userRef, {
         posts: arrayRemove(postId),
-        updatedAt: new Date(), // Maintain audit trail
+        updatedAt: new Date(),
       });
-
+  
+      // Delete associated comments
+      commentsSnap.forEach((doc) => batch.delete(doc.ref));
+  
+      // Delete associated likes
+      likesSnap.forEach((doc) => batch.delete(doc.ref));
+  
+      // Commit the batch
       await batch.commit();
-
-      // 4. Success Handling
+  
+      // 5. Success Notification
       toast.success("Post deleted successfully");
     } catch (error) {
       // Global error handler
@@ -494,124 +573,163 @@ const usePost = () => {
       return;
     }
   };
+  
 
+  /**
+   * Adds a comment to a post and updates the comment count
+   * - Validates user authentication and post existence
+   * - Creates comment with user metadata
+   * - Atomically updates post's comment count
+   * - Handles errors gracefully with user feedback
+   */
   const addCommentPost = async (
     postId: string,
     firebaseDocument: "farmers" | "experts",
     commentData: string
   ) => {
-    const user = auth.currentUser; // Get the currently signed-in user
-
+    // 1. Authentication Check
+    const user = auth.currentUser;
     if (!user) {
-      toast.warn("You need to login");
-      navigate("/expert/login");
+      toast.warn("Please login to comment");
+      navigate("/auth");
       return;
     }
 
     try {
-      const userData = await getUserInfo(user.uid, firebaseDocument);
-      const postRef = doc(db, "posts", postId);
-      const postSnapshot = await getDoc(postRef);
+      // 2. Fetch Required Data
+      const [userData, postSnapshot] = await Promise.all([
+        getUserInfo(user.uid, firebaseDocument),
+        getDoc(doc(db, "posts", postId)),
+      ]);
 
+      // 3. Validation Checks
       if (!postSnapshot.exists()) {
         throw new Error("Post not found");
       }
+      if (!userData) {
+        throw new Error("User profile not found");
+      }
 
+      // 4. Prepare Comment Data
       const newComment = {
-        content: commentData,
-        postId: postId,
+        content: commentData.trim(),
+        postId,
         ownerId: user.uid,
-        role: userData?.role,
+        role: userData.role,
         profileData: {
-          name: userData?.name,
-          profilePic: userData?.profileData?.profilePic || "",
+          name: userData.name,
+          profilePic: userData.profileData?.profilePic || "",
         },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      await addDoc(collection(db, "comments"), newComment);
-
-      const currentCommentsCount = postSnapshot.exists()
-        ? Number(postSnapshot.data()?.commentsCount || 0)
-        : 0;
-
-      await updateDoc(postRef, {
-        commentsCount: currentCommentsCount + 1,
-        updatedAt: serverTimestamp(),
+      // 5. Atomic Operations
+      const batch = writeBatch(db);
+      batch.set(doc(collection(db, "comments")), newComment);
+      batch.update(postSnapshot.ref, {
+        commentsCount: increment(1),
+        updatedAt: new Date(),
       });
+
+      await batch.commit();
+      toast.success("Comment added successfully");
     } catch (error) {
-      console.error("Error creating comment:", error);
-      toast.error("Comment Creation error");
+      console.error("Failed to add comment:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Comment creation failed"
+      );
     }
   };
 
-  const getPostComments = async (postId: string) => {
+  /**
+   * Fetches all comments for a specific post
+   * - Validates user authentication
+   * - Retrieves comments in chronological order
+   * - Returns empty array for no comments or errors
+   */
+  const getPostComments = async (postId: string): Promise<Comment[]> => {
     // Check if the user is authenticated
-    const user = auth.currentUser;
-
-    if (!user) {
-      toast.warn("You need to login");
-      navigate("/expert/login");
+    if (!auth.currentUser) {
+      toast.warn("Please login to view comments");
+      navigate("/auth");
       return [];
     }
 
     try {
-      const commentsRef = collection(db, "comments");
-      const q = query(
-        commentsRef,
+      // Build Firestore query to get all comments for a given post ID ordered by creation time
+      const commentsQuery = query(
+        collection(db, "comments"),
         where("postId", "==", postId),
         orderBy("createdAt", "asc")
       );
-      const querySnapshot = await getDocs(q);
 
-      const comments = querySnapshot.docs.map((doc) => ({
+      // Execute the query
+      const snapshot = await getDocs(commentsQuery);
+
+      // Map Firestore docs to Comment objects and return
+      return snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
-
-      return comments as Comment[];
+      })) as Comment[];
     } catch (error) {
-      console.error("Error fetching comments:", error);
-      return []; // Return an empty array in case of error
+      // Log error and show toast message
+      console.error("Failed to fetch comments:", error);
+      toast.error("Failed to load comments");
+      return [];
     }
   };
 
+  /**
+   * Retrieves comments filtered by user role
+   * - Authenticates user before fetching
+   * - Applies role-based filtering
+   * - Maintains chronological ordering
+   * - Gracefully handles empty results/errors
+   */
   const getFilteredComments = async (
     postId: string,
     filter: "farmer" | "doctor" | "researchInstitution" | "ngo" | "volunteer"
-  ) => {
-    // Check if the user is authenticated
-    const user = auth.currentUser;
-
-    if (!user) {
-      toast.warn("You need to login");
-      navigate("/expert/login");
+  ): Promise<Comment[]> => {
+    // Ensure user is authenticated
+    if (!auth.currentUser) {
+      toast.warn("Please login to view comments");
+      navigate("/auth");
       return [];
     }
 
     try {
-      const commentsRef = collection(db, "comments");
-      const q = query(
-        commentsRef,
-        where("postId", "==", postId),
-        where("role", "==", filter),
-        orderBy("createdAt", "asc")
+      // Build Firestore query to get comments by role for a specific post
+      const commentsQuery = query(
+        collection(db, "comments"),
+        where("postId", "==", postId), // Filter by post ID
+        where("role", "==", filter), // Filter by specified role
+        orderBy("createdAt", "asc") // Sort chronologically
       );
-      const querySnapshot = await getDocs(q);
 
-      const comments = querySnapshot.docs.map((doc) => ({
+      // Execute query
+      const snapshot = await getDocs(commentsQuery);
+
+      // Convert Firestore docs to Comment objects
+      return snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
-
-      return comments as Comment[];
+      })) as Comment[];
     } catch (error) {
-      console.error("Error fetching comments:", error);
-      return []; // Return an empty array in case of error
+      // Log error and show toast message
+      console.error(`Failed to fetch ${filter} comments:`, error);
+      toast.error("Failed to load filtered comments");
+      return [];
     }
   };
 
+  /**
+   * Handles post like/unlike functionality with optimistic UI updates
+   * - Manages debounced like actions to prevent rapid firing
+   * - Optimistically updates UI before server confirmation
+   * - Syncs with Firestore (likes collection and post counters)
+   * - Provides error recovery and user feedback
+   */
   const likePost = async (
     postId: string,
     likeTimeoutRef: { current: NodeJS.Timeout | null },
@@ -689,8 +807,8 @@ const usePost = () => {
 
   /**
    * Verifies a post and updates verification records
-   * @param postId - ID of the post to verify
-   * @returns Verification data if successful, false otherwise
+   *  postId - ID of the post to verify
+   * returns  Verification data if successful, false otherwise
    */
   const verifyPost = async (
     postId: string
@@ -752,89 +870,6 @@ const usePost = () => {
     }
   };
 
-  const handleBookMarkPost = async (
-    postId: string,
-    userType: "farmers" | "experts"
-  ) => {
-    const user = auth.currentUser;
-
-    // Edge Case 1: User not authenticated
-    if (!user) {
-      toast.warning("Please login to bookmark posts");
-      navigate("/auth");
-      return;
-    }
-
-    try {
-      // Edge Case 2: Verify post exists
-      const postRef = doc(db, "posts", postId);
-      const postSnap = await getDoc(postRef);
-
-      if (!postSnap.exists()) {
-        toast.error("The post no longer exists");
-        return;
-      }
-
-      const userRef = doc(db, userType, user.uid);
-      const userSnap = await getDoc(userRef);
-
-      // Edge Case 3: User document doesn't exist
-      if (!userSnap.exists()) {
-        toast.error("User profile not found");
-        return;
-      }
-
-      const currentBookmarks = userSnap.data()?.bookmarks || [];
-      const isBookmarked = currentBookmarks.includes(postId);
-
-      // Transaction-like pattern for atomic updates
-      if (isBookmarked) {
-        await updateDoc(userRef, {
-          bookmarks: arrayRemove(postId),
-          updatedAt: new Date().toISOString(),
-        });
-        toast.success("Removed from bookmarks");
-        return;
-      } else {
-        // Edge Case 4: Prevent duplicate bookmarks
-        await updateDoc(userRef, {
-          bookmarks: arrayUnion(postId),
-          updatedAt: new Date().toISOString(),
-        });
-        toast.success("Added to bookmarks");
-        return;
-      }
-    } catch (error) {
-      console.error("Failed to bookmark posts", error);
-      toast.error("Failed to bookmark posts");
-      return;
-    }
-  };
-
-  const fetchBookmarkedPosts = async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      toast.warning("Please login to view bookmarks");
-      return [];
-    }
-
-    try {
-      // 1. Get user's bookmark IDs
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const bookmarkIds = userDoc.data()?.bookmarks || [];
-
-      // 2. Reuse fetchPostById for each bookmark
-      const postPromises = bookmarkIds.map((id: string) => fetchPostById(id));
-      const posts = (await Promise.all(postPromises)).filter(Boolean);
-
-      return posts as Post[];
-    } catch (error) {
-      console.error("Bookmarks error:", error);
-      toast.error("Failed to load bookmarks");
-      return [];
-    }
-  };
-
   return {
     createPost,
     getAllPosts,
@@ -848,8 +883,6 @@ const usePost = () => {
     editPost,
     deletePost,
     likePost,
-    handleBookMarkPost,
-    fetchBookmarkedPosts,
   };
 };
 

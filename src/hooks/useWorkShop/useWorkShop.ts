@@ -28,6 +28,11 @@ import { useNavigate } from "react-router-dom";
 const useWorkShop = () => {
   const navigate = useNavigate();
 
+  /* 
+    Fetches all workshops owned by current user
+    - Auth check → Query owned workshops → Transform data
+    - Returns null on error, [] if none exist
+    */
   const getAllYourWorkshops = async (): Promise<WorkShop[] | null> => {
     try {
       // Check authentication
@@ -64,6 +69,12 @@ const useWorkShop = () => {
     }
   };
 
+  /*
+    Gets single workshop with registration status
+    - Verifies existence + user auth
+    - Checks if current user registered
+    - Returns enriched workshop object
+    */
   const createWorkshop: createWorkShopType = async (workshopData, filters) => {
     // Early exit if unauthenticated
     const user = auth.currentUser;
@@ -135,6 +146,12 @@ const useWorkShop = () => {
     }
   };
 
+  /*
+    Fetches upcoming workshops (future dates only)
+    - Sorts chronologically (earliest first)
+    - Tags each with user's registration status
+    - Returns [] for none, null on error
+    */
   const fetchWorkshopById: fetchWorkshopByIdType = async (id: string) => {
     try {
       // 1. Authentication Check
@@ -176,6 +193,13 @@ const useWorkShop = () => {
     }
   };
 
+
+  /**
+ * Fetches all upcoming workshops (future dates only)
+ * - Filters by authenticated user's registration status
+ * - Returns chronologically sorted (earliest first)
+ * - Handles empty results gracefully (returns [])
+ */
   const fetchAllWorkshops: fetchAllWorkshopsType = async () => {
     // Early return if no authenticated user
     if (!auth.currentUser) {
@@ -226,6 +250,13 @@ const useWorkShop = () => {
     }
   };
 
+
+  /**
+ * Retrieves workshops filtered by criteria and user type
+ * - Supports role-based and tag filtering
+ * - Always returns future workshops (>= today)
+ * - Returns [] for no matches, maintains registration status
+ */
   const fetchFilteredWorkshops: GetFilteredWorkshopType = async (
     filters,
     userType
@@ -293,6 +324,14 @@ const useWorkShop = () => {
     }
   };
 
+
+  /**
+ * Handles workshop registration with atomic updates
+ * - Validates user and workshop existence
+ * - Prevents duplicate registrations
+ * - Uses batched writes for data consistency
+ * - Manages both workshop and user registration records
+ */
   const registerWorkShop: RegisterWorkshopType = async (
     workshopId,
     userType
@@ -365,6 +404,13 @@ const useWorkShop = () => {
     }
   };
 
+
+  /**
+ * Retrieves registration details for a specific workshop
+ * - Validates user authentication and ownership
+ * - Returns full workshop data including registrations
+ * - Handles workshop not found/unauthorized cases
+ */
   const getWorkshopRegistrationDetails: GetWorkshopRegistrationDetailsType =
     async (workshopId) => {
       try {
@@ -408,6 +454,13 @@ const useWorkShop = () => {
       }
     };
 
+
+    /**
+ * Fetches all workshops user has registered for
+ * - Aggregates data from user profile and workshop collection
+ * - Handles missing workshops gracefully
+ * - Returns [] for no registrations
+ */
   const getUserRegistrations: GetUserRegistrationsDetailsType = async (
     userType
   ) => {
