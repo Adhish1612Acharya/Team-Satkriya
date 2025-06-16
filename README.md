@@ -20,7 +20,7 @@
 
 ## 📌 Introduction
 
-GoPushti is an AI-driven platform designed to conserve and improve indigenous Indian cow breeds by bridging the gap between farmers, experts, and volunteers. By integrating technology with traditional practices, we at GoPushti intend fosters a community-driven approach to promote sustainable agriculture, organic farming, and eco-friendly energy solutions. Our mission aligns with the Kamdhenu Program to empower farmers, enhance breeding programs, and strengthen socio-economic and environmental sustainability.
+GoPushti is an AI-driven platform designed to conserve and improve indigenous Indian cow breeds by bridging the gap between farmers, experts, and volunteers. By integrating technology with traditional practices, we at GoPushti intend fosters a community-driven approach to promote sustainable agriculture, organic farming, and eco-friendly energy solutions. Our mission aligns with the Kamdhenu Program to empower farmers, enhance breeding programs, and strengthen socio-economic and environmental sustainability...
 
 <a id="features"></a>
 
